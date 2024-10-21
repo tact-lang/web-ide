@@ -8,7 +8,7 @@ export const AppData = {
     {
       label: 'Telegram',
       icon: 'Telegram',
-      url: 'https://t.me/Nujan_io',
+      url: 'https://t.me/ton_web_IDE',
     },
   ],
 };
