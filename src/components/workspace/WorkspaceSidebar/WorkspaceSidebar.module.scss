@@ -21,7 +21,7 @@
     cursor: pointer;
     opacity: 0.6;
     position: relative;
-    color: #fff;
+    color: var(--text-color);
     display: flex;
     user-select: none;
     display: flex;
@@ -33,7 +33,8 @@
     &:hover {
       opacity: 1;
       color: var(--primary);
-      background: rgba(0, 0, 0, 0.7);
+      background: var(--menu-bg);
+      // handle for light theme based on global state
       &::before {
         display: block;
       }
@@ -60,9 +61,30 @@
   padding: 1rem 0;
   &:not(:last-child) {
     border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    [data-theme='light'] & {
+      border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+    }
   }
   > div {
     margin: 0 !important;
+  }
+}
+.themeSwitch {
+  display: flex;
+  margin: 0 auto 1rem auto;
+  align-items: center;
+  &[class*='ant-switch-checked'] {
+    background-color: #4e4e4e;
+  }
+  [class*='ant-switch-inner-checked'] {
+    display: inline-flex !important;
+    align-items: center;
+    height: 100%;
+  }
+  [class*='ant-switch-inner-unchecked'] {
+    height: 90%;
+    display: flex !important;
+    align-items: center;
   }
 }
 .resetAmount {

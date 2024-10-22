@@ -60,7 +60,7 @@
 
     &.isActive {
       background: var(--black-500);
-      color: #ffffff;
+      color: var(--text-color);
       .close {
         visibility: visible;
       }

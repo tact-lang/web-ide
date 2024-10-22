@@ -4,7 +4,7 @@
   height: 100vh;
   overflow-y: auto;
   .heading {
-    color: #ccc;
+    color: var(--color-light);
     text-align: center;
     display: block;
     font-size: 0.875rem;
@@ -28,6 +28,9 @@
     background: rgba(14, 14, 16, 0.9);
     border-radius: 5px;
     padding: 2px;
+    [data-theme='light'] & {
+      background: rgba(255, 255, 255, 0.9);
+    }
     > div {
       border-left: 0 !important;
     }
@@ -42,11 +45,11 @@
   }
   .connectedWallet {
     font-size: 0.8rem;
-    color: #ccc;
+    color: var(--color-light);
     margin-top: 1rem;
     span {
       font-size: 0.9rem;
-      color: #fff;
+      color: var(--text-color);
     }
   }
   .contractAddress {

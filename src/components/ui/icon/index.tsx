@@ -12,7 +12,7 @@ import {
 import { BsShare } from 'react-icons/bs';
 
 import { BsFillPlayFill } from 'react-icons/bs';
-import { FaRegClone } from 'react-icons/fa';
+import { FaMoon, FaRegClone, FaSun } from 'react-icons/fa';
 import { FiEdit2, FiEye } from 'react-icons/fi';
 import { GoTriangleDown, GoTriangleRight, GoTriangleUp } from 'react-icons/go';
 import { GrClear } from 'react-icons/gr';
@@ -69,7 +69,9 @@ export type AppIconType =
   | 'Import'
   | 'Reload'
   | 'Share'
-  | 'Save';
+  | 'Save'
+  | 'Moon'
+  | 'Sun';
 
 export interface AppIconInterface {
   name: AppIconType;
@@ -110,6 +112,8 @@ const Components = {
   Reload: AiOutlineReload,
   Share: BsShare,
   Save: AiOutlineSave,
+  Moon: FaMoon,
+  Sun: FaSun,
 };
 
 const AppIcon: FC<AppIconInterface> = ({ name, className = '' }) => {
