@@ -52,6 +52,21 @@
       text-align: center;
     }
   }
+  .themeSwitch {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem auto;
+    align-items: center;
+    border-radius: 50%;
+    height: 3rem;
+    width: 3rem;
+
+    > svg {
+      width: 1.4rem;
+      height: 1.4rem;
+    }
+  }
   .clone {
     font-size: 1.3rem;
   }
@@ -69,24 +84,7 @@
     margin: 0 !important;
   }
 }
-.themeSwitch {
-  display: flex;
-  margin: 0 auto 1rem auto;
-  align-items: center;
-  &[class*='ant-switch-checked'] {
-    background-color: #4e4e4e;
-  }
-  [class*='ant-switch-inner-checked'] {
-    display: inline-flex !important;
-    align-items: center;
-    height: 100%;
-  }
-  [class*='ant-switch-inner-unchecked'] {
-    height: 90%;
-    display: flex !important;
-    align-items: center;
-  }
-}
+
 .resetAmount {
   display: flex;
   align-items: center;

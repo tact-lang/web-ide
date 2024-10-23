@@ -71,6 +71,10 @@
       [data-theme='light'] & {
         background: #d6d6d6;
       }
+      &:hover {
+        color: var(--text-color);
+        background-color: var(--grey--50);
+      }
     }
   }
   &.Setter {
@@ -79,12 +83,21 @@
       background: var(--primary);
       box-shadow: none;
       z-index: 0;
+
       &:hover {
         border-color: transparent;
-        color: #fff;
+        color: var(--text-color);
+
         &:before {
           background: #101010;
+          [data-theme='light'] & {
+            background: var(--btn-primary-hover);
+          }
         }
+      }
+      & span,
+      &:hover span [data-theme='light'] & {
+        color: #fff;
       }
       &:disabled {
         opacity: 0.5;
@@ -102,7 +115,7 @@
         z-index: -1;
         border-radius: inherit;
         [data-theme='light'] & {
-          background: #fff;
+          background: var(--primary);
         }
       }
     }

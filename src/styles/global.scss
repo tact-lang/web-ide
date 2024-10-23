@@ -39,6 +39,7 @@
   --text-color: #000;
   --bg-color: #f7f7f7;
   --black-500: #dcdada;
+  --btn-disabled: rgba(0, 0, 0, 0.1);
   --menu-bg: rgba(255, 255, 255, 0.6);
   --sidebar-bg: #e8e8e8;
   --color-light: #454444;
@@ -54,10 +55,11 @@
     rgba(255, 255, 255, 0.6) 100%
   );
   --modal-bg: linear-gradient(
-    0deg,
-    rgba(255, 255, 255, 0.5) 0%,
-    rgba(255, 255, 255, 0.5) 100%
-  );
+      0deg,
+      rgba(255, 255, 255, 0.5) 0%,
+      rgba(255, 255, 255, 0.5) 100%
+    ),
+    #eaeaea;
 }
 
 html {

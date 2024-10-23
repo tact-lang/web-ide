@@ -233,15 +233,18 @@ const WorkspaceSidebar: FC<Props> = ({
           </div>
         </Popover>
         <Tooltip title="Switch Theme" placement="right">
-          <Switch
-            className={s.themeSwitch}
-            checkedChildren={<AppIcon name="Moon" />}
-            unCheckedChildren={<AppIcon name="Sun" />}
-            defaultChecked={themeContext?.theme == 'dark'}
-            onChange={() => {
+          <div
+            className={`${s.themeSwitch} ${s.action} ${s.isActive}`}
+            onClick={() => {
               themeContext?.toggleTheme();
             }}
-          />
+          >
+            {themeContext?.theme == 'dark' ? (
+              <AppIcon name="Moon" />
+            ) : (
+              <AppIcon name="Sun" />
+            )}
+          </div>
         </Tooltip>
       </div>
     </div>
