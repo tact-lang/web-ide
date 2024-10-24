@@ -33,8 +33,6 @@
     &:hover {
       opacity: 1;
       color: var(--primary);
-      background: var(--menu-bg);
-      // handle for light theme based on global state
       &::before {
         display: block;
       }
