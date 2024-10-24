@@ -33,10 +33,15 @@
   content: '';
   background-image: url('/images/icon/file/default_folder_opened.svg');
 }
-.show-file-icons .file-icon::before,
-.show-file-icons .txt-ext-file-icon.ext-file-icon.file-icon::before {
-  color: #d4d7d6;
-  content: '\E01A';
+.show-file-icons .file-icon,
+.show-file-icons .txt-ext-file-icon.ext-file-icon.file-icon {
+  &::before {
+    color: #d4d7d6;
+    content: '\E01A';
+    [data-theme='light'] & {
+      color: #4d5a5e;
+    }
+  }
 }
 .show-file-icons .bat-lang-file-icon.file-icon::before {
   color: #519aba;

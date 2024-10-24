@@ -1,8 +1,10 @@
 .ant-select {
   .ant-select-selector {
-    background-color: rgba(0, 0, 0, 0.4) !important;
     border: 0 !important;
     box-shadow: none !important;
+    [data-theme='dark'] & {
+      background-color: rgba(0, 0, 0, 0.4) !important;
+    }
   }
 }
 div.ant-form-item {
@@ -35,6 +37,9 @@ div.ant-form-item {
     background-color: rgba(0, 0, 0, 1);
     height: 35px;
     box-shadow: none;
+    [data-theme='light'] & {
+      background-color: rgba(204, 204, 204, 0.4);
+    }
     &:focus {
       border-color: #454545;
     }
