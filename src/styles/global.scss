@@ -1,38 +1,65 @@
 :root {
   --primary: #0098ea;
-  --brand-color-2: rgba(19, 226, 218, 1);
   --font-title: 'Inter', sans-serif;
   --font-body: 'Inter', sans-serif;
   --text-color: #f7f7f7;
+  --bg-color: #000;
+  --color-light: #ccc;
   --black-500: #0e0e10;
-  --grey: #4f4e4e;
-  --light-grey: #7e7d7d;
-  --grey-500: #1a1a1a;
-  --grey-900: #232328;
-  --grey-1000: #131212;
+  --color-danger: #c84075;
+  --color-warning: #d19228;
+  --border-radius: 5px;
+  --btn-primary: #0098ea;
+  --btn-primary-hover: #00a6ff;
+  --btn-disabled: rgba(255, 255, 255, 0.1);
+  --menu-bg: rgba(0, 0, 0, 0.7);
+  --sidebar-bg: #141416;
+  --splitter-bg: #141416;
   --grey--10: rgba(46, 46, 51, 0.1);
   --grey--50: rgba(46, 46, 51, 0.5);
   --grey--70: rgba(46, 46, 51, 0.7);
 
-  --bg-color-dark: #000;
-  --color-danger: #c84075;
-  --color-warning: #d19228;
-  --border-radius: 5px;
+  --dark-800: #181717;
   --dark-hover: linear-gradient(
     0deg,
     rgba(0, 0, 0, 0.6) 0%,
     rgba(0, 0, 0, 0.6) 100%
   );
-  --primary-gradient: linear-gradient(45deg, #2d83ec, #1ac9ff);
+  --grey-900: #232328;
   --modal-bg: linear-gradient(
       0deg,
       rgba(0, 0, 0, 0.5) 0%,
       rgba(0, 0, 0, 0.5) 100%
     ),
     #232328;
-  --btn-primary: #0098ea;
-  --btn-primary-hover: #00a6ff;
-  --btn-disabled: rgba(255, 255, 255, 0.1);
+}
+
+/* Light theme styles */
+[data-theme='light'] {
+  --text-color: #000;
+  --bg-color: #f7f7f7;
+  --black-500: #dcdada;
+  --btn-disabled: rgba(0, 0, 0, 0.1);
+  --menu-bg: rgba(255, 255, 255, 0.6);
+  --sidebar-bg: #e8e8e8;
+  --color-light: #454444;
+  --splitter-bg: #bbbbbb;
+  --grey--10: rgba(208, 208, 225, 0.1);
+  --grey--50: #e8e8e8;
+  --grey--70: #dcdada;
+  --dark-800: #eaeaea;
+  --grey-900: #f2f2f2;
+  --dark-hover: linear-gradient(
+    0deg,
+    rgba(255, 255, 255, 0.6) 0%,
+    rgba(255, 255, 255, 0.6) 100%
+  );
+  --modal-bg: linear-gradient(
+      0deg,
+      rgba(255, 255, 255, 0.5) 0%,
+      rgba(255, 255, 255, 0.5) 100%
+    ),
+    #eaeaea;
 }
 
 html {
@@ -44,14 +71,18 @@ body {
   font-family: var(--font-body);
   letter-spacing: 0.02em;
   color: var(--text-color);
-  background: var(--bg-color-dark);
+  background: var(--bg-color);
   line-height: 1.4;
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
   *::-webkit-scrollbar-track {
     -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
     background-color: #000000;
+    [data-theme='light'] & {
+      background-color: #f7f7f7;
+    }
   }
 
   *::-webkit-scrollbar {

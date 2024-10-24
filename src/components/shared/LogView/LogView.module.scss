@@ -57,4 +57,10 @@
     display: inline-block;
     margin-left: 0.5rem;
   }
+  [class*='xterm-cursor-outline'] {
+    outline-color: var(--text-color) !important;
+  }
+  [class*='xterm-cursor-bar'] {
+    box-shadow: 1px 0 0 var(--text-color) inset !important;
+  }
 }

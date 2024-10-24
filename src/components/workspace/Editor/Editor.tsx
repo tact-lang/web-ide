@@ -7,6 +7,7 @@ import EditorDefault, { loader } from '@monaco-editor/react';
 import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
 import { FC, useEffect, useRef, useState } from 'react';
 // import { useLatest } from 'react-use';
+import { useTheme } from '@/components/shared/ThemeProvider';
 import { useFile, useFileTab } from '@/hooks';
 import { useProject } from '@/hooks/projectV2.hooks';
 import { useLatest } from 'react-use';
@@ -23,6 +24,7 @@ const Editor: FC<Props> = ({ className = '' }) => {
   const { activeProject } = useProject();
   const { getFile, saveFile: storeFileContent } = useFile();
   const { fileTab, updateFileDirty } = useFileTab();
+  const { theme } = useTheme();
 
   const { isFormatOnSave, getSettingStateByKey } = useSettingAction();
 
@@ -249,7 +251,7 @@ const Editor: FC<Props> = ({ className = '' }) => {
       <EditorDefault
         className={s.editor}
         path={fileTab.active ?? ''}
-        theme="vs-theme-dark"
+        theme={theme === 'dark' ? 'vs-theme-dark' : 'light'}
         // height="90vh"
         defaultLanguage={fileTypeFromFileName(fileTab.active ?? '')}
         // defaultLanguage={`func`}
