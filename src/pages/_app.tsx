@@ -1,11 +1,10 @@
-import { Layout } from '@/components/shared';
+import { Layout, ThemeProvider } from '@/components/shared';
 import { AppConfig } from '@/config/AppConfig';
 import { IDEProvider } from '@/state/IDE.context';
 import '@/styles/theme.scss';
 import { THEME } from '@tonconnect/ui';
 import { TonConnectUIProvider } from '@tonconnect/ui-react';
 import { WebContainer } from '@webcontainer/api';
-import { ConfigProvider, theme } from 'antd';
 import mixpanel from 'mixpanel-browser';
 import type { AppProps } from 'next/app';
 import Head from 'next/head';
@@ -23,8 +22,6 @@ export default function App({
   Component,
   pageProps: { ...pageProps },
 }: AppProps) {
-  const { darkAlgorithm } = theme;
-
   useEffect(() => {
     if (process.env.NEXT_PUBLIC_DISABLE_WEBCONTAINER) return;
     (async () => {
@@ -86,17 +83,7 @@ export default function App({
       </Head>
       <RecoilRoot>
         <IDEProvider>
-          <ConfigProvider
-            theme={{
-              token: {
-                colorPrimary: '#0098ea',
-                colorError: '#C84075',
-                fontFamily: 'var(--font-body)',
-                borderRadius: 4,
-              },
-              algorithm: darkAlgorithm,
-            }}
-          >
+          <ThemeProvider>
             <TonConnectUIProvider
               uiPreferences={{ theme: THEME.LIGHT }}
               manifestUrl="https://ide.ton.org/assets/ton/tonconnect-manifest.json"
@@ -105,7 +92,7 @@ export default function App({
                 <Component {...pageProps} />
               </Layout>
             </TonConnectUIProvider>
-          </ConfigProvider>
+          </ThemeProvider>
         </IDEProvider>
       </RecoilRoot>
     </>
