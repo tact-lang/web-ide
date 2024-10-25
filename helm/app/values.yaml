@@ -25,11 +25,6 @@ ghcrSecret: ""
 tlsCert: ""
 tlsKey: ""
 
-
-# do not change
-tlsIssuer: "letsencrypt"
-certIssuingMode: false
-
 # http
 publicService: true
 sslRedirect: false
