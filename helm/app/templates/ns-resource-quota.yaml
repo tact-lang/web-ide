@@ -7,7 +7,6 @@ spec:
   hard:
     {{- if eq .Values.deployEnv "staging" }}
     pods: "2"
-    services: "1"
     requests.memory: "256Mi"
     limits.cpu: "1"
     limits.memory: "16Gi"

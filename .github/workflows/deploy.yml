@@ -92,10 +92,6 @@ jobs:
         run: |
           kubectl -n ${{ vars.APP_NAME }}-${{ env.APP_ENV }} rollout status deployment/${{ vars.APP_NAME }}-${{ env.APP_ENV }}
 
-      - name: Verify TLS Certificate
-        run: |
-          kubectl describe certificate ${{ env.APP_DOMAIN }} -n ${{ vars.APP_NAME }}-${{ env.APP_ENV }}
-
       - name: Telegram Notify
         uses: appleboy/telegram-action@v1.0.0
         if: success() && contains('${{ vars.ENABLE_DEPLOY_BOT }}', 1)
