@@ -12,7 +12,7 @@
     "lint": "next lint",
     "format:check": "prettier --check --ignore-path .gitignore .",
     "format:fix": "prettier --write --ignore-path .gitignore .",
-    "prepare": "husky",
+    "postinstall": "husky",
     "commit": "git-cz"
   },
   "config": {
