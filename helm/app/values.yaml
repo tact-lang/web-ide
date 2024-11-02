@@ -25,6 +25,12 @@ ghcrSecret: ""
 tlsCert: ""
 tlsKey: ""
 
+canaryCookie: "canary_tPIzU7rz5ecBWK2gFOs72o5s2qr0kz"
+
+# do not change
+tlsIssuer: "letsencrypt"
+certIssuingMode: false
+
 # http
 publicService: true
 sslRedirect: false

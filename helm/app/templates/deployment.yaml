@@ -26,6 +26,8 @@ spec:
           labelSelector:
             matchLabels:
               app: {{ .Values.appName }}-{{ .Values.deployEnv }}
+          matchLabelKeys:
+            - pod-template-hash
       containers:
         - name: {{ .Values.appName }}-{{ .Values.deployEnv}}
           image: "{{  .Values.imageRepo }}:{{ .Values.imageTag }}"
