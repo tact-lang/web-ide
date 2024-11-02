@@ -2,14 +2,14 @@
 
 .root {
   display: flex;
-  height: 100vh;
+  height: calc(var(--vh) * 100);
   overflow: hidden;
   .sidebar {
     flex: 0 0 70px;
     width: 70px;
     @include devices(mobile) {
       display: flex;
-      position: absolute;
+      position: fixed;
       bottom: 0;
       z-index: 15;
       width: 100%;
