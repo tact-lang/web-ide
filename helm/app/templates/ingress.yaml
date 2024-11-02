@@ -10,10 +10,13 @@ metadata:
     nginx.ingress.kubernetes.io/proxy-connect-timeout: "10s"
     nginx.ingress.kubernetes.io/proxy-read-timeout: "15s"
     nginx.ingress.kubernetes.io/proxy-send-timeout: "15s"
+    nginx.ingress.kubernetes.io/from-to-www-redirect: "true"
     nginx.ingress.kubernetes.io/proxy-next-upstream: "error timeout http_502 http_503 http_504"
     nginx.ingress.kubernetes.io/proxy-next-upstream-tries: "3"
+    cert-manager.io/cluster-issuer: {{ .Values.tlsIssuer }}
     {{- if eq .Values.deployEnv "canary" }}
     nginx.ingress.kubernetes.io/canary: "true"
+    nginx.ingress.kubernetes.io/canary-by-cookie: {{ .Values.canaryCookie | quote }}
     nginx.ingress.kubernetes.io/canary-weight: {{ .Values.canaryWeight | quote }}
     {{- end }}
     nginx.ingress.kubernetes.io/server-snippet: |

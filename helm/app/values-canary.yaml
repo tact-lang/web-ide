@@ -1,6 +1,7 @@
-deployEnv: staging
-replicaCount: 1
-imageTag: "staging"
+deployEnv: canary
+replicaCount: 2
+imageTag: "canary"
+canaryWeight: 10
 
 minReplicas: 1
 maxReplicas: 1

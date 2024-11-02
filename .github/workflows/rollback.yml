@@ -1,0 +1,63 @@
+name: Rollback Kubernetes Deployment
+
+on:
+  workflow_dispatch:
+    inputs:
+      app_env:
+        description: "Select the environment"
+        required: true
+        default: production
+        type: choice
+        options:
+          - production
+          - staging
+      revision:
+        description: "Choose the Helm revision to rollback to"
+        required: false
+
+jobs:
+  rollback:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Apply AWS k8s config
+        run: aws eks update-kubeconfig --name ${{ vars.AWS_CLUSTER }} --region ${{ vars.AWS_REGION }}
+
+      - name: Fetch Helm history
+        run: |
+          helm history ${{ vars.APP_NAME }} --namespace ${{ vars.APP_NAME }}-${{ github.event.inputs.app_env }}
+
+      - name: Get revision number
+        if: github.event.inputs.revision == ''
+        run: |
+          echo "No revision provided. Exiting."
+          exit 1
+
+      - name: Perform Helm rollback
+        run: |
+          helm rollback ${{ vars.APP_NAME }} ${{ github.event.inputs.revision }} --namespace ${{ vars.APP_NAME }}-${{ github.event.inputs.app_env }} ${{ github.event.inputs.revision }}
+
+      - name: Verify rollback
+        run: |
+          kubectl -n ${{ vars.APP_NAME }}-${{ github.event.inputs.app_env }} rollout status deployment/${{ vars.APP_NAME }}-${{ github.event.inputs.app_env }}
+
+      - name: Show Helm history
+        run: |
+          helm history ${{ vars.APP_NAME }} --namespace ${{ vars.APP_NAME }}-${{ github.event.inputs.app_env }}
+
+      - name: Telegram Notify
+        uses: appleboy/telegram-action@v1.0.0
+        with:
+          to: ${{ secrets.TELEGRAM_DEPLOY_CHAT_ID }}
+          token: ${{ secrets.TELEGRAM_DEPLOY_TOKEN }}
+          format: markdown
+          message: |
+            🔄 The deployment {{ app_env }} has been rolled back by [${{ github.actor }}](https://github.com/${{ github.actor }}) to revision ${{ github.event.inputs.revision }}.
+            🏗️ [GitHub Actions Run](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
