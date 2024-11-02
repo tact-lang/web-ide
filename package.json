@@ -10,8 +10,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "format:check": "prettier --check --ignore-path .gitignore .",
-    "format:fix": "prettier --write --ignore-path .gitignore .",
+    "format:check": "prettier --check --ignore-path .prettierignore --ignore-path .gitignore .",
+    "format:fix": "prettier --write --ignore-path .prettierignore --ignore-path .gitignore .",
     "prepare": "husky",
     "commit": "git-cz"
   },
