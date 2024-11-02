@@ -1,7 +1,7 @@
 @import '/src/styles/variables.scss';
 
 .root {
-  background-color: #181717;
+  background-color: var(--dark-800);
   height: 100%;
   z-index: 1000;
   position: relative;
@@ -58,11 +58,11 @@
       justify-content: center;
       .icon {
         path {
-          stroke: #fff;
+          stroke: var(--text-color);
         }
       }
       &:hover {
-        background-color: var(--grey);
+        background-color: var(--grey--70);
       }
     }
   }

@@ -1,10 +1,11 @@
+import { ThemeContext } from '@/components/shared/ThemeProvider';
 import { AppLogo, Tooltip } from '@/components/ui';
 import AppIcon, { AppIconType } from '@/components/ui/icon';
 import { AppData } from '@/constant/AppData';
 import { useSettingAction } from '@/hooks/setting.hooks';
 import { Form, Input, Popover, Select, Switch } from 'antd';
 import Link from 'next/link';
-import { FC, useEffect } from 'react';
+import { FC, useContext, useEffect } from 'react';
 import { useMedia } from 'react-use';
 import s from './WorkspaceSidebar.module.scss';
 
@@ -44,6 +45,7 @@ const WorkspaceSidebar: FC<Props> = ({
   const editorMode = getSettingStateByKey('editorMode');
   const isExternalMessage = getSettingStateByKey('isExternalMessage');
   const isMobile = useMedia('(max-width: 767px)');
+  const themeContext = useContext(ThemeContext);
 
   const menuItems: MenuItem[] = [
     {
@@ -107,6 +109,16 @@ const WorkspaceSidebar: FC<Props> = ({
             checked={isFormatOnSave()}
             onChange={(toggleState) => {
               toggleFormatOnSave(toggleState);
+            }}
+          />
+        </Form.Item>
+      </div>
+      <div className={s.settingItem}>
+        <Form.Item label="Light Mode" valuePropName="checked">
+          <Switch
+            checked={themeContext?.theme === 'light'}
+            onChange={() => {
+              themeContext?.toggleTheme();
             }}
           />
         </Form.Item>
@@ -207,6 +219,20 @@ const WorkspaceSidebar: FC<Props> = ({
           <AppIcon className={s.icon} name="Setting" />
         </div>
       </Popover>
+      <Tooltip title="Switch Theme" placement="right">
+        <div
+          className={`${s.themeSwitch} ${s.action} ${s.isActive}`}
+          onClick={() => {
+            themeContext?.toggleTheme();
+          }}
+        >
+          {themeContext?.theme == 'dark' ? (
+            <AppIcon name="Moon" />
+          ) : (
+            <AppIcon name="Sun" />
+          )}
+        </div>
+      </Tooltip>
     </>
   );
 

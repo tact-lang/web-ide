@@ -33,6 +33,7 @@ const defaultSetting = {
   autoBuildAndDeploy: true,
   editorMode: 'default' as const,
   isExternalMessage: false,
+  theme: 'dark' as const,
 };
 
 const defaultState = {

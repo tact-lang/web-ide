@@ -39,6 +39,7 @@ const Configuration: UserConfig = {
         'ci', // Continuous integration
         'ui',
         'release', // Release related changes
+        'theme', // Theme changes
         'other', // Other changes
       ],
     ],
