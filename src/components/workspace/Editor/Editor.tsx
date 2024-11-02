@@ -7,6 +7,7 @@ import EditorDefault, { loader } from '@monaco-editor/react';
 import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
 import { FC, useEffect, useRef, useState } from 'react';
 // import { useLatest } from 'react-use';
+import AppIcon from '@/components/ui/icon';
 import { useFile, useFileTab } from '@/hooks';
 import { useProject } from '@/hooks/projectV2.hooks';
 import { useLatest } from 'react-use';
@@ -238,6 +239,9 @@ const Editor: FC<Props> = ({ className = '' }) => {
 
   return (
     <div className={`${s.container} ${className}`}>
+      <span className={s.saveFile} onClick={updateFileSaveCounter}>
+        <AppIcon name="Save" />
+      </span>
       <div className={s.editorInfo}>
         <div>
           <span className={s.vimStatuBar} ref={vimStatusBarRef} />
@@ -259,6 +263,11 @@ const Editor: FC<Props> = ({ className = '' }) => {
           minimap: {
             enabled: false,
           },
+          scrollbar: {
+            verticalScrollbarSize: 5,
+            horizontalScrollbarSize: 5,
+          },
+          lineNumbersMinChars: 3,
           fontSize: 14,
           bracketPairColorization: {
             enabled: true,

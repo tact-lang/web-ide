@@ -37,6 +37,7 @@ const Configuration: UserConfig = {
         'test', // Tests
         'build', // Build scripts or configuration
         'ci', // Continuous integration
+        'ui',
         'release', // Release related changes
         'other', // Other changes
       ],

@@ -5,6 +5,7 @@ import { useSettingAction } from '@/hooks/setting.hooks';
 import { Form, Input, Popover, Select, Switch } from 'antd';
 import Link from 'next/link';
 import { FC, useEffect } from 'react';
+import { useMedia } from 'react-use';
 import s from './WorkspaceSidebar.module.scss';
 
 export type WorkSpaceMenu = 'code' | 'build' | 'test-cases' | 'setting';
@@ -42,6 +43,7 @@ const WorkspaceSidebar: FC<Props> = ({
 
   const editorMode = getSettingStateByKey('editorMode');
   const isExternalMessage = getSettingStateByKey('isExternalMessage');
+  const isMobile = useMedia('(max-width: 767px)');
 
   const menuItems: MenuItem[] = [
     {
@@ -181,9 +183,36 @@ const WorkspaceSidebar: FC<Props> = ({
     </div>
   );
 
+  const secondaryMenu = () => (
+    <>
+      {AppData.socials.map((menu, i) => (
+        <Tooltip key={i} title={menu.label} placement="right">
+          <Link href={menu.url} className={s.action} target="_blank">
+            <AppIcon className={s.icon} name={menu.icon as AppIconType} />
+          </Link>
+        </Tooltip>
+      ))}
+      <Popover
+        placement="rightTop"
+        title="Setting"
+        content={settingContent}
+        overlayStyle={{
+          maxWidth: '80vw',
+          maxHeight: '70vh',
+          overflowY: 'auto',
+          overflowX: 'hidden',
+        }}
+      >
+        <div className={s.action}>
+          <AppIcon className={s.icon} name="Setting" />
+        </div>
+      </Popover>
+    </>
+  );
+
   return (
     <div className={s.container}>
-      <div>
+      <div className={s.primaryMenu}>
         <AppLogo className={s.brandLogo} href="/" />
         {menuItems.map((menu, i) => {
           if (menu.private) {
@@ -206,19 +235,16 @@ const WorkspaceSidebar: FC<Props> = ({
           );
         })}
       </div>
-      <div>
-        {AppData.socials.map((menu, i) => (
-          <Tooltip key={i} title={menu.label} placement="right">
-            <Link href={menu.url} className={s.action} target="_blank">
-              <AppIcon className={s.icon} name={menu.icon as AppIconType} />
-            </Link>
-          </Tooltip>
-        ))}
-        <Popover placement="rightTop" title="Setting" content={settingContent}>
-          <div className={s.action}>
-            <AppIcon className={s.icon} name="Setting" />
-          </div>
-        </Popover>
+      <div className={s.secondaryMenu}>
+        {isMobile ? (
+          <Popover className={s.action} content={secondaryMenu}>
+            <div className={s.action}>
+              <AppIcon className={s.icon} name="Menu" />
+            </div>
+          </Popover>
+        ) : (
+          secondaryMenu()
+        )}
       </div>
     </div>
   );

@@ -1,3 +1,5 @@
+@import '/src/styles/variables.scss';
+
 .root {
   display: flex;
   height: 100vh;
@@ -5,15 +7,65 @@
   .sidebar {
     flex: 0 0 70px;
     width: 70px;
+    @include devices(mobile) {
+      display: flex;
+      position: absolute;
+      bottom: 0;
+      z-index: 15;
+      width: 100%;
+    }
   }
+
+  .openMenu,
+  .closeMenu {
+    display: none;
+    padding: 0.6rem;
+    cursor: pointer;
+    color: var(--text-color);
+    font-size: 1.5rem;
+    width: 2.5rem;
+    height: 2.5rem;
+    justify-content: center;
+    align-items: center;
+  }
+  .openMenu {
+    position: absolute;
+    top: 40%;
+    left: 0;
+    z-index: 5;
+    background: var(--grey-500);
+    box-shadow: 0 0 2px 3px #696767;
+    border-radius: 0 1rem 1rem 0;
+    height: 2rem;
+    width: 1.5rem;
+    padding: 0.3rem;
+    @include devices(mobile) {
+      display: flex;
+    }
+  }
+  .closeMenu {
+    position: fixed;
+    top: 0;
+    right: 0;
+    background: var(--grey-500);
+    z-index: 100;
+    border-radius: 0 0 0 1rem;
+  }
+
   .splitHorizontal {
     display: flex;
     flex-direction: row;
     width: calc(100% - 70px);
+    @include devices(mobile) {
+      width: 100% !important;
+    }
     div[class*='gutter-horizontal'] {
       background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAeCAYAAADkftS9AAAAIklEQVQoU2M4c+bMfxAGAgYYmwGrIIiDjrELjpo5aiZeMwF+yNnOs5KSvgAAAABJRU5ErkJggg==');
       cursor: col-resize;
       background-color: #141416;
+      @include devices(mobile) {
+        display: none;
+      }
     }
   }
   .splitVertical {
@@ -24,6 +76,7 @@
       background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAFAQMAAABo7865AAAABlBMVEVHcEzMzMzyAv2sAAAAAXRSTlMAQObYZgAAABBJREFUeF5jOAMEEAIEEFwAn3kMwcB6I2AAAAAASUVORK5CYII=');
       cursor: row-resize;
       background-color: #17171a;
+      z-index: 2;
     }
   }
   div[class*='gutter'] {
@@ -41,6 +94,22 @@
     background-color: #141416;
     overflow-x: hidden !important;
     overflow-y: auto !important;
+    @include devices(mobile) {
+      width: 100% !important;
+      position: fixed;
+      height: 100%;
+      z-index: 10;
+      transform: translateX(-100%);
+      transition: transform 0.3s ease-in;
+      &.hasMenu {
+        transform: translateX(0);
+        .closeMenu {
+          @include devices(mobile) {
+            display: flex;
+          }
+        }
+      }
+    }
     :global(.onboarding-active) & {
       overflow: initial !important;
     }
@@ -53,6 +122,9 @@
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    @include devices(mobile) {
+      width: 100% !important;
+    }
   }
   .heading {
     color: #ccc;

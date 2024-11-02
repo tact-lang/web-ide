@@ -3,6 +3,7 @@
 import { DownloadProject } from '@/components/project';
 import { ProjectTemplate } from '@/components/template';
 import { NonProductionNotice } from '@/components/ui';
+import AppIcon from '@/components/ui/icon';
 import { AppConfig } from '@/config/AppConfig';
 import { useFileTab } from '@/hooks';
 import { useLogActivity } from '@/hooks/logActivity.hooks';
@@ -37,6 +38,7 @@ const WorkSpace: FC = () => {
 
   const router = useRouter();
   const [activeMenu, setActiveMenu] = useState<WorkSpaceMenu>('code');
+  const [isSidebarMenuOpen, setIsSidebarMenuOpen] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [contract, setContract] = useState<any>('');
@@ -157,6 +159,14 @@ const WorkSpace: FC = () => {
 
   return (
     <div className={`${s.root} show-file-icons`}>
+      <span
+        className={s.openMenu}
+        onClick={() => {
+          setIsSidebarMenuOpen(true);
+        }}
+      >
+        <AppIcon name="AngleRightHollow" />
+      </span>
       <div className={`${s.sidebar} onboarding-workspace-sidebar`}>
         <WorkspaceSidebar
           activeMenu={activeMenu}
@@ -180,7 +190,17 @@ const WorkSpace: FC = () => {
           EventEmitter.emit('ON_SPLIT_DRAG_END');
         }}
       >
-        <div className={s.tree}>
+        <div
+          className={`${s.tree} ${isSidebarMenuOpen ? s.hasMenu : s.blankMenu}`}
+        >
+          <span
+            className={s.closeMenu}
+            onClick={() => {
+              setIsSidebarMenuOpen(false);
+            }}
+          >
+            <AppIcon name="Close" />
+          </span>
           {isLoaded && activeMenu === 'code' && (
             <div className="onboarding-file-explorer">
               <span className={s.heading}>Explorer</span>

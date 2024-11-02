@@ -11,13 +11,14 @@ import {
 } from 'react-icons/ai';
 import { BsShare } from 'react-icons/bs';
 
-import { BsFillPlayFill } from 'react-icons/bs';
+import { BsFillPlayFill, BsThreeDotsVertical } from 'react-icons/bs';
 import { FaRegClone } from 'react-icons/fa';
 import { FiEdit2, FiEye } from 'react-icons/fi';
 import { GoTriangleDown, GoTriangleRight, GoTriangleUp } from 'react-icons/go';
 import { GrClear } from 'react-icons/gr';
 import { HiDocumentText } from 'react-icons/hi';
 import { MdFeedback } from 'react-icons/md';
+import { TfiAngleRight } from 'react-icons/tfi';
 
 import {
   Beaker,
@@ -49,6 +50,7 @@ export type AppIconType =
   | 'AngleUp'
   | 'AngleDown'
   | 'AngleRight'
+  | 'AngleRightHollow'
   | 'Test'
   | 'Google'
   | 'GitHub'
@@ -69,7 +71,8 @@ export type AppIconType =
   | 'Import'
   | 'Reload'
   | 'Share'
-  | 'Save';
+  | 'Save'
+  | 'Menu';
 
 export interface AppIconInterface {
   name: AppIconType;
@@ -88,6 +91,7 @@ const Components = {
   AngleUp: GoTriangleUp,
   AngleDown: GoTriangleDown,
   AngleRight: GoTriangleRight,
+  AngleRightHollow: TfiAngleRight,
   Test: Test,
   Google: AiOutlineGoogle,
   GitHub,
@@ -110,6 +114,7 @@ const Components = {
   Reload: AiOutlineReload,
   Share: BsShare,
   Save: AiOutlineSave,
+  Menu: BsThreeDotsVertical,
 };
 
 const AppIcon: FC<AppIconInterface> = ({ name, className = '' }) => {
