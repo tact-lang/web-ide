@@ -130,7 +130,9 @@ const ProjectTemplate: FC = () => {
         rootClassName={s.projectExampleDrawer}
         title={examples[currentExample]?.name}
         placement="right"
-        width={500}
+        style={{
+          maxWidth: '500px',
+        }}
         onClose={closeTemplate}
         open={currentExample > -1}
         closeIcon={<AppIcon name="Close" />}

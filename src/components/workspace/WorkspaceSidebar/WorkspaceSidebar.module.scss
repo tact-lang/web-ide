@@ -49,6 +49,10 @@
   flex-direction: column;
   align-items: center;
   border-radius: 0.625rem;
+  .icon {
+    width: 2rem;
+    height: 2rem;
+  }
   @include devices(mobile) {
     padding: 0.7rem;
     width: 2.5rem;
@@ -84,13 +88,6 @@
   margin: 0 auto 1rem auto;
   align-items: center;
   border-radius: 50%;
-  height: 3rem;
-  width: 3rem;
-
-  > svg {
-    width: 1.4rem;
-    height: 1.4rem;
-  }
 }
 .settingItem {
   margin: 0 !important;

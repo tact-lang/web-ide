@@ -125,6 +125,13 @@
       width: 100% !important;
     }
   }
+  .editorWrapper {
+    height: calc(100% - 10px);
+
+    &.hasTabs {
+      height: calc(100% - 43px);
+    }
+  }
   .heading {
     color: var(--color-light);
     text-align: center;

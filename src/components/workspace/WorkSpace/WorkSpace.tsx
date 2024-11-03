@@ -265,7 +265,9 @@ const WorkSpace: FC = () => {
                     <Tabs />
                   </div>
 
-                  <div style={{ height: 'calc(100% - 43px)' }}>
+                  <div
+                    className={`${s.editorWrapper} ${fileTab.items.length > 0 ? s.hasTabs : ''}`}
+                  >
                     {fileTab.active ? <Editor /> : <ProjectTemplate />}
                   </div>
                 </div>

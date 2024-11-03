@@ -226,11 +226,10 @@ const WorkspaceSidebar: FC<Props> = ({
             themeContext?.toggleTheme();
           }}
         >
-          {themeContext?.theme == 'dark' ? (
-            <AppIcon name="Moon" />
-          ) : (
-            <AppIcon name="Sun" />
-          )}
+          <AppIcon
+            className={s.icon}
+            name={themeContext?.theme == 'dark' ? 'Moon' : 'Sun'}
+          />
         </div>
       </Tooltip>
     </>
