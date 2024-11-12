@@ -19,7 +19,7 @@ import { Buffer } from 'buffer';
 import { useRouter } from 'next/router';
 import { FC, useEffect, useMemo, useState } from 'react';
 import Split from 'react-split';
-import { useEffectOnce } from 'react-use';
+import { useEffectOnce, useMedia } from 'react-use';
 import BottomPanel from '../BottomPanel/BottomPanel';
 import BuildProject from '../BuildProject';
 import Editor from '../Editor';
@@ -51,6 +51,8 @@ const WorkSpace: FC = () => {
     loadProjectFiles,
     newFileFolder,
   } = useProject();
+
+  const isMobile = useMedia('(max-width: 767px)');
 
   const { fileTab, open: openTab } = useFileTab();
 
@@ -106,11 +108,12 @@ const WorkSpace: FC = () => {
   }, [cachedProjectPath]);
 
   useEffect(() => {
+    createSandbox(true).catch(() => {});
+
     if (!activeProject) {
       return;
     }
     createLog(`Project '${activeProject.name}' is opened`);
-    createSandbox(true).catch(() => {});
 
     if (fileTab.active) return;
     // Open main file on project switch
@@ -125,10 +128,11 @@ const WorkSpace: FC = () => {
     document.addEventListener('keydown', onKeydown);
     EventEmitter.on('RELOAD_PROJECT_FILES', reloadProjectFiles);
     EventEmitter.on('OPEN_PROJECT', openProject);
+    EventEmitter.on('SET_SIDEBAR_VISIBILITY', setIsSidebarMenuOpen);
 
     Analytics.track('Project Opened', {
       platform: 'IDE',
-      type: 'TON-func',
+      type: `TON-${activeProject?.language}`,
     });
 
     return () => {
@@ -136,6 +140,8 @@ const WorkSpace: FC = () => {
         document.removeEventListener('keydown', onKeydown);
         EventEmitter.off('RELOAD_PROJECT_FILES', reloadProjectFiles);
         EventEmitter.off('OPEN_PROJECT', openProject);
+        EventEmitter.off('SET_SIDEBAR_VISIBILITY', setIsSidebarMenuOpen);
+
         clearLog();
       } catch (error) {
         /* empty */
@@ -149,6 +155,10 @@ const WorkSpace: FC = () => {
     }
   }, [tab]);
 
+  useEffect(() => {
+    setIsSidebarMenuOpen(false);
+  }, [fileTab]);
+
   useEffectOnce(() => {
     setIsLoaded(true);
     initGlobalSetting();
@@ -159,20 +169,18 @@ const WorkSpace: FC = () => {
 
   return (
     <div className={`${s.root} show-file-icons`}>
-      <span
-        className={s.openMenu}
-        onClick={() => {
-          setIsSidebarMenuOpen(true);
-        }}
-      >
-        <AppIcon name="AngleRightHollow" />
-      </span>
       <div className={`${s.sidebar} onboarding-workspace-sidebar`}>
         <WorkspaceSidebar
           activeMenu={activeMenu}
           projectName={activeProject?.path ?? ''}
           onMenuClicked={(name) => {
             setActiveMenu(name);
+            setIsSidebarMenuOpen(() => {
+              if (activeMenu === name) {
+                return !isSidebarMenuOpen;
+              }
+              return true;
+            });
             router
               .replace({
                 query: { ...router.query, tab: name },
@@ -253,7 +261,7 @@ const WorkSpace: FC = () => {
                 className={s.splitVertical}
                 minSize={50}
                 gutterSize={4}
-                sizes={[80, 20]}
+                sizes={isMobile ? [65, 35] : [80, 20]}
                 direction="vertical"
                 onDragEnd={() => {
                   EventEmitter.emit('ON_SPLIT_DRAG_END');

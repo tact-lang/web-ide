@@ -248,9 +248,8 @@ const WorkspaceSidebar: FC<Props> = ({
               <div
                 className={`${s.action} ${
                   activeMenu === menu.value ? s.isActive : ''
-                } ${!projectName ? s.disabled : ''}`}
+                }`}
                 onClick={() => {
-                  if (!projectName) return;
                   onMenuClicked(menu.value);
                 }}
               >

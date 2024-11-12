@@ -101,6 +101,10 @@
   > div {
     margin: 0 !important;
   }
+  [class*='ant-form-item-control-input-content'] {
+    display: flex;
+    justify-content: flex-end;
+  }
 }
 .settingItem {
   [class*='ant-form-item-label'] label {
