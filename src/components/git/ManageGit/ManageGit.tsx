@@ -5,10 +5,13 @@ import { useProject } from '@/hooks/projectV2.hooks';
 import { IGitWorkerMessage, InitRepo } from '@/interfaces/git.interface';
 import GitManager from '@/lib/git';
 import EventEmitter from '@/utility/eventEmitter';
-import { Button, Collapse } from 'antd';
+import { CaretRightOutlined } from '@ant-design/icons';
+import { Button, Collapse, theme } from 'antd';
 import { ReadCommitResult } from 'isomorphic-git';
 import { FC, useEffect, useRef, useState } from 'react';
 import CommitChanges from '../CommitChanges';
+import GitRemote from '../GitRemote';
+import GitSetting from '../GitSetting';
 import s from './ManageGit.module.scss';
 
 interface IFileCollection {
@@ -26,6 +29,14 @@ const ManageGit: FC = () => {
   const [fileCollection, setFileCollection] = useState<IFileCollection[]>([]);
   const [commitHistory, setCommitHistory] = useState<ReadCommitResult[]>([]);
   const git = new GitManager();
+  const { token: themeToken } = theme.useToken();
+
+  const panelStyle: React.CSSProperties = {
+    marginBottom: 10,
+    background: themeToken.colorFillAlter,
+    borderRadius: themeToken.borderRadiusLG,
+    border: 'none',
+  };
 
   const filteredFiles = (type: 'staged' | 'changed') => {
     if (type === 'staged') {
@@ -227,14 +238,19 @@ const ManageGit: FC = () => {
       <div>
         <Collapse
           className={s.collapse}
-          defaultActiveKey={['1', '2', '3']}
+          defaultActiveKey={['1', '2', '3', '4', '5']}
           bordered={false}
+          expandIcon={({ isActive }) => (
+            <CaretRightOutlined rotate={isActive ? 90 : 0} />
+          )}
+          style={{ background: themeToken.colorBgContainer }}
         >
           {stagedFiles.length > 0 && (
             <Collapse.Panel
               header={header(true)}
               className={s.collapsePanel}
               key="1"
+              style={panelStyle}
             >
               {renderCategoryWiseFiles(stagedFiles, true)}
             </Collapse.Panel>
@@ -244,6 +260,7 @@ const ManageGit: FC = () => {
             header={header(false)}
             className={s.collapsePanel}
             key="2"
+            style={panelStyle}
           >
             {renderCategoryWiseFiles(unstagedFiles, false)}
           </Collapse.Panel>
@@ -252,6 +269,7 @@ const ManageGit: FC = () => {
               header="Commit History"
               className={s.collapsePanel}
               key="3"
+              style={panelStyle}
             >
               {commitHistory.map(({ oid, commit }) => (
                 <div key={oid} className={s.commitItem}>
@@ -264,6 +282,22 @@ const ManageGit: FC = () => {
               ))}
             </Collapse.Panel>
           )}
+          <Collapse.Panel
+            header="Remote"
+            key="4"
+            className={s.collapsePanel}
+            style={panelStyle}
+          >
+            <GitRemote />
+          </Collapse.Panel>
+          <Collapse.Panel
+            header="Setting"
+            key="5"
+            className={s.collapsePanel}
+            style={panelStyle}
+          >
+            <GitSetting />
+          </Collapse.Panel>
         </Collapse>
       </div>
     );

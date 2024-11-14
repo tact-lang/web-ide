@@ -75,12 +75,51 @@ class GitManager {
     console.log('status', status);
   }
 
-  async addRemote(repo: string, dest: string) {
+  async addRemote(repoURL: string, dest: string) {
     await git.addRemote({
       fs: this.fs,
       dir: dest,
       remote: 'origin',
-      url: repo,
+      url: repoURL,
+    });
+  }
+
+  async removeRemote(dest: string) {
+    await git.deleteRemote({ fs: this.fs, dir: dest, remote: 'origin' });
+  }
+
+  async getRemote(dest: string) {
+    return git.listRemotes({ fs: this.fs, dir: dest });
+  }
+
+  async setConfig({
+    path,
+    value,
+    dest,
+  }: {
+    path: string; // e.g. 'user.name'
+    value: string;
+    dest: string;
+  }): Promise<void> {
+    await git.setConfig({
+      fs: this.fs,
+      dir: dest,
+      path,
+      value,
+    });
+  }
+
+  async getConfig({
+    path,
+    dest,
+  }: {
+    path: string; // e.g. 'user.name'
+    dest: string;
+  }) {
+    return git.getConfig({
+      fs: this.fs,
+      dir: dest,
+      path,
     });
   }
 
