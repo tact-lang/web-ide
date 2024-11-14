@@ -55,16 +55,20 @@ const useFileTab = () => {
     }
   };
 
-  const open = (name: string, path: string) => {
+  const open = (
+    name: string,
+    path: string,
+    type: 'default' | 'git' = 'default',
+  ) => {
     if (fileTab.active === path) return;
 
     const existingTab = fileTab.items.find((item) => item.path === path);
 
     if (existingTab) {
-      const updatedTab = { ...fileTab, active: path };
+      const updatedTab = { ...fileTab, active: path, type };
       syncTabSettings(updatedTab);
     } else {
-      const newTab = { name, path, isDirty: false };
+      const newTab = { name, path, isDirty: false, type };
       const updatedTab = {
         ...fileTab,
         items: [...fileTab.items, newTab],

@@ -42,10 +42,6 @@ class GitManager {
         filepath: file.path,
       });
     }
-    // console.log(
-    //   'unstaged',
-    //   await git.status({ fs: this.fs, dir: dest, filepath: file }),
-    // );
   }
 
   async commit(
@@ -62,9 +58,16 @@ class GitManager {
     console.log('commit sha', sha);
   }
 
-  async log(dest: string) {
-    const commits = await git.log({ fs: this.fs, dir: dest });
-    console.log('commits', commits);
+  async log(dest: string, depth = 10) {
+    return git.log({ fs: this.fs, dir: dest, depth });
+  }
+
+  async getOldCommit(dest: string, stepBack = 1) {
+    const commits = await this.log(dest, stepBack);
+    if (commits.length > stepBack) {
+      return commits[stepBack].oid;
+    }
+    throw new Error('Not enough commits in the history.');
   }
 
   async status(dest: string, filepath: string) {
@@ -86,39 +89,46 @@ class GitManager {
   ): Promise<{ path: string; status: string; staged: boolean }[]> {
     try {
       const statusMatrix = await git.statusMatrix({ fs: this.fs, dir: dest });
-      type Status = 0 | 1 | 2;
 
       // Map over the status matrix to get the status for each file
       const filesWithStatus = statusMatrix.map(
-        ([filePath, workDirStatus, stageStatus, headStatus]) => {
-          let status = '';
-          let isStaged = false;
+        ([filePath, headStatus, workDirStatus, stageStatus]) => {
+          const workDir = workDirStatus;
+          const stage = stageStatus;
+          const head = headStatus;
 
-          // TypeScript expects workDirStatus and others to be '0 | 1' in some cases, so we assert it as 'Status' (0 | 1 | 2)
-          const workDir = workDirStatus as Status;
-          const stage = stageStatus as Status;
-          const head = headStatus as Status;
+          type StatusKey =
+            | '0,2,0'
+            | '1,2,0'
+            | '1,2,1'
+            | '1,2,2'
+            | '0,0,2'
+            | '0,2,2'
+            | '1,0,0'
+            | '1,0,2'
+            | '1,1,0'
+            | '1,1,3'
+            | '1,2,3';
 
-          // Determine status based on workDir, stage, and head
-          if (workDir === 2 && stage === 0 && head === 0) {
-            status = 'U'; // Untracked file
-          } else if (workDir === 2 && stage === 0 && head === 1) {
-            status = 'M'; // Modified but not staged
-          } else if (workDir === 2 && stage === 2 && head === 1) {
-            status = 'M'; // Modified and staged
-            // isStaged = true;
-          } else if (workDir === 0 && stage === 2 && head === 0) {
-            status = 'A'; // Added (new file staged but not yet committed)
-            // isStaged = true;
-          } else if (workDir === 0 && stage === 0 && head === 1) {
-            status = 'D'; // Deleted (file deleted but not staged)
-          } else if (workDir === 0 && stage === 2 && head === 1) {
-            status = 'D'; // Deleted and staged
-            // isStaged = true;
-          }
-          if (head === 2) {
-            isStaged = true;
-          }
+          const statusMap: Record<
+            StatusKey,
+            { status: string; isStaged: boolean }
+          > = {
+            '0,2,0': { status: 'U', isStaged: false }, // Untracked file
+            '1,2,0': { status: 'M', isStaged: false }, // Modified but not staged
+            '1,2,1': { status: 'M', isStaged: false }, // Modified in working directory but not staged
+            '1,2,2': { status: 'M', isStaged: true }, // Modified and staged
+            '0,0,2': { status: 'A', isStaged: true }, // Added (new file staged but not yet committed)
+            '0,2,2': { status: 'A', isStaged: true }, // New file, modified, and staged
+            '1,0,0': { status: 'D', isStaged: false }, // Deleted (file deleted but not staged)
+            '1,0,2': { status: 'D', isStaged: true }, // Deleted and staged
+            '1,1,0': { status: '', isStaged: false }, // Unchanged file, no action needed
+            '1,1,3': { status: 'C', isStaged: false }, // Conflict, requires resolution
+            '1,2,3': { status: 'C', isStaged: false }, // Modified file with conflicts, requires resolution
+          };
+
+          const key = `${head},${workDir},${stage}` as StatusKey;
+          const { status, isStaged } = statusMap[key];
 
           return { path: filePath, status, staged: isStaged };
         },
@@ -129,6 +139,15 @@ class GitManager {
       console.error('Error getting files to commit:', error);
       throw error;
     }
+  }
+
+  async readBlob(oid: string, dest: string, filePath: string) {
+    return git.readBlob({
+      fs: this.fs,
+      dir: dest,
+      oid: oid,
+      filepath: filePath,
+    });
   }
 
   // async clone(repo, dest) {

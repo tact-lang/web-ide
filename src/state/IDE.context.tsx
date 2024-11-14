@@ -5,6 +5,7 @@ import { FC, createContext, useEffect, useMemo, useState } from 'react';
 interface ITabItems {
   name: string;
   path: string;
+  type: 'default' | 'git';
   isDirty: boolean;
 }
 

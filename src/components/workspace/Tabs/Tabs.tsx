@@ -55,6 +55,7 @@ const Tabs: FC = () => {
             key={item.path}
           >
             {item.name}
+            {item.type === 'git' && ' (git)'}
             <span
               className={`${s.close} ${item.isDirty ? s.isDirty : ''}`}
               onClick={(e) => {

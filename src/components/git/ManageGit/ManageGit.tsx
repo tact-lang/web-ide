@@ -1,25 +1,46 @@
 import { Tooltip } from '@/components/ui';
 import AppIcon from '@/components/ui/icon';
+import { useFileTab } from '@/hooks';
 import { useProject } from '@/hooks/projectV2.hooks';
 import { IGitWorkerMessage, InitRepo } from '@/interfaces/git.interface';
 import GitManager from '@/lib/git';
 import EventEmitter from '@/utility/eventEmitter';
 import { Button, Collapse } from 'antd';
+import { ReadCommitResult } from 'isomorphic-git';
 import { FC, useEffect, useRef, useState } from 'react';
+import CommitChanges from '../CommitChanges';
 import s from './ManageGit.module.scss';
 
 interface IFileCollection {
   path: string;
-  status: 'U' | 'A' | 'M' | 'D';
+  status: 'U' | 'A' | 'M' | 'D' | 'C';
   staged: boolean;
 }
 
 const ManageGit: FC = () => {
   const workerRef = useRef<Worker>();
   const { activeProject } = useProject();
+  const { open: openTab } = useFileTab();
   const [isGitInitialized, setIsGitInitialized] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [fileCollection, setFileCollection] = useState<IFileCollection[]>([]);
+  const [commitHistory, setCommitHistory] = useState<ReadCommitResult[]>([]);
+  const git = new GitManager();
+
+  const filteredFiles = (type: 'staged' | 'changed') => {
+    if (type === 'staged') {
+      return fileCollection.filter((file) => file.staged);
+    }
+    return fileCollection.filter(
+      (file) =>
+        (file.status === 'M' && !file.staged) ||
+        file.status === 'U' ||
+        file.status === 'C',
+    );
+  };
+
+  const stagedFiles = filteredFiles('staged');
+  const unstagedFiles = filteredFiles('changed');
 
   const initGit = () => {
     if (!activeProject?.path) {
@@ -57,7 +78,7 @@ const ManageGit: FC = () => {
     let files = [];
     if (all) {
       const filterType = action === 'add' ? 'changed' : 'staged';
-      files = filterdFiles(filterType).map((file) => ({ path: file.path }));
+      files = filteredFiles(filterType).map((file) => ({ path: file.path }));
       if (files.length === 0) return;
     } else {
       files = [{ path: filePath }];
@@ -71,22 +92,31 @@ const ManageGit: FC = () => {
     });
   };
 
-  const filterdFiles = (type: 'staged' | 'changed') => {
-    if (type === 'staged') {
-      return fileCollection.filter((file) => file.staged);
+  const getCommitHistory = async () => {
+    if (!activeProject?.path) return;
+    try {
+      const commits = await git.log(activeProject.path);
+      setCommitHistory(commits);
+    } catch (error) {
+      setCommitHistory([]);
     }
-    return fileCollection.filter((file) => !file.staged);
   };
 
   const onMount = async () => {
     if (!activeProject?.path) return;
-    const git = new GitManager();
     const _isInitialized = await git.isInitialized(activeProject.path);
     setIsGitInitialized(_isInitialized);
     if (_isInitialized) {
       getFilesToCommit();
     }
     setIsLoading(false);
+    getCommitHistory();
+  };
+
+  const onFileClick = (file: IFileCollection) => {
+    console.log(file);
+    const { path } = file;
+    openTab(path.split('/').pop()!, path, 'git');
   };
 
   useEffect(() => {
@@ -118,10 +148,13 @@ const ManageGit: FC = () => {
     workerRef.current.onerror = (error) => {
       console.error('Worker error:', error);
     };
+
+    EventEmitter.on('FILE_SAVED', getFilesToCommit);
     return () => {
       if (workerRef.current) {
         workerRef.current.terminate();
       }
+      EventEmitter.off('FILE_SAVED', getFilesToCommit);
     };
   }, []);
 
@@ -136,7 +169,13 @@ const ManageGit: FC = () => {
     return (
       <ul>
         {files.map((file) => (
-          <li key={file.path} className={s.fileItem}>
+          <li
+            key={file.path}
+            className={s.fileItem}
+            onClick={() => {
+              onFileClick(file);
+            }}
+          >
             <div className={s.fileDetails}>
               {file.path.split('/').pop()}{' '}
               <span className={s.filePath}>
@@ -146,7 +185,9 @@ const ManageGit: FC = () => {
             <Tooltip title={staged ? 'Unstage file' : 'Stage file'}>
               <span
                 className={s.action}
-                onClick={() => {
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
                   handleFiles(file.path, staged ? 'unstage' : 'add');
                 }}
               >
@@ -165,8 +206,6 @@ const ManageGit: FC = () => {
     if (!fileCollection.length) {
       return <div>No changes</div>;
     }
-    const stagedFiles = filterdFiles('staged');
-    const unstagedFiles = filterdFiles('changed');
     const header = (staged = false) => {
       return (
         <div className={s.collapseHeader}>
@@ -188,7 +227,7 @@ const ManageGit: FC = () => {
       <div>
         <Collapse
           className={s.collapse}
-          defaultActiveKey={['1', '2']}
+          defaultActiveKey={['1', '2', '3']}
           bordered={false}
         >
           {stagedFiles.length > 0 && (
@@ -208,6 +247,23 @@ const ManageGit: FC = () => {
           >
             {renderCategoryWiseFiles(unstagedFiles, false)}
           </Collapse.Panel>
+          {commitHistory.length > 0 && (
+            <Collapse.Panel
+              header="Commit History"
+              className={s.collapsePanel}
+              key="3"
+            >
+              {commitHistory.map(({ oid, commit }) => (
+                <div key={oid} className={s.commitItem}>
+                  <div className={s.commitMessage}>{commit.message}</div>
+                  <div className={s.commitAuthor}>
+                    {commit.author.name} - {commit.author.email}
+                  </div>
+                  <br />
+                </div>
+              ))}
+            </Collapse.Panel>
+          )}
         </Collapse>
       </div>
     );
@@ -226,6 +282,15 @@ const ManageGit: FC = () => {
           <AppIcon name="GitBranch" /> Initialize Git
         </Button>
       )}
+      {stagedFiles.length > 0 && (
+        <CommitChanges
+          onCommit={() => {
+            getFilesToCommit();
+            getCommitHistory();
+          }}
+        />
+      )}
+
       {isGitInitialized && renderFiles()}
     </div>
   );
