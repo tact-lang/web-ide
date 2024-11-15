@@ -70,4 +70,16 @@
       padding-inline-end: 5px;
     }
   }
+  .commitItem {
+    padding: 0.5rem 0;
+    overflow-wrap: break-word;
+
+    &:not(:last-child) {
+      border-bottom: 1px solid var(--grey);
+    }
+    .commitAuthor {
+      opacity: 0.6;
+      font-size: 0.7rem;
+    }
+  }
 }

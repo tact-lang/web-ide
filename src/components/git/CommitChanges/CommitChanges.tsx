@@ -1,6 +1,7 @@
 import { useLogActivity } from '@/hooks/logActivity.hooks';
 import { useProject } from '@/hooks/projectV2.hooks';
 import GitManager from '@/lib/git';
+import { getConfigValue } from '@/utility/git';
 import { Button, Form, Input } from 'antd';
 import { useForm } from 'antd/lib/form/Form';
 import { FC, useState } from 'react';
@@ -19,13 +20,22 @@ const CommitChanges: FC<Props> = ({ onCommit }) => {
 
   const commit = async ({ message }: { message: string }) => {
     if (!activeProject?.path) return;
+    const [username, email] = await Promise.all([
+      getConfigValue('user.name', 'username', activeProject.path),
+      getConfigValue('user.email', 'email', activeProject.path),
+    ]);
+
+    if (!username || !email) {
+      createLog('Please set username and email in git setting', 'error');
+      return;
+    }
 
     try {
       setIsLoading(true);
 
       await git.commit(message, activeProject.path, {
-        name: 'test',
-        email: 'test@example.com',
+        name: username,
+        email: email,
       });
 
       onCommit(message);

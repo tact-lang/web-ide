@@ -1,5 +1,6 @@
 import { PromisifiedFS } from '@isomorphic-git/lightning-fs';
 import git from 'isomorphic-git';
+import http from 'isomorphic-git/http/web';
 import fileSystem from './fs';
 
 class GitManager {
@@ -71,8 +72,7 @@ class GitManager {
   }
 
   async status(dest: string, filepath: string) {
-    const status = await git.status({ fs: this.fs, dir: dest, filepath });
-    console.log('status', status);
+    return git.status({ fs: this.fs, dir: dest, filepath });
   }
 
   async addRemote(repoURL: string, dest: string) {
@@ -146,6 +146,7 @@ class GitManager {
             | '1,0,0'
             | '1,0,2'
             | '1,1,0'
+            | '1,1,1'
             | '1,1,3'
             | '1,2,3';
 
@@ -162,6 +163,7 @@ class GitManager {
             '1,0,0': { status: 'D', isStaged: false }, // Deleted (file deleted but not staged)
             '1,0,2': { status: 'D', isStaged: true }, // Deleted and staged
             '1,1,0': { status: '', isStaged: false }, // Unchanged file, no action needed
+            '1,1,1': { status: '', isStaged: false }, // Unchanged file, no action needed
             '1,1,3': { status: 'C', isStaged: false }, // Conflict, requires resolution
             '1,2,3': { status: 'C', isStaged: false }, // Modified file with conflicts, requires resolution
           };
@@ -192,8 +194,39 @@ class GitManager {
   // async clone(repo, dest) {
   // }
 
-  // async pull(repo, dest) {
-  // }
+  async pull(dest: string, onMessage?: (message: string) => void) {
+    const { token } = JSON.parse(localStorage.getItem('gitConfig') ?? '{}');
+
+    await git.pull({
+      fs: this.fs,
+      http: http,
+      dir: dest,
+      remote: 'origin',
+      ref: 'main',
+      corsProxy: 'https://cors.isomorphic-git.org',
+      onAuth: () => ({
+        username: token,
+      }),
+      onMessage,
+      onAuthFailure: () => {
+        throw new Error('Authentication failed');
+      },
+    });
+  }
+
+  async push(dest: string, onMessage?: (message: string) => void) {
+    const { token } = JSON.parse(localStorage.getItem('gitConfig') ?? '{}');
+    return await git.push({
+      fs: this.fs,
+      http: http,
+      dir: dest,
+      remote: 'origin',
+      ref: 'main',
+      corsProxy: 'https://cors.isomorphic-git.org',
+      onAuth: () => ({ username: token }),
+      onMessage,
+    });
+  }
 }
 
 export default GitManager;

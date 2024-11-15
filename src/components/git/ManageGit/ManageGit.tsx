@@ -12,6 +12,7 @@ import { FC, useEffect, useRef, useState } from 'react';
 import CommitChanges from '../CommitChanges';
 import GitRemote from '../GitRemote';
 import GitSetting from '../GitSetting';
+import GitSync from '../GitSync';
 import s from './ManageGit.module.scss';
 
 interface IFileCollection {
@@ -238,7 +239,7 @@ const ManageGit: FC = () => {
       <div>
         <Collapse
           className={s.collapse}
-          defaultActiveKey={['1', '2', '3', '4', '5']}
+          defaultActiveKey={['staged', 'unstaged', 'remote', 'sync', 'setting']}
           bordered={false}
           expandIcon={({ isActive }) => (
             <CaretRightOutlined rotate={isActive ? 90 : 0} />
@@ -249,7 +250,7 @@ const ManageGit: FC = () => {
             <Collapse.Panel
               header={header(true)}
               className={s.collapsePanel}
-              key="1"
+              key="staged"
               style={panelStyle}
             >
               {renderCategoryWiseFiles(stagedFiles, true)}
@@ -259,16 +260,32 @@ const ManageGit: FC = () => {
           <Collapse.Panel
             header={header(false)}
             className={s.collapsePanel}
-            key="2"
+            key="unstaged"
             style={panelStyle}
           >
             {renderCategoryWiseFiles(unstagedFiles, false)}
+          </Collapse.Panel>
+          <Collapse.Panel
+            header="Remote"
+            key="remote"
+            className={s.collapsePanel}
+            style={panelStyle}
+          >
+            <GitRemote />
+          </Collapse.Panel>
+          <Collapse.Panel
+            header="Sync"
+            key="sync"
+            className={s.collapsePanel}
+            style={panelStyle}
+          >
+            <GitSync />
           </Collapse.Panel>
           {commitHistory.length > 0 && (
             <Collapse.Panel
               header="Commit History"
               className={s.collapsePanel}
-              key="3"
+              key="history"
               style={panelStyle}
             >
               {commitHistory.map(({ oid, commit }) => (
@@ -277,22 +294,13 @@ const ManageGit: FC = () => {
                   <div className={s.commitAuthor}>
                     {commit.author.name} - {commit.author.email}
                   </div>
-                  <br />
                 </div>
               ))}
             </Collapse.Panel>
           )}
           <Collapse.Panel
-            header="Remote"
-            key="4"
-            className={s.collapsePanel}
-            style={panelStyle}
-          >
-            <GitRemote />
-          </Collapse.Panel>
-          <Collapse.Panel
             header="Setting"
-            key="5"
+            key="setting"
             className={s.collapsePanel}
             style={panelStyle}
           >

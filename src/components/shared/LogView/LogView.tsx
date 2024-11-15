@@ -50,9 +50,12 @@ const LogView: FC<Props> = ({ filter }) => {
     if (!data.timestamp) {
       timestamp = '';
     }
-    terminal.current.writeln(
-      `${colorMap[data.type]}${data.text}${colorMap.reset} ${timestamp}`,
-    );
+    const message = `${colorMap[data.type]}${data.text}${colorMap.reset} ${timestamp}`;
+    if (data.text.startsWith('\x1b[2K\r')) {
+      terminal.current.write(message);
+    } else {
+      terminal.current.writeln(message);
+    }
   };
 
   useEffect(() => {
