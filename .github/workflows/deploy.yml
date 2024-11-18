@@ -84,9 +84,9 @@ jobs:
           --set host=${{ env.APP_DOMAIN }} \
           --set appName=${{ vars.APP_NAME }} \
           --set ghcrSecret=${{ secrets.GHCR_SECRET  }} \
-          --set secrets.publicProxyKey=${{ secrets.NEXT_PUBLIC_MIXPANEL_TOKEN }} \
-          --set secrets.publicMixPanelToken=${{ secrets.NEXT_PUBLIC_ANALYTICS_ENABLED }} \
-          --set secrets.publicProxyKey=${{ secrets.NEXT_PUBLIC_ANALYTICS_ENABLED }}
+          --set secrets.nextPublicProxyKey=${{ secrets.NEXT_PUBLIC_PROXY_KEY }} \
+          --set secrets.nextPublicMixpanelToken=${{ secrets.NEXT_PUBLIC_MIXPANEL_TOKEN }} \
+          --set secrets.nextPublicAnalyticsEnabled=${{ secrets.NEXT_PUBLIC_ANALYTICS_ENABLED }}
 
       - name: Verify deployment
         run: |

@@ -37,6 +37,6 @@ sslRedirect: false
 
 
 secrets:
-  publicProxyKey: ""
-  publicMixPanelToken: ""
-  secrets.publicProxyKey: ""
+  nextPublicProxyKey: "redacted_proxy_key"
+  nextPublicMixpanelToken: "redacted_mixpanel_token"
+  nextPublicAnalyticsEnabled: "true"
