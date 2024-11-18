@@ -6,7 +6,7 @@
     flex: 0 0 70px;
     width: 70px;
   }
-  .splitHorizontal {
+  .splitVertical {
     display: flex;
     flex-direction: row;
     width: calc(100% - 70px);
@@ -16,7 +16,7 @@
       background-color: var(--splitter-bg);
     }
   }
-  .splitVertical {
+  .splitHorizontal {
     display: flex;
     flex-direction: column;
     height: 100%;
