@@ -9,6 +9,9 @@ const webpack = require("webpack");
 
 const nextConfig = withTM({
   reactStrictMode: true,
+  images: {
+    unoptimized: true,
+  },
   webpack: (config, options) => {
     config.resolve.fallback = { fs: false };
     config.resolve.alias = {

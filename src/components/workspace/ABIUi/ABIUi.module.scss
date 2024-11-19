@@ -12,6 +12,9 @@
     height: 1px;
     margin: 0 auto;
     background-color: #373636;
+    [data-theme='light'] & {
+      background-color: #e0e0e0;
+    }
   }
   &.tact {
     display: flex;
@@ -30,6 +33,9 @@
     background: rgba(14, 14, 16, 0.9);
     border-radius: 5px;
     padding: 5px;
+    [data-theme='light'] & {
+      background: rgba(255, 255, 255, 0.9);
+    }
 
     > div {
       border-left: 0 !important;
@@ -62,27 +68,40 @@
       border: 0;
       box-shadow: none;
       background: #232222;
+      [data-theme='light'] & {
+        background: #d6d6d6;
+      }
+      &:hover {
+        color: var(--text-color);
+        background-color: var(--grey--50);
+      }
     }
   }
   &.Setter {
     .btnAction {
       border: solid 1px transparent;
-      background-image: linear-gradient(rgb(20, 20, 20), rgb(20, 20, 20)),
-        var(--primary-gradient);
-      background-origin: border-box;
-      background-clip: content-box, border-box;
+      background: var(--primary);
       box-shadow: none;
       z-index: 0;
+
       &:hover {
         border-color: transparent;
-        color: #fff;
+        color: var(--text-color);
+
         &:before {
           background: #101010;
+          [data-theme='light'] & {
+            background: var(--btn-primary-hover);
+          }
         }
+      }
+      & span,
+      &:hover span [data-theme='light'] & {
+        color: #fff;
       }
       &:disabled {
         opacity: 0.5;
-        color: #fff;
+        color: var(--text-color);
       }
 
       &:before {
@@ -95,6 +114,9 @@
         background: #000;
         z-index: -1;
         border-radius: inherit;
+        [data-theme='light'] & {
+          background: var(--primary);
+        }
       }
     }
   }

@@ -1,0 +1,9 @@
+deployEnv: staging
+defaultReplicaCount: 6
+imageTag: "staging"
+
+minReplicas: 1
+maxReplicas: 1
+
+memoryLimit: 120Mi
+memoryRequest: 100Mi

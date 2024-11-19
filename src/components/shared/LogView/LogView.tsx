@@ -37,7 +37,7 @@ const LogView: FC<Props> = ({ filter }) => {
     grey: '\x1b[38;5;243m',
     success: '\x1b[38;5;40m',
     error: '\x1b[38;5;196m',
-    warning: '\x1b[38;5;226m',
+    warning: '\x1b[38;5;214m',
     info: '\x1b[38;5;33m',
     reset: '\x1b[0m',
   };

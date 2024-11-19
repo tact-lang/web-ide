@@ -1,5 +1,6 @@
 /* eslint-disable react/no-children-prop */
 import { NewProject } from '@/components/project';
+import { useTheme } from '@/components/shared/ThemeProvider';
 import AppIcon from '@/components/ui/icon';
 import { AppConfig } from '@/config/AppConfig';
 import { projectExamples } from '@/constant/projectExamples';
@@ -9,7 +10,10 @@ import Link from 'next/link';
 import { FC, useEffect, useState } from 'react';
 import Markdown from 'react-markdown';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { oneDark as darkTheme } from 'react-syntax-highlighter/dist/cjs/styles/prism';
+import {
+  oneDark as darkTheme,
+  oneLight as lightTheme,
+} from 'react-syntax-highlighter/dist/cjs/styles/prism';
 import s from './ProjectTemplate.module.scss';
 
 function LinkRenderer({
@@ -35,6 +39,7 @@ const ProjectTemplate: FC = () => {
     contract: string;
     content: string;
   }>({ contract: '', content: '' });
+  const { theme } = useTheme();
 
   const getContent = async () => {
     const link = examples[currentExample].link;
@@ -166,7 +171,7 @@ const ProjectTemplate: FC = () => {
                   PreTag="div"
                   children={String(children).replace(/\n$/, '')}
                   language={match[1]}
-                  style={darkTheme}
+                  style={theme === 'dark' ? darkTheme : lightTheme}
                 />
               ) : (
                 <code {...rest} className={className}>

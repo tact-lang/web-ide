@@ -60,7 +60,7 @@
 
     &.isActive {
       background: var(--black-500);
-      color: #ffffff;
+      color: var(--text-color);
       .close {
         visibility: visible;
       }
@@ -76,6 +76,9 @@
 
       &:hover {
         background-color: #403d3d;
+        [data-theme='light'] & {
+          background-color: #f7f7f7;
+        }
       }
       &.isDirty {
         .closeIcon {
@@ -92,7 +95,7 @@
       width: 8px;
       height: 8px;
       border-radius: 50%;
-      background: #fff;
+      background: var(--text-color);
       margin-right: 5px;
       position: absolute;
       left: 0;
