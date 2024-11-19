@@ -5,7 +5,7 @@ import { Project, Tree } from '@/interfaces/workspace.interface';
 import EventEmitter from '@/utility/eventEmitter';
 import { encodeBase64, fileTypeFromFileName } from '@/utility/utils';
 import { NodeModel } from '@minoru/react-dnd-treeview';
-import { message } from 'antd';
+import { App } from 'antd';
 import cn from 'clsx';
 import { FC, useState } from 'react';
 import s from './FileTree.module.scss';
@@ -35,6 +35,7 @@ const TreeNode: FC<Props> = ({ node, depth, isOpen, onToggle }) => {
   const { open: openTab } = useFileTab();
   const { createLog } = useLogActivity();
   const { getFile } = useFile();
+  const { message } = App.useApp();
 
   const disallowedFile = [
     'message.cell.ts',

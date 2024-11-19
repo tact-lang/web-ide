@@ -37,7 +37,7 @@ import {
 import { StateInit, TonClient } from '@ton/ton';
 import { ITonConnect, SendTransactionRequest } from '@tonconnect/sdk';
 import { useTonConnectUI } from '@tonconnect/ui-react';
-import { message } from 'antd';
+import { App } from 'antd';
 import { pascalCase } from 'change-case';
 import { useSettingAction } from './setting.hooks';
 
@@ -45,6 +45,7 @@ export function useContractAction() {
   const [tonConnector] = useTonConnectUI();
   const { getTonAmountForInteraction } = useSettingAction();
   const tonAmountForInteraction = toNano(getTonAmountForInteraction());
+  const { message } = App.useApp();
 
   return {
     deployContract,

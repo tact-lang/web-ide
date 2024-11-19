@@ -1,7 +1,7 @@
 import AppIcon from '@/components/ui/icon';
 import { baseProjectPath, useProject } from '@/hooks/projectV2.hooks';
 import fileSystem from '@/lib/fs';
-import { Button, Form, Input, message, Modal, Tooltip } from 'antd';
+import { App, Button, Form, Input, Modal, Tooltip } from 'antd';
 import cloneDeep from 'lodash.clonedeep';
 import { FC, useState } from 'react';
 import s from './CloneProject.module.scss';
@@ -10,6 +10,7 @@ const CloneProject: FC = () => {
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const { activeProject, projectFiles, createProject } = useProject();
+  const { message } = App.useApp();
 
   const storeAsNewProject = async ({ name }: { name: string }) => {
     try {

@@ -9,7 +9,7 @@ import AppIcon from '@/components/ui/icon';
 import { baseProjectPath, useProject } from '@/hooks/projectV2.hooks';
 import { Project } from '@/interfaces/workspace.interface';
 import EventEmitter from '@/utility/eventEmitter';
-import { Button, Modal, Select, message } from 'antd';
+import { App, Button, Modal, Select } from 'antd';
 import Router, { useRouter } from 'next/router';
 import { FC, useEffect, useState } from 'react';
 import s from './ManageProject.module.scss';
@@ -17,6 +17,8 @@ import s from './ManageProject.module.scss';
 const ManageProject: FC = () => {
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   const router = useRouter();
+  const { message } = App.useApp();
+
   const { importURL } = router.query;
 
   const {
