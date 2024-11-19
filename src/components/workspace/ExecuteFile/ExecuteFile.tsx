@@ -8,7 +8,7 @@ import { useWorkspaceActions } from '@/hooks/workspace.hooks';
 import { Project, Tree } from '@/interfaces/workspace.interface';
 import EventEmitter from '@/utility/eventEmitter';
 import { getFileExtension } from '@/utility/utils';
-import { Button, Select, message } from 'antd';
+import { App, Button, Select } from 'antd';
 import { FC, useEffect, useRef, useState } from 'react';
 import s from './ExecuteFile.module.scss';
 
@@ -43,6 +43,7 @@ const ExecuteFile: FC<Props> = ({
   const selectedFileRef = useRef<Tree | undefined>();
   const isAutoBuildAndDeployEnabled =
     useSettingAction().isAutoBuildAndDeployEnabled();
+  const { message } = App.useApp();
 
   const isAutoBuildAndDeployEnabledRef = useRef(false);
 

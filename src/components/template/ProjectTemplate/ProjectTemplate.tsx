@@ -4,7 +4,7 @@ import { useTheme } from '@/components/shared/ThemeProvider';
 import AppIcon from '@/components/ui/icon';
 import { AppConfig } from '@/config/AppConfig';
 import { projectExamples } from '@/constant/projectExamples';
-import { Drawer, Skeleton, message } from 'antd';
+import { App, Drawer, Skeleton } from 'antd';
 import axios from 'axios';
 import Link from 'next/link';
 import { FC, useEffect, useState } from 'react';
@@ -40,6 +40,7 @@ const ProjectTemplate: FC = () => {
     content: string;
   }>({ contract: '', content: '' });
   const { theme } = useTheme();
+  const { message } = App.useApp();
 
   const getContent = async () => {
     const link = examples[currentExample].link;
