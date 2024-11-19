@@ -37,11 +37,11 @@ spec:
             - name: APP_VERSION
               value: {{ .Values.appVersion | quote }}
             - name: NEXT_PUBLIC_PROXY_KEY
-              value: {{ .Values.secrets.nextPublicProxyKey | quote }}
+              value: {{ .Values.secrets.publicProxyKey | quote }}
             - name: NEXT_PUBLIC_MIXPANEL_TOKEN
-              value: {{ .Values.secrets.nextPublicMixpanelToken | quote }}
+              value: {{ .Values.secrets.publicMixPanelToken | quote }}
             - name: NEXT_PUBLIC_ANALYTICS_ENABLED
-              value: {{ .Values.secrets.nextPublicAnalyticsEnabled | quote }}
+              value: {{ .Values.secrets.publicProxyKey | quote }}
           ports:
             - containerPort: {{ .Values.containerPort }}
           resources:
