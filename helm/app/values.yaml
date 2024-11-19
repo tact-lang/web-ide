@@ -34,9 +34,3 @@ certIssuingMode: false
 # http
 publicService: true
 sslRedirect: false
-
-
-secrets:
-  publicProxyKey: ""
-  publicMixPanelToken: ""
-  secrets.publicProxyKey: ""

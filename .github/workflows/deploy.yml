@@ -65,6 +65,9 @@ jobs:
             sha=${{ github.sha }}
             sha_short=${{ env.GITHUB_SHA_SHORT }}
             app_env=${{ vars.APP_ENV }}
+            NEXT_PUBLIC_PROXY_KEY=${{ secrets.NEXT_PUBLIC_PROXY_KEY }}
+            NEXT_PUBLIC_MIXPANEL_TOKEN=${{ secrets.NEXT_PUBLIC_MIXPANEL_TOKEN }}
+            NEXT_PUBLIC_ANALYTICS_ENABLED=${{ secrets.NEXT_PUBLIC_ANALYTICS_ENABLED }}
 
       - name: Apply AWS k8s config
         run: aws eks update-kubeconfig --name ${{ vars.AWS_CLUSTER }} --region ${{ vars.AWS_REGION }}
@@ -83,10 +86,7 @@ jobs:
           --set imageTag="${{ env.GITHUB_SHA_SHORT }}" \
           --set host=${{ env.APP_DOMAIN }} \
           --set appName=${{ vars.APP_NAME }} \
-          --set ghcrSecret=${{ secrets.GHCR_SECRET  }} \
-          --set secrets.publicProxyKey=${{ secrets.NEXT_PUBLIC_MIXPANEL_TOKEN }} \
-          --set secrets.publicMixPanelToken=${{ secrets.NEXT_PUBLIC_ANALYTICS_ENABLED }} \
-          --set secrets.publicProxyKey=${{ secrets.NEXT_PUBLIC_ANALYTICS_ENABLED }}
+          --set ghcrSecret=${{ secrets.GHCR_SECRET  }}
 
       - name: Verify deployment
         run: |
