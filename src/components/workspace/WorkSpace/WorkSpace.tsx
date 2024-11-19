@@ -17,7 +17,7 @@ import * as TonCrypto from '@ton/crypto';
 import { Blockchain } from '@ton/sandbox';
 import { Buffer } from 'buffer';
 import { useRouter } from 'next/router';
-import { FC, useEffect, useMemo, useState } from 'react';
+import { FC, useEffect, useMemo, useRef, useState } from 'react';
 import Split from 'react-split';
 import { useEffectOnce } from 'react-use';
 import BottomPanel from '../BottomPanel/BottomPanel';
@@ -34,6 +34,8 @@ import FileTree from '../tree/FileTree';
 import ItemAction from '../tree/FileTree/ItemActions';
 import s from './WorkSpace.module.scss';
 
+type SplitInstance = Split & { split: Split.Instance };
+
 const WorkSpace: FC = () => {
   const { clearLog, createLog } = useLogActivity();
 
@@ -42,6 +44,7 @@ const WorkSpace: FC = () => {
   const [isLoaded, setIsLoaded] = useState(false);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [contract, setContract] = useState<any>('');
+  const splitVerticalRef = useRef<SplitInstance | null>(null);
 
   const { tab } = router.query;
   const {
@@ -155,6 +158,17 @@ const WorkSpace: FC = () => {
     window.TonCore = TonCore;
     window.TonCrypto = TonCrypto;
     window.Buffer = Buffer;
+
+    const handleResize = () => {
+      if (!splitVerticalRef.current) return;
+
+      splitVerticalRef.current.split.setSizes([5, 95]);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
   });
 
   return (
@@ -174,8 +188,10 @@ const WorkSpace: FC = () => {
         />
       </div>
       <Split
-        className={s.splitHorizontal}
+        ref={splitVerticalRef}
+        className={s.splitVertical}
         minSize={250}
+        expandToMin={true}
         gutterSize={4}
         sizes={[5, 95]}
         onDragEnd={() => {
@@ -237,7 +253,7 @@ const WorkSpace: FC = () => {
           {isLoaded && (
             <>
               <Split
-                className={s.splitVertical}
+                className={s.splitHorizontal}
                 minSize={50}
                 gutterSize={4}
                 sizes={[80, 20]}
