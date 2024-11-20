@@ -74,11 +74,23 @@ const useFileTab = () => {
     }
   };
 
-  const close = (filePath: string, closeAll: boolean = false) => {
+  const close = (
+    filePath: string | null,
+    action: 'close' | 'closeAll' | 'closeOthers' = 'close',
+  ) => {
     let updatedTab: IFileTab;
 
-    if (closeAll) {
+    if (action === 'closeAll') {
       updatedTab = { items: [], active: null };
+    } else if (action === 'closeOthers' && filePath) {
+      // Close all tabs except the specified one
+      const updatedItems = fileTab.items.filter(
+        (item) => item.path === filePath,
+      );
+      updatedTab = {
+        items: updatedItems,
+        active: updatedItems.length > 0 ? updatedItems[0].path : null,
+      };
     } else {
       const updatedItems = fileTab.items.filter(
         (item) => item.path !== filePath,
