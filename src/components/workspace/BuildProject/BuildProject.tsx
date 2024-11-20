@@ -102,23 +102,29 @@ const BuildProject: FC<Props> = ({ projectId, contract, updateContract }) => {
 
   const contractsToDeploy = () => {
     return projectFiles
-      .filter((f) => {
-        const _fileExtension = getFileExtension(f.name || '');
-        return (
-          f.path.startsWith(`${activeProject?.path}/dist`) &&
-          ['abi'].includes(_fileExtension as string)
+      .filter((file) => {
+        const fileExtension = getFileExtension(file.name || '');
+        const isAbiFile =
+          file.path.startsWith(`${activeProject?.path}/dist`) &&
+          fileExtension === 'abi';
+
+        if (activeProject?.language === 'func') {
+          return isAbiFile;
+        }
+
+        const hasTsFile = projectFiles.some(
+          (f) => f.path === file.path.replace('.abi', '.ts'),
         );
+        return isAbiFile && hasTsFile;
       })
-      .map((f) => {
-        return {
-          id: f.id,
-          name: f.name
-            .replace('.abi', '')
-            .replace('tact_', '')
-            .replace('func_', ''),
-          path: f.path,
-        };
-      });
+      .map((file) => ({
+        id: file.id,
+        name: file.name
+          .replace('.abi', '')
+          .replace('tact_', '')
+          .replace('func_', ''),
+        path: file.path,
+      }));
   };
 
   const cellBuilder = (info: string) => {
@@ -519,7 +525,7 @@ const BuildProject: FC<Props> = ({ projectId, contract, updateContract }) => {
     setEnvironment(network);
   };
 
-  const updateSelectedContract = (contract: string) => {
+  const updateSelectedContract = (contract: string | undefined) => {
     setSelectedContract(contract);
     updateProjectSetting({
       selectedContract: contract,
@@ -638,9 +644,29 @@ const BuildProject: FC<Props> = ({ projectId, contract, updateContract }) => {
     if (activeProject?.network) {
       setEnvironment(activeProject.network);
     }
-    if (activeProject?.selectedContract) {
-      setSelectedContract(activeProject.selectedContract);
-      deployForm.setFieldsValue({ contract: activeProject.selectedContract });
+    const selectedABIPath = activeProject?.selectedContract;
+
+    if (selectedABIPath) {
+      const correspondingScriptPath = selectedABIPath.replace('.abi', '.ts');
+
+      let _selectedContract: string | undefined = selectedABIPath;
+
+      if (activeProject.language === 'tact') {
+        const scriptFile = projectFiles.find(
+          (file) => file.path === correspondingScriptPath,
+        );
+        const hasValidScriptFile =
+          scriptFile &&
+          projectFiles.find((file) => file.path === selectedABIPath);
+
+        _selectedContract = hasValidScriptFile ? selectedABIPath : undefined;
+      }
+
+      deployForm.setFieldsValue({
+        contract: _selectedContract,
+      });
+
+      updateSelectedContract(_selectedContract);
     }
     const handler = (
       event: MessageEvent<{
