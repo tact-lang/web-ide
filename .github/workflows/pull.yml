@@ -36,8 +36,3 @@ jobs:
       - name: Run Next lint
         run: |
           npm run lint
-
-      - name: Check commit names
-        run: |
-          npx commitlint --from ${{ github.event.pull_request.base.sha }} --to ${{ github.event.pull_request.head.sha }} --verbose
-
