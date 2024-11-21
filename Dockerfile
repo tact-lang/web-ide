@@ -18,7 +18,9 @@ RUN NEXT_PUBLIC_PROXY_KEY=${NEXT_PUBLIC_PROXY_KEY} \
 FROM node:21-alpine AS runtime
 
 WORKDIR /app
+
 COPY --from=build /app/.next ./.next
+COPY --from=build /app/public ./public
 COPY package*.json ./
 
 RUN npm install
