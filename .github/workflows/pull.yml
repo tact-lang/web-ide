@@ -21,11 +21,11 @@ jobs:
         with:
           node-version: 18
 
-      - name: Install dependencies
+      - name: Install
         run: |
           npm ci
 
-      - name: Build Tact compiler
+      - name: Build
         run: |
           npm run build
 
