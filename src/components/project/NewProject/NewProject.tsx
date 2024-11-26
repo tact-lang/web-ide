@@ -45,10 +45,11 @@ const NewProject: FC<Props> = ({
   name,
 }) => {
   const [isActive, setIsActive] = useState(active);
-  const { createProject } = useProject();
+  const { createProject, projects } = useProject();
   const [isLoading, setIsLoading] = useState(false);
   const { createLog } = useLogActivity();
   const { open: openTab } = useFileTab();
+  const [currentProjectType, setCurrentProjectType] = useState(projectType);
 
   const router = useRouter();
   const {
@@ -91,7 +92,7 @@ const NewProject: FC<Props> = ({
     try {
       setIsLoading(true);
 
-      if (projectType === 'git') {
+      if (currentProjectType === 'git') {
         files = await downloadRepo(githubUrl as string);
       }
 
@@ -108,7 +109,7 @@ const NewProject: FC<Props> = ({
       Analytics.track('Create project', {
         platform: 'IDE',
         type: `TON - ${language}`,
-        sourceType: projectType,
+        sourceType: currentProjectType,
         template: values.template,
       });
       // eslint-disable-next-line @typescript-eslint/no-floating-promises
@@ -170,13 +171,19 @@ const NewProject: FC<Props> = ({
       return;
     }
 
-    if (!importURL || !active) {
+    if (
+      (projects.length == 0 && !importURL && !active) ||
+      (projects.length !== 0 && (!importURL || !active))
+    ) {
       return;
+    }
+    if (projects.length === 0 && importURL) {
+      setCurrentProjectType('git');
     }
 
     form.setFieldsValue({
       template: 'import',
-      githubUrl: importURL || '',
+      githubUrl: importURL ?? '',
       name: projectName ?? '',
       language: importLanguage ?? 'func',
     });
@@ -207,7 +214,7 @@ const NewProject: FC<Props> = ({
         <div
           className={`${s.root} ${className} onboarding-new-project`}
           onClick={() => {
-            if (projectType !== 'exampleTemplate') {
+            if (currentProjectType !== 'exampleTemplate') {
               setIsActive(true);
               return;
             }
@@ -270,7 +277,7 @@ const NewProject: FC<Props> = ({
             </Form.Item>
           </div>
 
-          {projectType === 'default' && (
+          {currentProjectType === 'default' && (
             <Form.Item
               label="Select Template"
               name="template"
@@ -280,7 +287,7 @@ const NewProject: FC<Props> = ({
             </Form.Item>
           )}
 
-          {projectType === 'local' && (
+          {currentProjectType === 'local' && (
             <Form.Item
               label="Select contract zip file"
               name="file"
@@ -303,7 +310,7 @@ const NewProject: FC<Props> = ({
             </Form.Item>
           )}
 
-          {projectType === 'git' && (
+          {currentProjectType === 'git' && (
             <Form.Item
               label="Github Repository URL"
               name="githubUrl"
