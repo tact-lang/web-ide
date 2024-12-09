@@ -4,7 +4,6 @@ import EventEmitterDefault from 'eventemitter3';
 const eventEmitter = new EventEmitterDefault();
 
 export interface EventEmitterPayloads {
-  ONBOARDING_NEW_PROJECT: { projectName: string };
   LOG_CLEAR: undefined;
   LOG: LogEntry;
   ON_SPLIT_DRAG_END: { position?: number };

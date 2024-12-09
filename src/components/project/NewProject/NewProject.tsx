@@ -1,17 +1,16 @@
 import { Tooltip } from '@/components/ui';
 import AppIcon, { AppIconType } from '@/components/ui/icon';
-import { useFileTab } from '@/hooks';
+import useCodeImport from '@/hooks/codeImport.hooks';
 import { useLogActivity } from '@/hooks/logActivity.hooks';
-import { baseProjectPath, useProject } from '@/hooks/projectV2.hooks';
+import { useProject } from '@/hooks/projectV2.hooks';
 import {
   ContractLanguage,
   ProjectTemplate,
   Tree,
 } from '@/interfaces/workspace.interface';
 import { Analytics } from '@/utility/analytics';
-import EventEmitter from '@/utility/eventEmitter';
 import { downloadRepo } from '@/utility/gitRepoDownloader';
-import { decodeBase64 } from '@/utility/utils';
+import { delay } from '@/utility/utils';
 import { Button, Form, Input, Modal, Radio, Upload, message } from 'antd';
 import { useForm } from 'antd/lib/form/Form';
 import type { RcFile } from 'antd/lib/upload';
@@ -48,8 +47,8 @@ const NewProject: FC<Props> = ({
   const { createProject, projects } = useProject();
   const [isLoading, setIsLoading] = useState(false);
   const { createLog } = useLogActivity();
-  const { open: openTab } = useFileTab();
-  const [currentProjectType, setCurrentProjectType] = useState(projectType);
+  const [newProjectType, setNewProjectType] = useState(projectType);
+  const { importEncodedCode, removeImportParams } = useCodeImport();
 
   const router = useRouter();
   const {
@@ -92,7 +91,7 @@ const NewProject: FC<Props> = ({
     try {
       setIsLoading(true);
 
-      if (currentProjectType === 'git') {
+      if (newProjectType === 'git') {
         files = await downloadRepo(githubUrl as string);
       }
 
@@ -109,7 +108,7 @@ const NewProject: FC<Props> = ({
       Analytics.track('Create project', {
         platform: 'IDE',
         type: `TON - ${language}`,
-        sourceType: currentProjectType,
+        sourceType: newProjectType,
         template: values.template,
       });
       // eslint-disable-next-line @typescript-eslint/no-floating-promises
@@ -128,57 +127,35 @@ const NewProject: FC<Props> = ({
     }
   };
 
-  const importFromCode = async (code: string) => {
-    try {
-      const defaultFileName = `main.${importLanguage}`;
-      if (!importLanguage || !['tact', 'func'].includes(importLanguage)) {
-        createLog(`Invalid language: ${importLanguage}`, 'error');
-        return;
-      }
-      await createProject({
-        name: 'temp',
-        language: importLanguage,
-        template: 'import',
-        file: null,
-        defaultFiles: [
-          {
-            id: '',
-            parent: null,
-            path: defaultFileName,
-            type: 'file' as const,
-            name: defaultFileName,
-            content: decodeBase64(code),
-          },
-        ],
-        isTemporary: true,
-      });
-      const finalQueryParam = router.query;
-      delete finalQueryParam.code;
-      delete finalQueryParam.lang;
-      router.replace({ query: finalQueryParam }).catch(() => {});
-      openTab(defaultFileName, `${baseProjectPath}/temp/${defaultFileName}`);
-    } catch (error) {
-      if (error instanceof Error) {
-        createLog(error.message, 'error');
-        return;
-      }
-    }
-  };
-
-  useEffect(() => {
+  const onRouterReady = async () => {
     if (codeToImport) {
-      importFromCode(codeToImport as string);
+      // Default to 'func' as the language if none is provided in the query parameters.
+      // This ensures backward compatibility for cases where the language was not included in the query params initially.
+      try {
+        await importEncodedCode(codeToImport, importLanguage ?? 'func');
+      } catch (error) {
+        if (error instanceof Error) {
+          createLog(error.message, 'error');
+          return;
+        }
+        createLog('Error in importing code', 'error');
+      }
       return;
     }
 
+    // When the IDE starts without any projects and no import URL is provided,
+    // or if projects already exist but the import URL is missing or the modal is inactive,
+    // skip setting up the New Project dialog for import.
     if (
       (projects.length == 0 && !importURL && !active) ||
       (projects.length !== 0 && (!importURL || !active))
     ) {
       return;
     }
+
+    // If there are no projects but an import URL is provided, set the project type to git
     if (projects.length === 0 && importURL) {
-      setCurrentProjectType('git');
+      setNewProjectType('git');
     }
 
     form.setFieldsValue({
@@ -188,25 +165,20 @@ const NewProject: FC<Props> = ({
       language: importLanguage ?? 'func',
     });
     setIsActive(true);
-    const finalQueryParam = router.query;
-    delete finalQueryParam.importURL;
-    delete finalQueryParam.name;
-    router.replace({ query: finalQueryParam }).catch(() => {});
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [importURL, projectName, form, codeToImport]);
+
+    // Wait for the form to be set up before removing the import query parameters
+    await delay(100);
+    removeImportParams();
+  };
+
+  useEffect(() => {
+    if (!router.isReady) return;
+    onRouterReady();
+  }, [router.isReady]);
 
   const closeModal = () => {
     setIsActive(false);
   };
-
-  useEffect(() => {
-    EventEmitter.on('ONBOARDING_NEW_PROJECT', () => {
-      setIsActive(true);
-    });
-    return () => {
-      EventEmitter.off('ONBOARDING_NEW_PROJECT');
-    };
-  }, []);
 
   return (
     <>
@@ -214,7 +186,7 @@ const NewProject: FC<Props> = ({
         <div
           className={`${s.root} ${className} onboarding-new-project`}
           onClick={() => {
-            if (currentProjectType !== 'exampleTemplate') {
+            if (newProjectType !== 'exampleTemplate') {
               setIsActive(true);
               return;
             }
@@ -277,7 +249,7 @@ const NewProject: FC<Props> = ({
             </Form.Item>
           </div>
 
-          {currentProjectType === 'default' && (
+          {newProjectType === 'default' && (
             <Form.Item
               label="Select Template"
               name="template"
@@ -287,7 +259,7 @@ const NewProject: FC<Props> = ({
             </Form.Item>
           )}
 
-          {currentProjectType === 'local' && (
+          {newProjectType === 'local' && (
             <Form.Item
               label="Select contract zip file"
               name="file"
@@ -310,7 +282,7 @@ const NewProject: FC<Props> = ({
             </Form.Item>
           )}
 
-          {currentProjectType === 'git' && (
+          {newProjectType === 'git' && (
             <Form.Item
               label="Github Repository URL"
               name="githubUrl"
