@@ -10,7 +10,6 @@ import type { AppProps } from 'next/app';
 import Head from 'next/head';
 import { useEffect } from 'react';
 import { RecoilRoot } from 'recoil';
-import '../lib/polyfills';
 
 mixpanel.init(AppConfig.analytics.MIXPANEL_TOKEN, {
   debug: false,
