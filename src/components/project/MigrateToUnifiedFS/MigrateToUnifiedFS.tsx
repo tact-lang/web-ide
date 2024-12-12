@@ -7,7 +7,7 @@ import {
   Tree,
 } from '@/interfaces/workspace.interface';
 import EventEmitter from '@/utility/eventEmitter';
-import { Button, ConfigProvider, message, Modal, Popconfirm } from 'antd';
+import { App, Button, ConfigProvider, Modal, Popconfirm } from 'antd';
 import { FC, useEffect, useState } from 'react';
 import { IndexedDBHelper } from './IndexedDBHelper';
 import s from './MigrateToUnifiedFS.module.scss';
@@ -35,6 +35,8 @@ const MigrateToUnifiedFS: FC<Props> = ({ hasDescription = false }) => {
   >('pending');
   const { createProject } = useProject();
   const { createLog } = useLogActivity();
+  const { message } = App.useApp();
+
   const note = `We've recently upgraded the IDE, and some of your projects may not be visible.`;
 
   const checkMigration = async () => {

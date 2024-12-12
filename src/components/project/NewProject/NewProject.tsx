@@ -12,7 +12,7 @@ import { Analytics } from '@/utility/analytics';
 import EventEmitter from '@/utility/eventEmitter';
 import { downloadRepo } from '@/utility/gitRepoDownloader';
 import { decodeBase64 } from '@/utility/utils';
-import { Button, Form, Input, Modal, Radio, Upload, message } from 'antd';
+import { App, Button, Form, Input, Modal, Radio, Upload } from 'antd';
 import { useForm } from 'antd/lib/form/Form';
 import type { RcFile } from 'antd/lib/upload';
 import { useRouter } from 'next/router';
@@ -49,6 +49,7 @@ const NewProject: FC<Props> = ({
   const [isLoading, setIsLoading] = useState(false);
   const { createLog } = useLogActivity();
   const { open: openTab } = useFileTab();
+  const { message } = App.useApp();
 
   const router = useRouter();
   const {
