@@ -10,7 +10,7 @@ import {
 } from '@/interfaces/workspace.interface';
 import { Analytics } from '@/utility/analytics';
 import { downloadRepo } from '@/utility/gitRepoDownloader';
-import { Button, Form, Input, Modal, Radio, Upload, message } from 'antd';
+import { App, Button, Form, Input, Modal, Radio, Upload } from 'antd';
 import { useForm } from 'antd/lib/form/Form';
 import type { RcFile } from 'antd/lib/upload';
 import { useRouter } from 'next/router';
@@ -55,6 +55,7 @@ const NewProject: FC<Props> = ({
   const { createLog } = useLogActivity();
   const [newProjectType, setNewProjectType] = useState(projectType);
   const { importEncodedCode, removeImportParams } = useCodeImport();
+  const { message } = App.useApp();
 
   const router = useRouter();
 

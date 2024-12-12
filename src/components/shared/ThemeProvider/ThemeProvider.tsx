@@ -1,4 +1,4 @@
-import { ConfigProvider, theme as antdTheme } from 'antd';
+import { App, ConfigProvider, ThemeConfig, theme as antdTheme } from 'antd';
 import {
   ReactNode,
   createContext,
@@ -53,12 +53,13 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
   };
 
   // Ant Design's theme configuration
-  const antdConfig = {
+  const antdConfig: ThemeConfig = {
     token: {
       colorPrimary: '#0098ea',
       colorError: '#C84075',
       fontFamily: 'var(--font-body)',
       borderRadius: 4,
+      colorText: 'var(--text-color)',
     },
     algorithm:
       theme === 'dark' ? antdTheme.darkAlgorithm : antdTheme.defaultAlgorithm,
@@ -66,7 +67,9 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
 
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme }}>
-      <ConfigProvider theme={antdConfig}>{children}</ConfigProvider>
+      <ConfigProvider theme={antdConfig}>
+        <App>{children}</App>
+      </ConfigProvider>
     </ThemeContext.Provider>
   );
 };
