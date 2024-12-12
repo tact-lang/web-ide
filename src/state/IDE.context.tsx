@@ -2,7 +2,7 @@ import { SettingInterface } from '@/interfaces/setting.interface';
 import { ProjectSetting, Tree } from '@/interfaces/workspace.interface';
 import { FC, createContext, useEffect, useMemo, useState } from 'react';
 
-interface ITabItems {
+export interface ITabItems {
   name: string;
   path: string;
   isDirty: boolean;
