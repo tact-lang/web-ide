@@ -1,5 +1,6 @@
 'use client';
 
+import MistiStaticAnalyzer from '@/components/MistiStaticAnalyzer';
 import { DownloadProject } from '@/components/project';
 import { ProjectTemplate } from '@/components/template';
 import { NonProductionNotice } from '@/components/ui';
@@ -239,6 +240,11 @@ const WorkSpace: FC = () => {
           {activeMenu === 'test-cases' && (
             <div className={s.testCaseArea}>
               <TestCases projectId={activeProject?.path as string} />
+            </div>
+          )}
+          {activeMenu === 'misti' && (
+            <div className={s.testCaseArea}>
+              <MistiStaticAnalyzer />
             </div>
           )}
         </div>
