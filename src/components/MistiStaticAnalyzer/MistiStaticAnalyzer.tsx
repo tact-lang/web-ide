@@ -15,7 +15,6 @@ import stdLibFiles from '@tact-lang/compiler/dist/imports/stdlib';
 import { Button, Form, Select, Switch, TreeSelect } from 'antd';
 import { useForm } from 'antd/lib/form/Form';
 import { FC, useState } from 'react';
-import AppIcon from '../ui/icon';
 import s from './MistiStaticAnalyzer.module.scss';
 
 const severityOptions = Object.keys(Severity)
@@ -189,7 +188,7 @@ const MistiStaticAnalyzer: FC = () => {
           loading={isAnalyzing}
           htmlType="submit"
         >
-          <AppIcon className={s.icon} name="Test" /> Analyze
+          Analyze
         </Button>
       </Form>
       <p className={s.note}>
