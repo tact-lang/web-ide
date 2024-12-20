@@ -191,7 +191,7 @@ const MistiStaticAnalyzer: FC = () => {
           Analyze
         </Button>
       </Form>
-      <p className={s.note}>
+      <div className={s.note}>
         <b>Note:</b> Soufflé-related analysis will not work as it cannot run in
         the browser. The following detectors will be disabled:
         <ul>
@@ -199,7 +199,7 @@ const MistiStaticAnalyzer: FC = () => {
           <li>ReadOnlyVariables</li>
           <li>UnboundLoop</li>
         </ul>
-      </p>
+      </div>
     </div>
   );
 };
