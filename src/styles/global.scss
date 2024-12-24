@@ -149,6 +149,15 @@ hr {
   border: 0;
 }
 
+.section-heading {
+  color: var(--color-light);
+  text-align: center;
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  padding: 0.5rem 0;
+}
+
 .color-warn {
   color: var(--color-warning);
 }

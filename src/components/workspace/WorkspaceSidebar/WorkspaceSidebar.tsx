@@ -8,7 +8,13 @@ import Link from 'next/link';
 import { FC, useContext } from 'react';
 import s from './WorkspaceSidebar.module.scss';
 
-export type WorkSpaceMenu = 'code' | 'build' | 'test-cases' | 'setting' | 'git';
+export type WorkSpaceMenu =
+  | 'code'
+  | 'build'
+  | 'test-cases'
+  | 'setting'
+  | 'misti'
+  | 'git';
 interface MenuItem {
   label: string;
   value: WorkSpaceMenu;
@@ -59,6 +65,11 @@ const WorkspaceSidebar: FC<Props> = ({ activeMenu, onMenuClicked }) => {
       label: 'Unit Test',
       value: 'test-cases',
       icon: 'Test',
+    },
+    {
+      label: 'Misti Static Analyzer',
+      value: 'misti',
+      icon: 'CodeScan',
     },
     {
       label: 'Git',

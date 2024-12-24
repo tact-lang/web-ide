@@ -1,5 +1,6 @@
 'use client';
 
+import MistiStaticAnalyzer from '@/components/MistiStaticAnalyzer';
 import { ManageGit } from '@/components/git';
 import { DownloadProject } from '@/components/project';
 import { ProjectTemplate } from '@/components/template';
@@ -241,6 +242,11 @@ const WorkSpace: FC = () => {
           {activeMenu === 'test-cases' && (
             <div className={s.commonContainer}>
               <TestCases projectId={activeProject?.path as string} />
+            </div>
+          )}
+          {activeMenu === 'misti' && (
+            <div className={s.commonContainer}>
+              <MistiStaticAnalyzer />
             </div>
           )}
           {activeMenu === 'git' && (
