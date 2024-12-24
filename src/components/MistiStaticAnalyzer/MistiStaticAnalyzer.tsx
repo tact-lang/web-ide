@@ -2,6 +2,7 @@ import { useLogActivity } from '@/hooks/logActivity.hooks';
 import { useProject } from '@/hooks/projectV2.hooks';
 import { Tree } from '@/interfaces/workspace.interface';
 import fileSystem from '@/lib/fs';
+import { normalizeRelativePath } from '@/utility/path';
 import Path from '@isomorphic-git/lightning-fs/src/path';
 import {
   BuiltInDetectors,
@@ -46,7 +47,7 @@ const MistiStaticAnalyzer: FC = () => {
     if (!activeProject?.path) return;
     const { contractFile, severity, allDetectors, detectors } = formValues;
     try {
-      const vfs = createVirtualFileSystem(activeProject.path, {}, false);
+      const vfs = createVirtualFileSystem('/', {}, false);
       setIsAnalyzing(true);
 
       for (const file of projectFiles) {
@@ -55,7 +56,10 @@ const MistiStaticAnalyzer: FC = () => {
         }
         const content = await fileSystem.readFile(file.path);
         if (content) {
-          vfs.writeFile(file.path, content as string);
+          vfs.writeFile(
+            normalizeRelativePath(file.path, activeProject.path),
+            content as string,
+          );
         }
       }
 
@@ -65,24 +69,23 @@ const MistiStaticAnalyzer: FC = () => {
         vfs.writeFile(stdLibPath, content);
       }
 
-      const driver = await Driver.create([contractFile], {
-        allDetectors: allDetectors,
-        fs: vfs,
-        enabledDetectors: detectors,
-        minSeverity: severity,
-        listDetectors: false,
-        souffleEnabled: false,
-        tactStdlibPath: Path.resolve(...DEFAULT_STDLIB_PATH_ELEMENTS),
-        newDetector: undefined,
-      });
-
-      const result = await driver.execute();
-      const textResult = resultToString(result, 'plain').replace(
-        activeProject.path.slice(1),
-        '',
+      const driver = await Driver.create(
+        [normalizeRelativePath(contractFile, activeProject.path)],
+        {
+          allDetectors,
+          fs: vfs,
+          enabledDetectors: detectors,
+          minSeverity: severity,
+          listDetectors: false,
+          souffleEnabled: false,
+          tactStdlibPath: Path.resolve(...DEFAULT_STDLIB_PATH_ELEMENTS),
+          newDetector: undefined,
+        },
       );
 
-      createLog(textResult, 'info');
+      const result = await driver.execute();
+
+      createLog(resultToString(result, 'plain'), 'info');
     } catch (error) {
       if (error instanceof Error) {
         createLog(error.message, 'error');
@@ -116,6 +119,7 @@ const MistiStaticAnalyzer: FC = () => {
         form={form}
         className={`${s.form} app-form`}
         onFinish={run}
+        layout="vertical"
         initialValues={{
           severity: Severity.INFO,
           allDetectors: true,
@@ -125,9 +129,10 @@ const MistiStaticAnalyzer: FC = () => {
           name="contractFile"
           className={s.formItem}
           rules={[{ required: true }]}
+          label="Contract File"
         >
           <Select
-            placeholder="Select a file"
+            placeholder="Select a contract file"
             notFoundContent="Required file not found"
             allowClear
             showSearch
@@ -147,9 +152,13 @@ const MistiStaticAnalyzer: FC = () => {
           </Select>
         </Form.Item>
 
-        <Form.Item className={s.formItem} name="severity">
+        <Form.Item
+          className={s.formItem}
+          name="severity"
+          label="Minimum Severity Level"
+        >
           <Select
-            placeholder="Minimum severity"
+            placeholder="Select Minimum Severity Level"
             allowClear
             options={severityOptions}
           />
