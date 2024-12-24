@@ -1,0 +1,22 @@
+.root {
+  font-size: 0.8rem;
+  .formItem {
+    margin: 1rem 0 0.5rem 0;
+  }
+  .action {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.2rem;
+    .icon {
+      width: 1.2rem;
+    }
+  }
+  .note {
+    margin-top: 1rem;
+    ul {
+      padding-left: 1rem;
+      margin-top: 0.2rem;
+    }
+  }
+}
