@@ -125,11 +125,13 @@ const useFileTab = () => {
     });
 
     // Check if the old path was the active tab
-    const isActiveTab = fileTab.active === oldPath;
+    const isActiveTab = fileTab.active?.path === oldPath;
 
     const updatedTab = {
       items: updatedItems,
-      active: isActiveTab ? newPath : fileTab.active, // Set the active tab to the new path if it was renamed
+      active: isActiveTab
+        ? { path: newPath, type: 'default' as const }
+        : { path: fileTab.active?.path ?? '', type: 'default' as const }, // Set the active tab to the new path if it was renamed
     };
 
     syncTabSettings(updatedTab);
