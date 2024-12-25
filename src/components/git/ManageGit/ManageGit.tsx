@@ -246,7 +246,7 @@ const ManageGit: FC = () => {
           expandIcon={({ isActive }) => (
             <CaretRightOutlined rotate={isActive ? 90 : 0} />
           )}
-          style={{ background: themeToken.colorBgContainer }}
+          style={{ background: 'transparent' }}
         >
           {stagedFiles.length > 0 && (
             <Collapse.Panel
