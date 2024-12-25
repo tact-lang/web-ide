@@ -1,3 +1,4 @@
+import { useTheme } from '@/components/shared/ThemeProvider';
 import { useFile, useFileTab } from '@/hooks';
 import { useLogActivity } from '@/hooks/logActivity.hooks';
 import { useProject } from '@/hooks/projectV2.hooks';
@@ -25,6 +26,7 @@ const CodeDiffViewer: FC = () => {
   const { fileTab } = useFileTab();
   const { getFile, saveFile } = useFile();
   const logger = useLogActivity();
+  const { theme } = useTheme();
 
   const diffEditorRef = useRef<monaco.editor.IStandaloneDiffEditor | null>(
     null,
@@ -115,7 +117,7 @@ const CodeDiffViewer: FC = () => {
   return (
     <div className={s.diffEditor}>
       <DiffEditor
-        theme="vs-theme-dark"
+        theme={theme === 'dark' ? 'vs-theme-dark' : 'light'}
         height="100vh"
         language={fileTypeFromFileName(fileTab.active?.path ?? '')}
         original={diff.oldContent}
