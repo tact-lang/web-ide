@@ -253,10 +253,10 @@ const WorkSpace: FC = () => {
                   </div>
                   <div style={{ height: 'calc(100% - 43px)' }}>
                     {fileTab.active ? (
-                      fileTab.active.type === 'default' ? (
-                        <Editor />
-                      ) : (
+                      fileTab.active.type === 'git' ? (
                         <CodeDiffViewer />
+                      ) : (
+                        <Editor />
                       )
                     ) : (
                       <ProjectTemplate />
