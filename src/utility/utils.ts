@@ -230,3 +230,11 @@ export function isIncludesTypeCellOrSlice(obj: Record<string, any>): boolean {
   }
   return false;
 }
+
+interface ErrorWithCode extends Error {
+  code?: string;
+}
+
+export function isErrorWithCode(error: unknown): error is ErrorWithCode {
+  return typeof error === 'object' && error !== null && 'code' in error;
+}

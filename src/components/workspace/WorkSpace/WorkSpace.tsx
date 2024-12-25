@@ -22,6 +22,7 @@ import { useEffectOnce } from 'react-use';
 import BottomPanel from '../BottomPanel/BottomPanel';
 import BuildProject from '../BuildProject';
 import Editor from '../Editor';
+import CodeDiffViewer from '../Editor/CodeDiffViewer';
 import Tabs from '../Tabs';
 import TestCases from '../TestCases';
 import WorkspaceSidebar from '../WorkspaceSidebar';
@@ -248,9 +249,16 @@ const WorkSpace: FC = () => {
                   <div className={s.tabsWrapper}>
                     <Tabs />
                   </div>
-
                   <div style={{ height: 'calc(100% - 43px)' }}>
-                    {fileTab.active ? <Editor /> : <ProjectTemplate />}
+                    {fileTab.active ? (
+                      fileTab.active.type === 'default' ? (
+                        <Editor />
+                      ) : (
+                        <CodeDiffViewer />
+                      )
+                    ) : (
+                      <ProjectTemplate />
+                    )}
                   </div>
                 </div>
                 <div>

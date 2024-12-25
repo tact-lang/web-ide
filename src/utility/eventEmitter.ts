@@ -15,6 +15,7 @@ export interface EventEmitterPayloads {
   RELOAD_PROJECT_FILES: string;
   OPEN_PROJECT: string;
   PROJECT_MIGRATED: undefined;
+  GIT_PULL_FINISHED: string;
 }
 
 const EventEmitter = {

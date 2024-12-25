@@ -699,7 +699,7 @@ const BuildProject: FC<Props> = ({ projectId, contract, updateContract }) => {
 
   return (
     <div className={`${s.root} onboarding-build-deploy`}>
-      <h3 className={s.heading}>Build & Deploy</h3>
+      <h3 className={`${s.heading} sidebar-section-title`}>Build & Deploy</h3>
       <iframe
         className={`${s.cellBuilderRef} cell-builder-ref`}
         ref={cellBuilderRef}

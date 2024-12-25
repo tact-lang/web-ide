@@ -11,7 +11,7 @@ interface ITabItems {
 
 export interface IFileTab {
   items: ITabItems[];
-  active: string | null;
+  active: Pick<ITabItems, 'path' | 'type'> | null;
 }
 
 interface IDEContextProps {

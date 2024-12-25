@@ -24,10 +24,9 @@ const GitSetting: FC = () => {
     setIsLoading(true);
     const { username, email } = values;
     try {
-      await Promise.all([
-        setConfigValue('user.name', username, activeProjectPath),
-        setConfigValue('user.email', email, activeProjectPath),
-      ]);
+      await setConfigValue('user.name', username, activeProjectPath);
+      await delay(500);
+      setConfigValue('user.email', email, activeProjectPath);
 
       localStorage.setItem('gitConfig', JSON.stringify(values));
       // dummy delay to show loading

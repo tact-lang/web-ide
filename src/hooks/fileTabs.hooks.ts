@@ -60,19 +60,19 @@ const useFileTab = () => {
     path: string,
     type: 'default' | 'git' = 'default',
   ) => {
-    if (fileTab.active === path) return;
+    if (fileTab.active?.path === path) return;
 
     const existingTab = fileTab.items.find((item) => item.path === path);
 
     if (existingTab) {
-      const updatedTab = { ...fileTab, active: path, type };
+      const updatedTab = { ...fileTab, active: { path, type }, type };
       syncTabSettings(updatedTab);
     } else {
       const newTab = { name, path, isDirty: false, type };
       const updatedTab = {
         ...fileTab,
         items: [...fileTab.items, newTab],
-        active: path,
+        active: { path, type },
       };
       syncTabSettings(updatedTab);
     }
@@ -89,15 +89,17 @@ const useFileTab = () => {
       );
 
       let newActiveTab = fileTab.active;
-      if (fileTab.active === filePath) {
+      if (fileTab.active?.path === filePath) {
         const closedTabIndex = fileTab.items.findIndex(
           (item) => item.path === filePath,
         );
-        if (updatedItems.length > 0) {
+        if (updatedItems.length > 0 && newActiveTab) {
           if (closedTabIndex > 0) {
-            newActiveTab = updatedItems[closedTabIndex - 1].path;
+            newActiveTab.path = updatedItems[closedTabIndex - 1].path;
+            newActiveTab.type = updatedItems[closedTabIndex - 1].type;
           } else {
-            newActiveTab = updatedItems[0].path;
+            newActiveTab.path = updatedItems[0].path;
+            newActiveTab.type = updatedItems[0].type;
           }
         } else {
           newActiveTab = null; // No more tabs open

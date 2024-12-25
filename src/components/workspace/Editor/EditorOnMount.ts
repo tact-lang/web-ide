@@ -1,13 +1,9 @@
 import { tactSnippets } from '@/assets/ton/tact/snippets';
-import { editor } from 'monaco-editor';
 import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
 
 type Monaco = typeof monaco;
 
-export const editorOnMount = async (
-  editor: editor.IStandaloneCodeEditor,
-  monaco: Monaco,
-) => {
+export const editorOnMount = async (monaco: Monaco) => {
   // monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
   //   // experimentalDecorators: false,
   // });

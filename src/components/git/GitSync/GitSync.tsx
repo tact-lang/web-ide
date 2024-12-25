@@ -2,6 +2,7 @@ import AppIcon from '@/components/ui/icon';
 import { useLogActivity } from '@/hooks/logActivity.hooks';
 import { useProject } from '@/hooks/projectV2.hooks';
 import GitManager from '@/lib/git';
+import EventEmitter from '@/utility/eventEmitter';
 import { delay } from '@/utility/utils';
 import { Button } from 'antd';
 import { FC, useState } from 'react';
@@ -69,6 +70,7 @@ const GitSync: FC = () => {
     try {
       setCurrentLoading('pull');
       await git.pull(activeProjectPath, onMessage);
+      EventEmitter.emit('GIT_PULL_FINISHED', activeProjectPath);
       createLog('', 'info', true, true);
     } catch (error) {
       if (error instanceof Error) {

@@ -162,11 +162,13 @@ const ManageGit: FC = () => {
     };
 
     EventEmitter.on('FILE_SAVED', getFilesToCommit);
+    EventEmitter.on('GIT_PULL_FINISHED', getCommitHistory);
     return () => {
       if (workerRef.current) {
         workerRef.current.terminate();
       }
       EventEmitter.off('FILE_SAVED', getFilesToCommit);
+      EventEmitter.off('GIT_PULL_FINISHED', getCommitHistory);
     };
   }, []);
 
@@ -313,6 +315,9 @@ const ManageGit: FC = () => {
 
   return (
     <div className={s.root}>
+      <span className={`text-center sidebar-section-title`}>
+        Git Version Control
+      </span>
       {!isGitInitialized && (
         <Button
           type="primary"

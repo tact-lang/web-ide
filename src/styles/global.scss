@@ -126,3 +126,15 @@ hr {
 .color-warn {
   color: var(--color-warning);
 }
+
+.text-center {
+  text-align: center;
+}
+.sidebar-section-title {
+  color: #ccc;
+  text-align: center;
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-bottom: 1rem;
+}

@@ -1,3 +1,4 @@
+import { AppConfig } from '@/config/AppConfig';
 import { PromisifiedFS } from '@isomorphic-git/lightning-fs';
 import git from 'isomorphic-git';
 import http from 'isomorphic-git/http/web';
@@ -50,13 +51,12 @@ class GitManager {
     dest: string,
     author: { name: string; email: string },
   ) {
-    const sha = await git.commit({
+    await git.commit({
       fs: this.fs,
       dir: dest,
       message,
       author,
     });
-    console.log('commit sha', sha);
   }
 
   async log(dest: string, depth = 10) {
@@ -64,9 +64,14 @@ class GitManager {
   }
 
   async getOldCommit(dest: string, stepBack = 1) {
-    const commits = await this.log(dest, stepBack);
-    if (commits.length > stepBack) {
-      return commits[stepBack].oid;
+    try {
+      const commits = await this.log(dest, stepBack);
+      if (commits.length > stepBack) {
+        return commits[stepBack].oid;
+      }
+    } catch (error) {
+      console.error('Error getting old commit:', error);
+      return null;
     }
     throw new Error('Not enough commits in the history.');
   }
@@ -183,16 +188,13 @@ class GitManager {
   }
 
   async readBlob(oid: string, dest: string, filePath: string) {
-    return git.readBlob({
+    return await git.readBlob({
       fs: this.fs,
       dir: dest,
       oid: oid,
       filepath: filePath,
     });
   }
-
-  // async clone(repo, dest) {
-  // }
 
   async pull(dest: string, onMessage?: (message: string) => void) {
     const { token } = JSON.parse(localStorage.getItem('gitConfig') ?? '{}');
@@ -203,7 +205,7 @@ class GitManager {
       dir: dest,
       remote: 'origin',
       ref: 'main',
-      corsProxy: 'https://cors.isomorphic-git.org',
+      corsProxy: AppConfig.cors.proxy,
       onAuth: () => ({
         username: token,
       }),
@@ -222,7 +224,7 @@ class GitManager {
       dir: dest,
       remote: 'origin',
       ref: 'main',
-      corsProxy: 'https://cors.isomorphic-git.org',
+      corsProxy: AppConfig.cors.proxy,
       onAuth: () => ({ username: token }),
       onMessage,
     });
