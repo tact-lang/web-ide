@@ -1,0 +1,10 @@
+deployEnv: canary
+replicaCount: 2
+imageTag: "canary"
+canaryWeight: 10
+
+minReplicas: 1
+maxReplicas: 1
+
+memoryLimit: 120Mi
+memoryRequest: 100Mi

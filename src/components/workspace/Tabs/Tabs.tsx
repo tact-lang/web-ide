@@ -6,8 +6,13 @@ import { delay, fileTypeFromFileName } from '@/utility/utils';
 import { FC, useEffect } from 'react';
 import s from './Tabs.module.scss';
 
+interface IRenameFile {
+  oldPath: string;
+  newPath: string;
+}
+
 const Tabs: FC = () => {
-  const { fileTab, open, close, syncTabSettings, updateFileDirty } =
+  const { fileTab, open, close, rename, syncTabSettings, updateFileDirty } =
     useFileTab();
   const { activeProject } = useProject();
 
@@ -21,6 +26,10 @@ const Tabs: FC = () => {
     updateFileDirty(filePath, false);
   };
 
+  const onFileRename = ({ oldPath, newPath }: IRenameFile) => {
+    rename(oldPath, newPath);
+  };
+
   useEffect(() => {
     (async () => {
       await delay(200);
@@ -30,8 +39,10 @@ const Tabs: FC = () => {
 
   useEffect(() => {
     EventEmitter.on('FILE_SAVED', onFileSave);
+    EventEmitter.on('FILE_RENAMED', onFileRename);
     return () => {
       EventEmitter.off('FILE_SAVED', onFileSave);
+      EventEmitter.off('FILE_RENAMED', onFileRename);
     };
   }, [updateFileDirty]);
 

@@ -9,8 +9,9 @@ export interface EventEmitterPayloads {
   LOG: LogEntry;
   ON_SPLIT_DRAG_END: { position?: number };
   SAVE_FILE: undefined | { fileId: string; content: string };
-  FORCE_UPDATE_FILE: string;
+  FORCE_UPDATE_FILE: string | { oldPath: string; newPath: string };
   FILE_SAVED: { filePath: string };
+  FILE_RENAMED: { oldPath: string; newPath: string };
   TEST_CASE_LOG: string;
   RELOAD_PROJECT_FILES: string;
   OPEN_PROJECT: string;

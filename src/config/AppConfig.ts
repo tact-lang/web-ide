@@ -1,10 +1,10 @@
 export const AppConfig = {
-  name: 'Nujan',
+  name: 'TON Web IDE',
+  host: process.env.NEXT_PUBLIC_PROJECT_HOST ?? 'ide.ton.org',
   seo: {
-    title: 'Nujan IDE',
+    title: 'TON Web IDE',
   },
   network: 'testnet',
-  API_URL: process.env.NEXT_PUBLIC_API_URL ?? 'http://127.0.0.1:3000',
   analytics: {
     MIXPANEL_TOKEN: process.env.NEXT_PUBLIC_MIXPANEL_TOKEN ?? '',
     IS_ENABLED: !!process.env.NEXT_PUBLIC_ANALYTICS_ENABLED || false,

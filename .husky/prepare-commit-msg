@@ -1,0 +1,14 @@
+#!/bin/sh
+
+# Check if commit message is provided with -m flag
+COMMIT_MSG_FILE=$1
+COMMIT_SOURCE=$2
+
+# Check if commit is being created from the message source (e.g., with `git commit -m`)
+if echo "$HUSKY_GIT_PARAMS" | grep -qE '^-m\s'; then
+  if [ "$COMMIT_SOURCE" = "message" ]; then
+    exit 0
+  fi
+fi
+
+exec < /dev/tty && npx git-cz --hook || true

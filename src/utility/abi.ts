@@ -119,6 +119,7 @@ export class ABIParser {
           if (receiver.message.kind !== 'typed') {
             return {
               name: argumentName,
+              receiverType: receiver.receiver,
               type: {
                 kind: 'simple',
                 type: receiver.message.kind,
@@ -138,6 +139,7 @@ export class ABIParser {
 
           return {
             name: argumentName,
+            receiverType: receiver.receiver,
             params: [
               {
                 name: argumentName,

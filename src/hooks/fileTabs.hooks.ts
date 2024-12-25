@@ -112,6 +112,30 @@ const useFileTab = () => {
     syncTabSettings(updatedTab);
   };
 
+  const rename = (oldPath: string, newPath: string) => {
+    const updatedItems = fileTab.items.map((item) => {
+      if (item.path === oldPath) {
+        return {
+          ...item,
+          path: newPath,
+          name: newPath.split('/').pop() ?? item.name,
+        };
+      }
+      return item;
+    });
+
+    // Check if the old path was the active tab
+    const isActiveTab = fileTab.active === oldPath;
+
+    const updatedTab = {
+      items: updatedItems,
+      active: isActiveTab ? newPath : fileTab.active, // Set the active tab to the new path if it was renamed
+    };
+
+    syncTabSettings(updatedTab);
+    EventEmitter.emit('FORCE_UPDATE_FILE', newPath);
+  };
+
   const updateFileDirty = (filePath: string, isDirty: boolean) => {
     const updatedItems = cloneDeep(fileTab).items.map((item) => {
       if (item.path === filePath) {
@@ -132,6 +156,7 @@ const useFileTab = () => {
     fileTab,
     open,
     close,
+    rename,
     syncTabSettings,
     updateFileDirty,
     hasDirtyFiles,

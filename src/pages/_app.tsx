@@ -1,11 +1,10 @@
-import { Layout } from '@/components/shared';
+import { Layout, ThemeProvider } from '@/components/shared';
 import { AppConfig } from '@/config/AppConfig';
 import { IDEProvider } from '@/state/IDE.context';
 import '@/styles/theme.scss';
 import { THEME } from '@tonconnect/ui';
 import { TonConnectUIProvider } from '@tonconnect/ui-react';
 import { WebContainer } from '@webcontainer/api';
-import { ConfigProvider, theme } from 'antd';
 import mixpanel from 'mixpanel-browser';
 import type { AppProps } from 'next/app';
 import Head from 'next/head';
@@ -22,8 +21,6 @@ export default function App({
   Component,
   pageProps: { ...pageProps },
 }: AppProps) {
-  const { darkAlgorithm } = theme;
-
   useEffect(() => {
     if (process.env.NEXT_PUBLIC_DISABLE_WEBCONTAINER) return;
     (async () => {
@@ -36,7 +33,7 @@ export default function App({
             file: {
               contents: `
                 {
-                  "name": "nujan-app",
+                  "name": "ton-web-ide-app",
                   "type": "module",
                   "dependencies": {
                     "jest": "29.6.2",
@@ -81,30 +78,20 @@ export default function App({
         <title>{AppConfig.seo.title}</title>
         <meta name="description" content="" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="icon" type="image/png" href="/images/logo.png" />
+        <link rel="icon" type="image/image/svg+xml" href="/images/logo.svg" />
       </Head>
       <RecoilRoot>
         <IDEProvider>
-          <ConfigProvider
-            theme={{
-              token: {
-                colorPrimary: '#0098ea',
-                colorError: '#C84075',
-                fontFamily: 'var(--font-body)',
-                borderRadius: 4,
-              },
-              algorithm: darkAlgorithm,
-            }}
-          >
+          <ThemeProvider>
             <TonConnectUIProvider
               uiPreferences={{ theme: THEME.LIGHT }}
-              manifestUrl="https://ide.nujan.io/assets/ton/tonconnect-manifest.json"
+              manifestUrl="https://ide.ton.org/assets/ton/tonconnect-manifest.json"
             >
               <Layout>
                 <Component {...pageProps} />
               </Layout>
             </TonConnectUIProvider>
-          </ConfigProvider>
+          </ThemeProvider>
         </IDEProvider>
       </RecoilRoot>
     </>

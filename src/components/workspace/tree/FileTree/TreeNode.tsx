@@ -2,6 +2,7 @@ import { useFile, useFileTab } from '@/hooks';
 import { useLogActivity } from '@/hooks/logActivity.hooks';
 import { useProject } from '@/hooks/projectV2.hooks';
 import { Project, Tree } from '@/interfaces/workspace.interface';
+import EventEmitter from '@/utility/eventEmitter';
 import { encodeBase64, fileTypeFromFileName } from '@/utility/utils';
 import { NodeModel } from '@minoru/react-dnd-treeview';
 import { message } from 'antd';
@@ -59,7 +60,16 @@ const TreeNode: FC<Props> = ({ node, depth, isOpen, onToggle }) => {
 
   const commitEditing = async (name: string) => {
     try {
-      await renameProjectFile(node.data?.path as string, name);
+      const { success, oldPath, newPath } = await renameProjectFile(
+        node.data?.path as string,
+        name,
+      );
+      if (success && newPath) {
+        EventEmitter.emit('FILE_RENAMED', {
+          oldPath,
+          newPath,
+        });
+      }
       reset();
     } catch (error) {
       createLog((error as Error).message, 'error');

@@ -426,7 +426,7 @@ const BuildProject: FC<Props> = ({ projectId, contract, updateContract }) => {
 
       cellBuilderRef.current.contentWindow.postMessage(
         {
-          name: 'nujan-ton-ide',
+          name: 'ton-web-ide',
           type: 'state-init-data',
           code: finalJsoutput,
           language: activeProject?.language,
@@ -653,7 +653,7 @@ const BuildProject: FC<Props> = ({ projectId, contract, updateContract }) => {
       if (
         typeof event.data !== 'object' ||
         event.data.type !== 'state-init-data' ||
-        event.data.name !== 'nujan-ton-ide'
+        event.data.name !== 'ton-web-ide'
       ) {
         return;
       }

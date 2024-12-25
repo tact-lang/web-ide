@@ -13,7 +13,7 @@
     div[class*='gutter-horizontal'] {
       background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAeCAYAAADkftS9AAAAIklEQVQoU2M4c+bMfxAGAgYYmwGrIIiDjrELjpo5aiZeMwF+yNnOs5KSvgAAAABJRU5ErkJggg==');
       cursor: col-resize;
-      background-color: #141416;
+      background-color: var(--splitter-bg);
     }
   }
   .splitVertical {
@@ -23,7 +23,7 @@
     div[class*='gutter-vertical'] {
       background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAFAQMAAABo7865AAAABlBMVEVHcEzMzMzyAv2sAAAAAXRSTlMAQObYZgAAABBJREFUeF5jOAMEEAIEEFwAn3kMwcB6I2AAAAAASUVORK5CYII=');
       cursor: row-resize;
-      background-color: #17171a;
+      background-color: var(--splitter-bg);
     }
   }
   div[class*='gutter'] {
@@ -38,7 +38,7 @@
     // padding-top: 0.5rem;
     // flex: 0 0 250px;
     // width: 250px;
-    background-color: #141416;
+    background-color: var(--sidebar-bg);
     overflow-x: hidden !important;
     overflow-y: auto !important;
     :global(.onboarding-active) & {
@@ -55,7 +55,7 @@
     justify-content: space-between;
   }
   .heading {
-    color: #ccc;
+    color: var(--color-light);
     text-align: center;
     display: block;
     font-size: 0.875rem;
@@ -68,7 +68,7 @@
     gap: 0.3rem;
   }
   .globalAction {
-    color: #ccc;
+    color: var(--color-light);
     display: flex;
     justify-content: space-between;
     padding: 0.5rem;

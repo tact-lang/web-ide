@@ -266,14 +266,15 @@ export const useProject = () => {
   };
 
   const renameProjectFile = async (oldPath: string, newName: string) => {
-    if (!activeProject?.path) return;
+    if (!activeProject?.path) return { success: false };
     const newPath = oldPath.includes('/')
       ? oldPath.split('/').slice(0, -1).join('/') + '/' + newName
       : newName;
 
     const success = await fileSystem.rename(oldPath, newPath);
-    if (!success) return;
+    if (!success) return { success: false };
     await loadProjectFiles(activeProject.path);
+    return { success: true, oldPath, newPath };
   };
 
   const updateActiveProject = async (

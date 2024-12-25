@@ -1,0 +1,36 @@
+# app
+appVersion: "0.1"
+
+# limits & requests
+cpuLimit: "500m"
+memoryLimit: "128Mi"
+cpuRequest: "500m"
+memoryRequest: "64Mi"
+
+# replicas
+minReplicas: 2
+maxReplicas: 40
+
+# docker
+containerPort: 3000
+nodePort: 80
+
+# from github deploy
+imageRepo: ""
+imageTag: ""
+host: ""
+appName: ""
+ghcrSecret: ""
+
+tlsCert: ""
+tlsKey: ""
+
+canaryCookie: "canary_tPIzU7rz5ecBWK2gFOs72o5s2qr0kz"
+
+# do not change
+tlsIssuer: "letsencrypt"
+certIssuingMode: false
+
+# http
+publicService: true
+sslRedirect: false

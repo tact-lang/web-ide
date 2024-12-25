@@ -1,7 +1,7 @@
 import { useFile } from '@/hooks';
 import { useContractAction } from '@/hooks/contract.hooks';
 import { useLogActivity } from '@/hooks/logActivity.hooks';
-import { useProject } from '@/hooks/projectV2.hooks';
+import { baseProjectPath, useProject } from '@/hooks/projectV2.hooks';
 import { CellABI, ProjectSetting } from '@/interfaces/workspace.interface';
 import { buildTs } from '@/utility/typescriptHelper';
 import { Cell } from '@ton/core';
@@ -70,7 +70,7 @@ const FuncContractInteraction: FC<ProjectInteractionProps> = ({
 
       cellBuilderRef.current.contentWindow.postMessage(
         {
-          name: 'nujan-ton-ide',
+          name: 'ton-web-ide',
           type: 'abi-data',
           code: finalJsoutput,
         },
@@ -133,7 +133,7 @@ const FuncContractInteraction: FC<ProjectInteractionProps> = ({
       if (
         typeof event.data !== 'object' ||
         event.data.type !== 'abi-data' ||
-        event.data.name !== 'nujan-ton-ide'
+        event.data.name !== 'ton-web-ide'
       ) {
         setIsLoading('');
         return;
@@ -170,10 +170,13 @@ const FuncContractInteraction: FC<ProjectInteractionProps> = ({
         src="/html/tonweb.html"
         sandbox="allow-scripts  allow-same-origin"
       />
-      <p className="color-warn">
-        You are using code that has been imported from an external source.
-        Exercise caution with the contract code before executing it.
-      </p>
+      {activeProject?.path === `${baseProjectPath}/temp` && (
+        <p className="color-warn">
+          You are using code that has been imported from an external source.
+          Exercise caution with the contract code before executing it.
+        </p>
+      )}
+
       <p>
         Below options will be used to send internal message and call getter
         method on contract after the contract is deployed.

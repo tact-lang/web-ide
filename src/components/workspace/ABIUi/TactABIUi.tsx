@@ -372,7 +372,7 @@ const TactABIUi: FC<TactABI> = ({
         fieldName,
         contract as SandboxContract<UserContract>,
         'tact',
-        '',
+        abiType.receiverType,
         parsedInputsValues as TupleItem[],
         network,
       );
@@ -380,11 +380,15 @@ const TactABIUi: FC<TactABI> = ({
       if (Array.isArray(response)) {
         createLog(JSON.stringify(response, null, 2));
       } else if (response?.logs) {
-        for (const log of response.logs) {
-          createLog(
-            log,
-            response.status ? (response.status as LogType) : 'info',
-          );
+        if (response.logs.length === 0 && response.message) {
+          createLog(response.message);
+        } else {
+          for (const log of response.logs) {
+            createLog(
+              log,
+              response.status ? (response.status as LogType) : 'info',
+            );
+          }
         }
       } else {
         createLog(JSON.stringify(response, null, 2));

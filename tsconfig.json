@@ -19,6 +19,12 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["next-env.d.ts", "types/*", "**/*.ts", "**/*.tsx"],
+  "include": [
+    "next-env.d.ts",
+    "types/*",
+    "**/*.ts",
+    "**/*.tsx",
+    "commitlint.config.ts"
+  ],
   "exclude": ["node_modules"]
 }

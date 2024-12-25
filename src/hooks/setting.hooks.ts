@@ -22,6 +22,7 @@ export function useSettingAction() {
     isAutoBuildAndDeployEnabled,
     toggleAutoBuildAndDeploy,
     updateEditorMode,
+    toggleExternalMessage,
   };
 
   async function init() {
@@ -101,6 +102,12 @@ export function useSettingAction() {
   function updateEditorMode(mode: 'default' | 'vim') {
     updateStateByKey({
       editorMode: mode,
+    });
+  }
+
+  function toggleExternalMessage(active: boolean = !setting.isExternalMessage) {
+    updateStateByKey({
+      isExternalMessage: active,
     });
   }
 }

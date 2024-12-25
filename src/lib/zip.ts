@@ -1,3 +1,4 @@
+import { Tree } from '@/interfaces/workspace.interface';
 import { BlobReader, BlobWriter, ZipReader, ZipWriter } from '@zip.js/zip.js';
 import { RcFile } from 'antd/es/upload';
 import { FileSystem } from './fs';
@@ -8,7 +9,11 @@ class ZIP {
     this.fs = fs;
   }
 
-  async importZip(file: RcFile, outputDir: string) {
+  async importZip(
+    file: RcFile | Blob,
+    outputDir: string,
+    writeFiles: boolean = true,
+  ) {
     const reader = new ZipReader(new BlobReader(file));
     const entries = await reader.getEntries();
     const filesToSkip = [
@@ -17,9 +22,10 @@ class ZIP {
       '.DS_Store',
       'node_modules',
       'build',
-      '.git',
       '.zip',
     ];
+
+    const files = [];
 
     for (const entry of entries) {
       const outputPath = `${outputDir}/${entry.filename}`;
@@ -29,19 +35,30 @@ class ZIP {
         continue;
       }
       if (entry.directory) {
-        await this.fs.mkdir(outputDir);
+        if (writeFiles) {
+          await this.fs.mkdir(outputDir);
+        }
       } else if (entry.getData) {
         // Ensure getData is defined before calling it
         const writer = new BlobWriter();
         await entry.getData(writer);
         const fileBlob = await writer.getData();
         const arrayBuffer = await fileBlob.arrayBuffer();
-        await this.fs.writeFile(outputPath, new Uint8Array(arrayBuffer));
+        const fileContent = new Uint8Array(arrayBuffer);
+        const utf8Decoder = new TextDecoder('utf-8');
+        if (writeFiles) {
+          await this.fs.writeFile(outputPath, fileContent);
+        } else {
+          files.push({
+            path: outputPath,
+            content: utf8Decoder.decode(fileContent),
+          });
+        }
       }
     }
 
     await reader.close();
-    return [];
+    return files as Tree[];
   }
 
   // zip files and directories and trigger download

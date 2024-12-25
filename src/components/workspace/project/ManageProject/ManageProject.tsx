@@ -10,12 +10,14 @@ import { baseProjectPath, useProject } from '@/hooks/projectV2.hooks';
 import { Project } from '@/interfaces/workspace.interface';
 import EventEmitter from '@/utility/eventEmitter';
 import { Button, Modal, Select, message } from 'antd';
-import Router from 'next/router';
+import Router, { useRouter } from 'next/router';
 import { FC, useEffect, useState } from 'react';
 import s from './ManageProject.module.scss';
 
 const ManageProject: FC = () => {
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
+  const router = useRouter();
+  const { importURL } = router.query;
 
   const {
     projects,
@@ -50,7 +52,14 @@ const ManageProject: FC = () => {
       <div className={s.options}>
         <CloneProject />
         <NewProject />
-
+        <NewProject
+          label="Import"
+          projectType="git"
+          heading="Import from GitHub"
+          icon="GitHub"
+          className={s.git}
+          active={!!importURL}
+        />
         <NewProject
           label="Import"
           projectType="local"

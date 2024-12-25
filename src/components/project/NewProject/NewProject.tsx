@@ -10,6 +10,7 @@ import {
 } from '@/interfaces/workspace.interface';
 import { Analytics } from '@/utility/analytics';
 import EventEmitter from '@/utility/eventEmitter';
+import { downloadRepo } from '@/utility/gitRepoDownloader';
 import { decodeBase64 } from '@/utility/utils';
 import { Button, Form, Input, Modal, Radio, Upload, message } from 'antd';
 import { useForm } from 'antd/lib/form/Form';
@@ -85,17 +86,13 @@ const NewProject: FC<Props> = ({
   const onFormFinish = async (values: FormValues) => {
     const { githubUrl, language } = values;
     const { name: projectName } = values;
-    const files: Tree[] = defaultFiles;
+    let files: Tree[] = defaultFiles;
 
     try {
       setIsLoading(true);
 
       if (projectType === 'git') {
-        throw new Error(
-          `Git import has been disabled for now. Repo: ${githubUrl}`,
-        );
-        // TODO: Implement downloadRepo function
-        // files = await downloadRepo(githubUrl as string);
+        files = await downloadRepo(githubUrl as string);
       }
 
       await createProject({
@@ -318,7 +315,7 @@ const NewProject: FC<Props> = ({
                 },
               ]}
             >
-              <Input placeholder="Ex. https://github.com/nujan-io/ton-contracts/" />
+              <Input placeholder="Ex. https://github.com/tact-lang/tact-template" />
             </Form.Item>
           )}
 

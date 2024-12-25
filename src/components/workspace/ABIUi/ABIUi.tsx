@@ -70,7 +70,7 @@ const ABIUi: FC<ABIUiProps> = ({
         abi.name,
         contract as SandboxContract<UserContract>,
         'func',
-        abi.kind,
+        'none',
         stack as TupleItem[],
         network,
       );

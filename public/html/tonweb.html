@@ -16,7 +16,7 @@
           !event.data ||
           typeof event.data !== "object" ||
           !event.data?.type ||
-          event.data?.name !== "nujan-ton-ide"
+          event.data?.name !== "ton-web-ide"
         ) {
           return;
         }
@@ -48,7 +48,7 @@
           }
 
           const response = {
-            name: "nujan-ton-ide",
+            name: "ton-web-ide",
             data: cellValue,
             type: event.data?.type,
           };
@@ -72,7 +72,7 @@
             });
           const _error = `Error: ${error.message} \n${errorStack.join("\n")}`;
           const response = {
-            name: "nujan-ton-ide",
+            name: "ton-web-ide",
             error: _error,
             type: event.data?.type,
           };

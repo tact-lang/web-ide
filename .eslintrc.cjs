@@ -12,7 +12,12 @@ module.exports = {
     ecmaVersion: 2020,
     project: "./tsconfig.json",
   },
-  ignorePatterns: ["*.cjs"],
+  ignorePatterns: [
+    "*.cjs",
+    "!.lintstagedrc.js",
+    ".lintstagedrc.js",
+    "next.config.js",
+  ],
   plugins: ["@typescript-eslint"],
   root: true,
   env: {

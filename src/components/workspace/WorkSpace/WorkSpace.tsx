@@ -3,6 +3,7 @@
 import { ManageGit } from '@/components/git';
 import { DownloadProject } from '@/components/project';
 import { ProjectTemplate } from '@/components/template';
+import { NonProductionNotice } from '@/components/ui';
 import { AppConfig } from '@/config/AppConfig';
 import { useFileTab } from '@/hooks';
 import { useLogActivity } from '@/hooks/logActivity.hooks';
@@ -246,6 +247,7 @@ const WorkSpace: FC = () => {
                 }}
               >
                 <div>
+                  <NonProductionNotice />
                   <div className={s.tabsWrapper}>
                     <Tabs />
                   </div>

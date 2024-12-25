@@ -5,6 +5,7 @@ import { useProjectActions } from '@/hooks/project.hooks';
 import { useWorkspaceActions } from '@/hooks/workspace.hooks';
 import { Analytics } from '@/utility/analytics';
 import EventEmitter from '@/utility/eventEmitter';
+import Path from '@isomorphic-git/lightning-fs/src/path';
 import { FC } from 'react';
 import ExecuteFile from '../ExecuteFile';
 import s from './TestCases.module.scss';
@@ -50,19 +51,21 @@ const TestCases: FC<Props> = ({ projectId }) => {
 
     const contractCompileBlock = compileBlockExp.exec(testCaseCode);
     const contractPath = contractCompileBlock?.[1].replace(/['"]/g, '');
+
+    const contractAbsolutePath = Path.normalize(`${projectId}/${contractPath}`);
     // if (!contractPath) {
     //   createLog('Please specify contract path', 'error');
     //   return;
     // }
     let contractFile = undefined;
     try {
-      contractFile = await getFile(contractPath!);
+      contractFile = await getFile(contractAbsolutePath);
     } catch (error) {
       /* empty */
     }
     if (contractPath && !contractFile) {
       createLog(
-        `Contract file not found - ${contractPath}. Define correct absolute path. Ex. contracts/main.fc`,
+        `Contract file not found - ${contractPath}. Define correct absolute path. Ex. contracts/main.fc or /contracts/main.fc`,
         'error',
       );
       return;
@@ -73,7 +76,7 @@ const TestCases: FC<Props> = ({ projectId }) => {
     if (contractPath && contractCompileBlock && contractPath.includes('.fc')) {
       try {
         const contract = await compileFuncProgram(
-          { path: contractPath },
+          { path: contractAbsolutePath },
           projectId,
         );
         contractBOC = contract.contractBOC;

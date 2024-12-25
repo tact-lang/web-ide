@@ -3,12 +3,12 @@ export const AppData = {
     {
       label: 'Project GitHub',
       icon: 'GitHub',
-      url: 'https://github.com/nujan-io/nujan-ide',
+      url: 'https://github.com/tact-lang/web-ide',
     },
     {
       label: 'Telegram',
       icon: 'Telegram',
-      url: 'https://t.me/Nujan_io',
+      url: 'https://t.me/ton_web_IDE',
     },
   ],
 };

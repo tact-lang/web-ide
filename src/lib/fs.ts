@@ -67,7 +67,11 @@ class FileSystem {
       } else if (error.code === 'ENOENT') {
         // Parent directory does not exist, create it recursively
         await this.ensureDirectoryExists(dirname);
-        await this.fs.mkdir(dirname);
+        try {
+          await this.fs.mkdir(dirname);
+        } catch {
+          /* empty */
+        }
       } else {
         throw error;
       }

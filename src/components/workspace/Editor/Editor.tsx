@@ -1,5 +1,3 @@
-import { useFile, useFileTab } from '@/hooks';
-import { useProject } from '@/hooks/projectV2.hooks';
 import { useSettingAction } from '@/hooks/setting.hooks';
 import { Tree } from '@/interfaces/workspace.interface';
 import { configureMonacoEditor } from '@/utility/editor';
@@ -8,6 +6,10 @@ import { delay, fileTypeFromFileName } from '@/utility/utils';
 import EditorDefault from '@monaco-editor/react';
 import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
 import { FC, useEffect, useRef, useState } from 'react';
+// import { useLatest } from 'react-use';
+import { useTheme } from '@/components/shared/ThemeProvider';
+import { useFile, useFileTab } from '@/hooks';
+import { useProject } from '@/hooks/projectV2.hooks';
 import { useLatest } from 'react-use';
 import ReconnectingWebSocket from 'reconnecting-websocket';
 import s from './Editor.module.scss';
@@ -23,6 +25,7 @@ const Editor: FC<Props> = ({ className = '' }) => {
   const { activeProject } = useProject();
   const { getFile, saveFile: storeFileContent } = useFile();
   const { fileTab, updateFileDirty } = useFileTab();
+  const { theme } = useTheme();
 
   const { isFormatOnSave, getSettingStateByKey } = useSettingAction();
 
@@ -105,14 +108,16 @@ const Editor: FC<Props> = ({ className = '' }) => {
     EventEmitter.on('SAVE_FILE', updateFileSaveCounter);
 
     // If file is changed e.g. in case of build process then force update in editor
-    EventEmitter.on('FORCE_UPDATE_FILE', (filePath: string) => {
+    EventEmitter.on('FORCE_UPDATE_FILE', (file) => {
       if (
         !activeProject?.path ||
-        latestFile.current?.path.includes('setting.json')
+        (latestFile.current?.path.includes('setting.json') &&
+          typeof file == 'string')
       )
         return;
 
       (async () => {
+        const filePath = typeof file === 'string' ? file : file.newPath;
         if (filePath !== latestFile.current?.path) return;
         await fetchFileContent(true);
       })().catch((error) => {
@@ -234,7 +239,8 @@ const Editor: FC<Props> = ({ className = '' }) => {
       <EditorDefault
         className={s.editor}
         path={fileTab.active?.path ?? ''}
-        theme="vs-theme-dark"
+        theme={theme === 'dark' ? 'vs-theme-dark' : 'light'}
+        // height="90vh"
         defaultLanguage={fileTypeFromFileName(fileTab.active?.path ?? '')}
         defaultValue={undefined}
         onChange={markFileDirty}

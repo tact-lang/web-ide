@@ -128,6 +128,7 @@ export interface TactABIField {
 
 export interface TactType {
   name: string;
+  receiverType: 'internal' | 'external';
   type?: ABITypeRef;
   params: TactABIField[];
   returnType: Maybe<ABITypeRef>;

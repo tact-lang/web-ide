@@ -257,7 +257,7 @@ export function useContractAction() {
     methodName: string,
     contract: SandboxContract<UserContract> | null = null,
     language: ContractLanguage,
-    kind?: string,
+    receiverType?: 'none' | 'external' | 'internal',
     stack?: TupleItem[],
     network?: Network | Partial<NetworkEnvironment>,
   ): Promise<
@@ -276,14 +276,21 @@ export function useContractAction() {
       sender = new TonConnectSender(tonConnector.connector);
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const response = await (contract as any).send(
-      sender,
-      {
-        value: tonAmountForInteraction,
-      },
-      stack ? stack[0] : '',
-    );
+    let response = null;
+
+    if (receiverType === 'internal') {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      response = await (contract as any).send(
+        sender,
+        {
+          value: tonAmountForInteraction,
+        },
+        stack ? stack[0] : '',
+      );
+    } else {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      response = await (contract as any).sendExternal(stack ? stack[0] : '');
+    }
 
     return {
       message: 'Message sent successfully',

@@ -1,14 +1,24 @@
 {
-  "name": "nujan-ton-ide",
+  "name": "ton-web-ide",
   "version": "0.1.0",
-  "private": true,
+  "author": {
+    "name": "Rahul Yadav",
+    "url": "https://github.com/rahulyadav-57/"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "format:check": "prettier --check --ignore-path .gitignore .",
-    "format:fix": "prettier --write --ignore-path .gitignore ."
+    "format:check": "prettier --check --ignore-path .prettierignore --ignore-path .gitignore .",
+    "format:fix": "prettier --write --ignore-path .prettierignore --ignore-path .gitignore .",
+    "postinstall": "husky",
+    "commit": "git-cz"
+  },
+  "config": {
+    "commitizen": {
+      "path": "cz-conventional-changelog"
+    }
   },
   "dependencies": {
     "@codingame/monaco-jsonrpc": "^0.3.1",
@@ -17,7 +27,7 @@
     "@minoru/react-dnd-treeview": "^3.4.1",
     "@monaco-editor/react": "^4.5.1",
     "@orbs-network/ton-access": "^2.3.0",
-    "@tact-lang/compiler": "^1.5.0",
+    "@tact-lang/compiler": "^1.5.3",
     "@ton-community/func-js": "^0.5.0",
     "@ton/core": "^0.56.3",
     "@ton/sandbox": "^0.16.0",
@@ -30,7 +40,7 @@
     "@xterm/addon-search": "^0.14.0-beta.1",
     "@zip.js/zip.js": "^2.7.6",
     "antd": "^5.2.3",
-    "axios": "^1.6.7",
+    "axios": "^1.7.4",
     "bn.js": "^5.2.1",
     "change-case": "^5.4.4",
     "clsx": "^1.2.1",
@@ -56,11 +66,11 @@
     "react-markdown": "^9.0.1",
     "react-split": "^2.0.14",
     "react-syntax-highlighter": "^15.5.0",
-    "react-use": "^17.4.0",
+    "react-use": "^17.5.1",
     "recoil": "^0.7.7",
     "recoil-persist": "^4.2.0",
     "reconnecting-websocket": "^4.4.0",
-    "rollup": "^4.20.0",
+    "rollup": "^4.22.4",
     "sass": "^1.58.3",
     "ts-browser-eval": "^0.0.1",
     "typescript": "4.9.5",
@@ -70,6 +80,9 @@
     "xterm-addon-fit": "^0.8.0"
   },
   "devDependencies": {
+    "@commitlint/cli": "^19.5.0",
+    "@commitlint/config-conventional": "^19.5.0",
+    "@commitlint/types": "^19.5.0",
     "@types/bn.js": "^5.1.1",
     "@types/jsonwebtoken": "^9.0.1",
     "@types/lodash.clonedeep": "^4.5.7",
@@ -77,9 +90,14 @@
     "@types/react-syntax-highlighter": "^15.5.10",
     "@types/uuid": "^9.0.1",
     "@typescript-eslint/eslint-plugin": "^7.15.0",
+    "commitizen": "^4.3.1",
+    "conventional-changelog-atom": "^5.0.0",
+    "cz-conventional-changelog": "^3.3.0",
     "eslint-config-prettier": "^9.1.0",
+    "husky": "^9.1.6",
+    "lint-staged": "^15.2.10",
     "monaco-editor-webpack-plugin": "^7.0.1",
     "next-transpile-modules": "^10.0.0",
-    "prettier": "^3.3.2"
+    "prettier": "^3.3.3"
   }
 }

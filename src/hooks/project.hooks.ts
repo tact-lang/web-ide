@@ -6,6 +6,7 @@ import {
   build as buildTact,
   createVirtualFileSystem,
 } from '@tact-lang/compiler';
+import { featureEnable } from '@tact-lang/compiler/dist/config/features';
 import stdLibFiles from '@tact-lang/compiler/dist/imports/stdlib';
 import { precompile } from '@tact-lang/compiler/dist/pipeline/precompile';
 
@@ -23,9 +24,10 @@ import { useProject } from './projectV2.hooks';
 import { useSettingAction } from './setting.hooks';
 
 export function useProjectActions() {
-  const { isContractDebugEnabled } = useSettingAction();
+  const { isContractDebugEnabled, getSettingStateByKey } = useSettingAction();
   const { writeFiles, projectFiles } = useProject();
   const { getFile } = useFile();
+  const isExternalMessage = getSettingStateByKey('isExternalMessage');
 
   return {
     compileFuncProgram,
@@ -137,6 +139,9 @@ export function useProjectActions() {
     let ctx = new CompilerContext();
     const stdlib = createVirtualFileSystem('@stdlib', stdLibFiles);
     const entryFile = file.path;
+    if (isExternalMessage) {
+      ctx = featureEnable(ctx, 'external');
+    }
     ctx = precompile(ctx, fs, stdlib, entryFile);
 
     const response = await buildTact({
@@ -146,6 +151,7 @@ export function useProjectActions() {
         name: 'tact',
         options: {
           debug: isContractDebugEnabled(),
+          external: !!isExternalMessage,
         },
       },
       project: fs,
