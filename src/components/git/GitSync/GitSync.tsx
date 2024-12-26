@@ -90,7 +90,7 @@ const GitSync: FC = () => {
   return (
     <div className={s.root}>
       <div>
-        <Form.Item label="Force Push" style={{ marginBottom: '0.5rem' }}>
+        <Form.Item label="Force Push">
           <Switch checked={forcePush} onChange={setForcePush} />
         </Form.Item>
       </div>

@@ -197,7 +197,9 @@ class GitManager {
   }
 
   async pull(dest: string, onMessage?: (message: string) => void) {
-    const { token } = JSON.parse(localStorage.getItem('gitConfig') ?? '{}');
+    const { token, username, email } = JSON.parse(
+      localStorage.getItem('gitConfig') ?? '{}',
+    );
 
     await git.pull({
       fs: this.fs,
@@ -213,6 +215,7 @@ class GitManager {
       onAuthFailure: () => {
         throw new Error('Authentication failed');
       },
+      author: { name: username, email },
     });
   }
 
