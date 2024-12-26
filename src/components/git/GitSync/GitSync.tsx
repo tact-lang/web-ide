@@ -4,7 +4,7 @@ import { useProject } from '@/hooks/projectV2.hooks';
 import GitManager from '@/lib/git';
 import EventEmitter from '@/utility/eventEmitter';
 import { delay } from '@/utility/utils';
-import { Button } from 'antd';
+import { Button, Form, Switch } from 'antd';
 import { FC, useState } from 'react';
 import s from './GitSync.module.scss';
 
@@ -17,6 +17,7 @@ const GitSync: FC = () => {
   const [currentLoading, setCurrentLoading] = useState<'push' | 'pull' | null>(
     null,
   );
+  const [forcePush, setForcePush] = useState(false);
 
   const onMessage = async (message: string) => {
     // add a delay to show the progress counter
@@ -42,7 +43,7 @@ const GitSync: FC = () => {
     try {
       if (!(await preCheck())) return;
       setCurrentLoading('push');
-      const response = await git.push(activeProjectPath, onMessage);
+      const response = await git.push(activeProjectPath, onMessage, forcePush);
       if (response.ok) {
         createLog('Push operation completed successfully.', 'success');
         return;
@@ -88,24 +89,31 @@ const GitSync: FC = () => {
 
   return (
     <div className={s.root}>
-      <Button
-        type="primary"
-        className={`item-center-align w-100`}
-        onClick={pull}
-        loading={currentLoading === 'pull'}
-        disabled={currentLoading !== null}
-      >
-        <AppIcon name="AngleDown" /> Pull
-      </Button>
-      <Button
-        type="primary"
-        className={`item-center-align w-100`}
-        onClick={push}
-        loading={currentLoading === 'push'}
-        disabled={currentLoading !== null}
-      >
-        <AppIcon name="AngleUp" /> Push
-      </Button>
+      <div>
+        <Form.Item label="Force Push" style={{ marginBottom: '0.5rem' }}>
+          <Switch checked={forcePush} onChange={setForcePush} />
+        </Form.Item>
+      </div>
+      <div className={s.actions}>
+        <Button
+          type="primary"
+          className={`item-center-align w-100`}
+          onClick={pull}
+          loading={currentLoading === 'pull'}
+          disabled={currentLoading !== null}
+        >
+          <AppIcon name="AngleDown" /> Pull
+        </Button>
+        <Button
+          type="primary"
+          className={`item-center-align w-100`}
+          onClick={push}
+          loading={currentLoading === 'push'}
+          disabled={currentLoading !== null}
+        >
+          <AppIcon name="AngleUp" /> Push
+        </Button>
+      </div>
     </div>
   );
 };

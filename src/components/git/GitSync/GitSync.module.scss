@@ -1,6 +1,8 @@
 .root {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
+  .actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+  }
 }

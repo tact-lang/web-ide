@@ -216,7 +216,11 @@ class GitManager {
     });
   }
 
-  async push(dest: string, onMessage?: (message: string) => void) {
+  async push(
+    dest: string,
+    onMessage?: (message: string) => void,
+    force = false,
+  ) {
     const { token } = JSON.parse(localStorage.getItem('gitConfig') ?? '{}');
     return await git.push({
       fs: this.fs,
@@ -227,6 +231,7 @@ class GitManager {
       corsProxy: AppConfig.cors.proxy,
       onAuth: () => ({ username: token }),
       onMessage,
+      force,
     });
   }
 }

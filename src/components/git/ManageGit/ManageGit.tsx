@@ -209,7 +209,7 @@ const ManageGit: FC = () => {
               </span>
             </Tooltip>
 
-            <div className={s.actionWrapper}>{file.status}</div>
+            <div className={s.status}>{file.status}</div>
           </li>
         ))}
       </ul>

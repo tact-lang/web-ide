@@ -32,9 +32,15 @@
       gap: 0.5rem;
       justify-content: space-between;
       position: relative;
+      .status {
+        font-size: 0.8em;
+      }
       &:hover {
         .action {
           visibility: visible;
+        }
+        .status {
+          visibility: hidden;
         }
       }
       .fileDetails {
