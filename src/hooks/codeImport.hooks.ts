@@ -5,7 +5,7 @@ import { useCallback } from 'react';
 import useFileTab from './fileTabs.hooks';
 import { baseProjectPath, useProject } from './projectV2.hooks';
 
-const useCodeImport = () => {
+export const useCodeImport = () => {
   const router = useRouter();
   const { createProject } = useProject();
   const { open: openTab } = useFileTab();
@@ -57,5 +57,3 @@ const useCodeImport = () => {
     removeImportParams,
   };
 };
-
-export default useCodeImport;

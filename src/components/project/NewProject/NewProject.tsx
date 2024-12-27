@@ -1,6 +1,6 @@
 import { Tooltip } from '@/components/ui';
 import AppIcon, { AppIconType } from '@/components/ui/icon';
-import useCodeImport from '@/hooks/codeImport.hooks';
+import { useCodeImport } from '@/hooks/codeImport.hooks';
 import { useLogActivity } from '@/hooks/logActivity.hooks';
 import { useProject } from '@/hooks/projectV2.hooks';
 import {
