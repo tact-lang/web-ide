@@ -10,12 +10,11 @@ import {
 } from '@/interfaces/workspace.interface';
 import { Analytics } from '@/utility/analytics';
 import { downloadRepo } from '@/utility/gitRepoDownloader';
-import { delay } from '@/utility/utils';
 import { Button, Form, Input, Modal, Radio, Upload, message } from 'antd';
 import { useForm } from 'antd/lib/form/Form';
 import type { RcFile } from 'antd/lib/upload';
 import { useRouter } from 'next/router';
-import { FC, useEffect, useState } from 'react';
+import { FC, useCallback, useEffect, useState } from 'react';
 import s from './NewProject.module.scss';
 
 interface Props {
@@ -29,6 +28,13 @@ interface Props {
   defaultFiles?: Tree[];
   projectLanguage?: ContractLanguage;
   name?: string;
+}
+
+interface RouterParams {
+  importURL?: string;
+  name?: string;
+  lang?: ContractLanguage;
+  code?: string;
 }
 
 const NewProject: FC<Props> = ({
@@ -51,17 +57,6 @@ const NewProject: FC<Props> = ({
   const { importEncodedCode, removeImportParams } = useCodeImport();
 
   const router = useRouter();
-  const {
-    importURL,
-    name: projectName,
-    lang: importLanguage,
-    code: codeToImport,
-  } = router.query as {
-    importURL?: string;
-    name?: string;
-    lang?: ContractLanguage;
-    code?: string;
-  };
 
   const [form] = useForm();
 
@@ -127,7 +122,14 @@ const NewProject: FC<Props> = ({
     }
   };
 
-  const onRouterReady = async () => {
+  const onRouterReady = useCallback(async () => {
+    const {
+      importURL,
+      name: projectName,
+      lang: importLanguage,
+      code: codeToImport,
+    } = router.query as RouterParams;
+    await removeImportParams();
     if (codeToImport) {
       // Default to 'func' as the language if none is provided in the query parameters.
       // This ensures backward compatibility for cases where the language was not included in the query params initially.
@@ -165,16 +167,12 @@ const NewProject: FC<Props> = ({
       language: importLanguage ?? 'func',
     });
     setIsActive(true);
-
-    // Wait for the form to be set up before removing the import query parameters
-    await delay(100);
-    removeImportParams();
-  };
+  }, [router.isReady, form]);
 
   useEffect(() => {
     if (!router.isReady) return;
     onRouterReady();
-  }, [router.isReady]);
+  }, [router.isReady, onRouterReady]);
 
   const closeModal = () => {
     setIsActive(false);
