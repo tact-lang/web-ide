@@ -129,7 +129,6 @@ const NewProject: FC<Props> = ({
       lang: importLanguage,
       code: codeToImport,
     } = router.query as RouterParams;
-    await removeImportParams();
     if (codeToImport) {
       // Default to 'func' as the language if none is provided in the query parameters.
       // This ensures backward compatibility for cases where the language was not included in the query params initially.
@@ -167,6 +166,7 @@ const NewProject: FC<Props> = ({
       language: importLanguage ?? 'func',
     });
     setIsActive(true);
+    await removeImportParams();
   }, [router.isReady, form]);
 
   useEffect(() => {
