@@ -45,15 +45,10 @@ const WorkSpace: FC = () => {
   const splitVerticalRef = useRef<SplitInstance | null>(null);
 
   const { tab } = router.query;
-  const {
-    activeProject,
-    setActiveProject,
-    projectFiles,
-    loadProjectFiles,
-    newFileFolder,
-  } = useProject();
+  const { activeProject, setActiveProject, loadProjectFiles, newFileFolder } =
+    useProject();
 
-  const { fileTab, open: openTab } = useFileTab();
+  const { fileTab } = useFileTab();
 
   const { init: initGlobalSetting } = useSettingAction();
 
@@ -82,7 +77,6 @@ const WorkSpace: FC = () => {
       return;
     }
     await setActiveProject(selectedProjectPath);
-    await loadProjectFiles(selectedProjectPath);
   };
 
   const cachedProjectPath = useMemo(() => {
@@ -113,13 +107,7 @@ const WorkSpace: FC = () => {
     createLog(`Project '${activeProject.name}' is opened`);
     createSandbox(true).catch(() => {});
 
-    if (fileTab.active) return;
-    // Open main file on project switch
-    const mainFile = projectFiles.find((file) =>
-      ['main.tact', 'main.fc'].includes(file.name),
-    );
-    if (!mainFile) return;
-    openTab(mainFile.name, mainFile.path);
+    loadProjectFiles(cachedProjectPath);
   }, [cachedProjectPath]);
 
   useEffect(() => {

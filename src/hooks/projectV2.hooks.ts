@@ -277,11 +277,7 @@ export const useProject = () => {
     return { success: true, oldPath, newPath };
   };
 
-  const updateActiveProject = async (
-    projectPath: string | null,
-    force = false,
-  ) => {
-    if (activeProject?.path === projectPath && !force) return;
+  const updateActiveProject = async (projectPath: string | null) => {
     const projectSettingPath = `${projectPath}/.ide/setting.json`;
     if (projectPath && (await fileSystem.exists(projectSettingPath))) {
       const setting = (await fileSystem.readFile(projectSettingPath)) as string;
@@ -310,7 +306,7 @@ export const useProject = () => {
           overwrite: true,
         },
       );
-      await updateActiveProject(activeProject.path, true);
+      await updateActiveProject(activeProject.path);
     }
     await loadProjectFiles(activeProject.path);
   };

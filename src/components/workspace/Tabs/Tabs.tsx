@@ -1,15 +1,14 @@
 import { ContextMenu } from '@/components/ui';
 import AppIcon from '@/components/ui/icon';
 import { useFileTab } from '@/hooks';
-import { useProject } from '@/hooks/projectV2.hooks';
 import { Tree } from '@/interfaces/workspace.interface';
 import { ITabItems } from '@/state/IDE.context';
 import EventEmitter from '@/utility/eventEmitter';
-import { delay, fileTypeFromFileName } from '@/utility/utils';
+import { fileTypeFromFileName } from '@/utility/utils';
 import type { MenuProps } from 'antd';
 import cn from 'clsx';
 import type { MenuInfo } from 'rc-menu/lib/interface';
-import { FC, useEffect } from 'react';
+import { FC, useCallback, useEffect } from 'react';
 import s from './Tabs.module.scss';
 
 interface IRenameFile {
@@ -19,12 +18,14 @@ interface IRenameFile {
 
 type ContextMenuKeys = 'close' | 'closeOthers' | 'closeAll';
 
+interface ContextMenuItem {
+  key: ContextMenuKeys;
+  label: string;
+}
+
 interface IContextMenuItems extends MenuProps {
   key: ContextMenuKeys;
-  items: {
-    key: ContextMenuKeys;
-    label: string;
-  }[];
+  items: ContextMenuItem[];
 }
 
 const contextMenuItems: IContextMenuItems['items'] = [
@@ -43,9 +44,7 @@ const contextMenuItems: IContextMenuItems['items'] = [
 ];
 
 const Tabs: FC = () => {
-  const { fileTab, open, close, rename, syncTabSettings, updateFileDirty } =
-    useFileTab();
-  const { activeProject } = useProject();
+  const { fileTab, open, close, rename, updateFileDirty } = useFileTab();
 
   const closeTab = (e: React.MouseEvent, filePath: string) => {
     e.preventDefault();
@@ -53,16 +52,25 @@ const Tabs: FC = () => {
     close(filePath);
   };
 
-  const onMenuItemClick = (info: MenuInfo, filePath: Tree['path']) => {
-    close(filePath, info.key as ContextMenuKeys);
-  };
-  const onFileSave = ({ filePath }: { filePath: string }) => {
-    updateFileDirty(filePath, false);
-  };
+  const onMenuItemClick = useCallback(
+    (info: MenuInfo, filePath: Tree['path']) => {
+      close(filePath, info.key as ContextMenuKeys);
+    },
+    [close],
+  );
+  const onFileSave = useCallback(
+    ({ filePath }: { filePath: string }) => {
+      updateFileDirty(filePath, false);
+    },
+    [updateFileDirty],
+  );
 
-  const onFileRename = ({ oldPath, newPath }: IRenameFile) => {
-    rename(oldPath, newPath);
-  };
+  const onFileRename = useCallback(
+    ({ oldPath, newPath }: IRenameFile) => {
+      rename(oldPath, newPath);
+    },
+    [rename],
+  );
 
   const computeTabClassNames = (item: ITabItems) => {
     const fileExtension = item.name.split('.').pop() ?? '';
@@ -88,13 +96,6 @@ const Tabs: FC = () => {
       <AppIcon name="Close" className={s.closeIcon} />
     </span>
   );
-
-  useEffect(() => {
-    (async () => {
-      await delay(200);
-      syncTabSettings();
-    })();
-  }, [activeProject]);
 
   useEffect(() => {
     EventEmitter.on('FILE_SAVED', onFileSave);

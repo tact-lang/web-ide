@@ -1,5 +1,6 @@
 import { SettingInterface } from '@/interfaces/setting.interface';
 import { ProjectSetting, Tree } from '@/interfaces/workspace.interface';
+import { updateProjectTabSetting } from '@/utility/projectSetting';
 import { FC, createContext, useEffect, useMemo, useState } from 'react';
 
 export interface ITabItems {
@@ -88,6 +89,23 @@ export const IDEProvider: FC<{ children: React.ReactNode }> = ({
       setActiveProject(JSON.parse(storedActiveProject));
     }
   };
+
+  const handleActiveProjectChange = async () => {
+    const mainFile = projectFiles.find((file) =>
+      ['main.tact', 'main.fc'].includes(file.name),
+    );
+
+    const updatedTabs = await updateProjectTabSetting(
+      activeProject?.path,
+      null,
+      mainFile ? mainFile.path : undefined,
+    );
+    setFileTab(updatedTabs);
+  };
+
+  useEffect(() => {
+    handleActiveProjectChange();
+  }, [activeProject, handleActiveProjectChange]);
 
   useEffect(() => {
     onInit();
