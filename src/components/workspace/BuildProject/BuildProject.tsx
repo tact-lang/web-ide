@@ -627,6 +627,34 @@ const BuildProject: FC<Props> = ({ projectId, contract, updateContract }) => {
     }
   };
 
+  const getSelectedContractABIPath = () => {
+    const previousSelectedABIPath = activeProject?.selectedContract;
+    if (!previousSelectedABIPath) return;
+
+    const correspondingScriptPath = replaceFileExtension(
+      previousSelectedABIPath,
+      '.abi',
+      '.ts',
+    );
+
+    let contractABIPath: string | undefined = previousSelectedABIPath;
+
+    // in case of Tact, verify the presence of the corresponding contract wrapper script
+    if (activeProject.language === 'tact') {
+      const scriptFile = projectFiles.find(
+        (file) => file.path === correspondingScriptPath,
+      );
+      const hasValidScriptFile =
+        scriptFile &&
+        projectFiles.find((file) => file.path === previousSelectedABIPath);
+
+      contractABIPath = hasValidScriptFile
+        ? previousSelectedABIPath
+        : undefined;
+    }
+    return contractABIPath;
+  };
+
   useEffect(() => {
     updateABI().catch(() => {});
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -645,34 +673,16 @@ const BuildProject: FC<Props> = ({ projectId, contract, updateContract }) => {
     if (activeProject?.network) {
       setEnvironment(activeProject.network);
     }
-    const selectedABIPath = activeProject?.selectedContract;
 
-    if (selectedABIPath) {
-      const correspondingScriptPath = replaceFileExtension(
-        selectedABIPath,
-        '.abi',
-        '.ts',
-      );
-
-      let contractABIPath: string | undefined = selectedABIPath;
-
-      if (activeProject.language === 'tact') {
-        const scriptFile = projectFiles.find(
-          (file) => file.path === correspondingScriptPath,
-        );
-        const hasValidScriptFile =
-          scriptFile &&
-          projectFiles.find((file) => file.path === selectedABIPath);
-
-        contractABIPath = hasValidScriptFile ? selectedABIPath : undefined;
-      }
-
+    const contractABIPath = getSelectedContractABIPath();
+    if (contractABIPath) {
       deployForm.setFieldsValue({
         contract: contractABIPath,
       });
 
       updateSelectedContract(contractABIPath);
     }
+
     const handler = (
       event: MessageEvent<{
         name: string;
