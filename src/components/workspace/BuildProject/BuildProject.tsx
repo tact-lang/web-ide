@@ -654,7 +654,7 @@ const BuildProject: FC<Props> = ({ projectId, contract, updateContract }) => {
         '.ts',
       );
 
-      let _selectedContract: string | undefined = selectedABIPath;
+      let contractABIPath: string | undefined = selectedABIPath;
 
       if (activeProject.language === 'tact') {
         const scriptFile = projectFiles.find(
@@ -664,14 +664,14 @@ const BuildProject: FC<Props> = ({ projectId, contract, updateContract }) => {
           scriptFile &&
           projectFiles.find((file) => file.path === selectedABIPath);
 
-        _selectedContract = hasValidScriptFile ? selectedABIPath : undefined;
+        contractABIPath = hasValidScriptFile ? selectedABIPath : undefined;
       }
 
       deployForm.setFieldsValue({
-        contract: _selectedContract,
+        contract: contractABIPath,
       });
 
-      updateSelectedContract(_selectedContract);
+      updateSelectedContract(contractABIPath);
     }
     const handler = (
       event: MessageEvent<{
