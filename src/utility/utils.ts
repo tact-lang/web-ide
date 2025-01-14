@@ -231,6 +231,22 @@ export function isIncludesTypeCellOrSlice(obj: Record<string, any>): boolean {
   return false;
 }
 
+/**
+ * Removes a specified suffix from the input string if it's present.
+ * Otherwise, returns the input string unchanged.
+ */
+export function stripSuffix(input: string, suffix: string): string {
+  return input.endsWith(suffix) ? input.slice(0, -suffix.length) : input;
+}
+
+/**
+ * Removes a specified prefix from the input string if it's present.
+ * Otherwise, returns the input string unchanged.
+ */
+export function stripPrefix(input: string, prefix: string): string {
+  return input.startsWith(prefix) ? input.slice(prefix.length) : input;
+}
+
 interface ErrorWithCode extends Error {
   code?: string;
 }
