@@ -1,8 +1,16 @@
 import { SettingInterface } from '@/interfaces/setting.interface';
 import { ProjectSetting, Tree } from '@/interfaces/workspace.interface';
-import { FC, createContext, useEffect, useMemo, useState } from 'react';
+import { updateProjectTabSetting } from '@/utility/projectSetting';
+import {
+  FC,
+  createContext,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 
-interface ITabItems {
+export interface ITabItems {
   name: string;
   path: string;
   type: 'default' | 'git';
@@ -89,6 +97,23 @@ export const IDEProvider: FC<{ children: React.ReactNode }> = ({
       setActiveProject(JSON.parse(storedActiveProject));
     }
   };
+
+  const handleActiveProjectChange = useCallback(async () => {
+    const mainFile = projectFiles.find((file) =>
+      ['main.tact', 'main.fc'].includes(file.name),
+    );
+
+    const updatedTabs = await updateProjectTabSetting(
+      activeProject?.path,
+      null,
+      mainFile ? mainFile.path : undefined,
+    );
+    setFileTab(updatedTabs);
+  }, [projectFiles, activeProject?.path]);
+
+  useEffect(() => {
+    handleActiveProjectChange();
+  }, [activeProject]);
 
   useEffect(() => {
     onInit();
