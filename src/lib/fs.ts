@@ -303,7 +303,26 @@ class FileSystem {
   }
 }
 
-const fileSystem = new FileSystem(new FS('IDE_FS').promises);
-Object.freeze(fileSystem);
-export default fileSystem;
+/**
+ * Only create the LightningFS instance in the browser.
+ */
+let fsPromises: PromisifiedFS | null = null;
+if (typeof window !== 'undefined') {
+  fsPromises = new FS('IDE_FS').promises;
+}
+
+/**
+ * Only instantiate the FileSystem if fsPromises is available (i.e., in the browser).
+ */
+let fileSystem: FileSystem | null = null;
+
+if (fsPromises) {
+  fileSystem = new FileSystem(fsPromises);
+  Object.freeze(fileSystem);
+}
+
+// By default, we export `fileSystem`. It will be `null` on the server, and a valid instance in the browser.
+// We explicitly cast to `FileSystem` here because we only use `fileSystem` in the browser,
+// where it's guaranteed to be non-null. This avoids compile-time errors in TypeScript.
+export default fileSystem as FileSystem;
 export type { FileSystem };
