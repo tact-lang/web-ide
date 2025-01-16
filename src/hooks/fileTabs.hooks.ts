@@ -1,4 +1,5 @@
 import fileSystem from '@/lib/fs';
+import { iFileTabSchema } from '@/schemas/fileTab.schema';
 import { IDEContext, IFileTab } from '@/state/IDE.context';
 import EventEmitter from '@/utility/eventEmitter';
 import cloneDeep from 'lodash.clonedeep';
@@ -40,6 +41,13 @@ const useFileTab = () => {
           ...parsedSetting,
         };
       }
+
+      try {
+        parsedSetting.tab = iFileTabSchema.parse(parsedSetting.tab);
+      } catch (error) {
+        parsedSetting.tab = defaultSetting.tab;
+      }
+
       setFileTab(cloneDeep(parsedSetting.tab));
 
       await fileSystem.writeFile(
