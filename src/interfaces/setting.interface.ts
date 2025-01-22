@@ -6,4 +6,5 @@ export interface SettingInterface {
   editorMode: 'default' | 'vim';
   isExternalMessage?: boolean;
   theme?: 'light' | 'dark';
+  masterchain?: boolean;
 }

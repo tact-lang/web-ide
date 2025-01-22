@@ -39,7 +39,7 @@ export default function App({
                     "jest": "29.6.2",
                     "@ton/core": "^0.56.3",
                     "@ton/test-utils": "0.4.2",
-                    "@ton/sandbox": "^0.15.0"
+                    "@ton/sandbox": "^0.20.0"
                   }
                 }`,
             },

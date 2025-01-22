@@ -23,6 +23,7 @@ export function useSettingAction() {
     toggleAutoBuildAndDeploy,
     updateEditorMode,
     toggleExternalMessage,
+    toggleMasterChain,
   };
 
   async function init() {
@@ -108,6 +109,12 @@ export function useSettingAction() {
   function toggleExternalMessage(active: boolean = !setting.isExternalMessage) {
     updateStateByKey({
       isExternalMessage: active,
+    });
+  }
+
+  function toggleMasterChain(active: boolean = !setting.isExternalMessage) {
+    updateStateByKey({
+      masterchain: active,
     });
   }
 }

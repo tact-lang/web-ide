@@ -28,6 +28,7 @@ export function useProjectActions() {
   const { writeFiles, projectFiles } = useProject();
   const { getFile } = useFile();
   const isExternalMessage = getSettingStateByKey('isExternalMessage');
+  const isMasterChainEnabled = getSettingStateByKey('masterchain');
 
   return {
     compileFuncProgram,
@@ -152,6 +153,7 @@ export function useProjectActions() {
         options: {
           debug: isContractDebugEnabled(),
           external: !!isExternalMessage,
+          masterchain: !!isMasterChainEnabled,
         },
       },
       project: fs,
