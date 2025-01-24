@@ -1,7 +1,6 @@
 import { AppConfig } from '@/config/AppConfig';
 import { LogEntry } from '@/interfaces/log.interface';
 import EventEmitter from '@/utility/eventEmitter';
-import { WebLinkProvider } from '@/utility/terminal/xtermWebLinkProvider';
 import { FitAddon } from '@xterm/addon-fit';
 import { SearchAddon } from '@xterm/addon-search';
 import { Terminal } from '@xterm/xterm';
@@ -73,16 +72,6 @@ const useTerminal = ({ onLogClear, onLog }: UseTerminalProps) => {
       const searchAddon = new SearchAddon.SearchAddon();
       searchAddonRef.current = searchAddon;
       terminal.loadAddon(searchAddon);
-
-      const exitCodeRegex = /Exit Code:\s*\d+/;
-
-      terminal.registerLinkProvider(
-        new WebLinkProvider(terminal, exitCodeRegex, () => {}, {
-          hover: (_, text) => {
-            console.log('text', text);
-          },
-        }),
-      );
 
       terminal.open(terminalContainerRef.current);
       terminal.writeln(
