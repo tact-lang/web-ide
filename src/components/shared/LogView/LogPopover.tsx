@@ -56,14 +56,10 @@ export const LogPopover: FC<Props> = ({ terminal }) => {
   const onPopoverMouseLeave = () => {
     setIsHoveringPopover(false);
     setPopoverState((state) => ({ ...state, visible: false }));
-    // If we're already in a scheduled hide, it will close soon
-    // You could force-commit a hide here if you want immediate closure
   };
 
-  // Called when the mouse enters the popover
   const onPopoverMouseEnter = () => {
     setIsHoveringPopover(true);
-    // Cancel any hide timers that might be pending
     if (hideTimerRef.current) {
       window.clearTimeout(hideTimerRef.current);
       hideTimerRef.current = null;
@@ -104,6 +100,7 @@ export const LogPopover: FC<Props> = ({ terminal }) => {
   const { visible, text, x, y } = popoverState;
 
   if (!visible) return <></>;
+
   return (
     <div
       style={{
