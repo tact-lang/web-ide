@@ -1,4 +1,6 @@
 import { globalWorkspace } from '@/components/workspace/globalWorkspace';
+import { ANSI_UNDERLINE_CODES } from '@/constant/ansiCodes';
+import { ExitCodes } from '@/constant/exitCodes';
 import {
   ContractLanguage,
   NetworkEnvironment,
@@ -514,69 +516,58 @@ function terminalLogMessages(
           if (transaction.description.type === 'generic') {
             if (transaction.description.computePhase.type === 'vm') {
               const compute = transaction.description.computePhase;
-              if (compute.exitCode === 4294967282) compute.exitCode = -14;
-              messages.push(
-                `Transaction Executed: ${
-                  compute.success ? 'success' : 'error'
-                }, ` +
-                  `Exit Code: ${compute.exitCode}, Gas: ${shorten(
-                    compute.gasFees,
-                    'coins',
-                  )}`,
-              );
-              let foundError = false;
-              for (const contractInstance of contractInstances) {
-                if (
-                  transaction.inMessage.info.dest.equals(
-                    contractInstance.address,
-                  )
-                ) {
-                  if (compute.exitCode === -14) compute.exitCode = 13;
-                  const message =
-                    contractInstance.abi?.errors?.[compute.exitCode]?.message;
-                  if (message) {
-                    messages.push(`🔴 Error message: ${message}\n`);
-                    foundError = true;
+              let exitCode = compute.exitCode;
+              // 4294967282 as an unsigned 32-bit integer is equivalent to -14 when interpreted as a signed 32-bit integer.
+              if (exitCode === 4294967282) exitCode = -14;
+              const transactionStatus = compute.success ? 'success' : 'error';
+
+              // Collect error messages from contract instances
+              const contractErrorMessages = contractInstances
+                .filter((contractInstance) => {
+                  if (
+                    transaction.inMessage?.info.type === 'external-in' ||
+                    transaction.inMessage?.info.type === 'internal'
+                  ) {
+                    return transaction.inMessage.info.dest.equals(
+                      contractInstance.address,
+                    );
                   }
-                }
-              }
-              if (!foundError) {
-                const knownErrors: Record<number, { message: string }> = {
-                  [-14]: { message: `Out of gas error` },
-                  2: { message: `Stack undeflow` },
-                  3: { message: `Stack overflow` },
-                  4: { message: `Integer overflow` },
-                  5: { message: `Integer out of expected range` },
-                  6: { message: `Invalid opcode` },
-                  7: { message: `Type check error` },
-                  8: { message: `Cell overflow` },
-                  9: { message: `Cell underflow` },
-                  10: { message: `Dictionary error` },
-                  13: { message: `Out of gas error` },
-                  32: { message: `Method ID not found` },
-                  34: { message: `Action is invalid or not supported` },
-                  37: { message: `Not enough TON` },
-                  38: { message: `Not enough extra-currencies` },
-                  128: { message: `Null reference exception` },
-                  129: { message: `Invalid serialization prefix` },
-                  130: { message: `Invalid incoming message` },
-                  131: { message: `Constraints error` },
-                  132: { message: `Access denied` },
-                  133: { message: `Contract stopped` },
-                  134: { message: `Invalid argument` },
-                  135: { message: `Code of a contract was not found` },
-                  136: { message: `Invalid address` },
-                  137: {
-                    message: `Masterchain support is not enabled for this contract`,
-                  },
-                };
-                // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-                const message = knownErrors[compute.exitCode]?.message;
-                if (message) {
-                  messages.push(`Error message: ${message}`);
-                  foundError = true;
-                }
-              }
+                  return false;
+                })
+                .map(
+                  (contractInstance) =>
+                    contractInstance.abi?.errors?.[exitCode]?.message,
+                )
+                .filter((message) => message) // Remove undefined or null messages
+                .map((message) => `(${message})`);
+
+              // If no error messages from contractInstances, check ExitCodes
+              const generalErrorMessage =
+                contractErrorMessages.length === 0
+                  ? ExitCodes[exitCode]?.message
+                    ? [`(${ExitCodes[exitCode]?.message})`]
+                    : []
+                  : [];
+
+              const allErrorMessages = [
+                ...contractErrorMessages,
+                ...generalErrorMessage,
+              ];
+
+              const exitCodeMessage = Object.prototype.hasOwnProperty.call(
+                ExitCodes,
+                exitCode,
+              )
+                ? `${ANSI_UNDERLINE_CODES.enable}Exit Code: ${exitCode} ⓘ${ANSI_UNDERLINE_CODES.disable}`
+                : `Exit Code: ${exitCode}`;
+
+              const transactionMessage = (
+                `${transactionStatus === 'success' ? '🟢' : '🔴'} Transaction Executed: ${transactionStatus}, ` +
+                `${exitCodeMessage} ${allErrorMessages.join('\n')}, ` +
+                `Gas: ${shorten(compute.gasFees, 'coins')}`
+              ).trim();
+
+              messages.push(transactionMessage);
             }
           }
         }
