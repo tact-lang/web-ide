@@ -5,13 +5,12 @@ const eventEmitter = new EventEmitterDefault();
 
 export interface EventEmitterPayloads {
   LOG_CLEAR: undefined;
-  LOG: LogEntry;
+  LOG: LogEntry | string | Uint8Array;
   ON_SPLIT_DRAG_END: { position?: number };
   SAVE_FILE: undefined | { fileId: string; content: string };
   FORCE_UPDATE_FILE: string | { oldPath: string; newPath: string };
   FILE_SAVED: { filePath: string };
   FILE_RENAMED: { oldPath: string; newPath: string };
-  TEST_CASE_LOG: string;
   RELOAD_PROJECT_FILES: string;
   OPEN_PROJECT: string;
   PROJECT_MIGRATED: undefined;

@@ -64,3 +64,28 @@
     box-shadow: 1px 0 0 var(--text-color) inset !important;
   }
 }
+
+.popoverRoot {
+  position: absolute;
+  z-index: 9999;
+}
+.logPopover {
+  [class*='ant-popover-inner'] {
+    padding: 0;
+  }
+
+  .exitCodeHeading {
+    font-size: 1.3rem;
+    font-weight: 600;
+    opacity: 0.8;
+  }
+  .content {
+    padding: 1rem;
+    pointer-events: auto;
+    width: 400px;
+    max-width: 100%;
+  }
+  .readMore {
+    text-decoration: underline;
+  }
+}

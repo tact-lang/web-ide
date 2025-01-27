@@ -147,7 +147,7 @@ const TestCases: FC<Props> = ({ projectId }) => {
     await response.output.pipeTo(
       new WritableStream({
         write(data) {
-          EventEmitter.emit('TEST_CASE_LOG', data);
+          EventEmitter.emit('LOG', data);
         },
       }),
     );
