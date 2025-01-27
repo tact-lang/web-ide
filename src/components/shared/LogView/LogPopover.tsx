@@ -119,7 +119,19 @@ export const LogPopover: FC<Props> = ({ terminal }) => {
             onMouseLeave={onPopoverMouseLeave}
           >
             <h4 className={s.exitCodeHeading}>Exit Code: {text}</h4>
-            <Markdown>{ExitCodes[text]?.description}</Markdown>
+            <Markdown
+              components={{
+                a: ({ href, children, ...props }) => {
+                  return (
+                    <a href={href} target="_blank" rel="noreferrer" {...props}>
+                      {children}
+                    </a>
+                  );
+                },
+              }}
+            >
+              {ExitCodes[text]?.description}
+            </Markdown>
             <a
               href={`https://docs.tact-lang.org/book/exit-codes/#${text}`}
               target="_blank"
