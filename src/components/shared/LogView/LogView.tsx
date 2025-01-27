@@ -4,6 +4,7 @@ import '@xterm/xterm/css/xterm.css';
 import { FC, useCallback } from 'react';
 import useLogFilter from './hooks/useLogFilter';
 import useTerminal from './hooks/useTerminal';
+import { LogPopover } from './LogPopover';
 import s from './LogView.module.scss';
 import { COLOR_MAP } from './utils/constants';
 import { formatTimestamp } from './utils/formatTimestamp';
@@ -35,7 +36,10 @@ const LogView: FC<Props> = ({ filter }) => {
   useLogFilter(filter, printLog, searchAddonRef.current);
 
   return (
-    <div className={s.root} ref={terminalContainerRef} id="app-terminal" />
+    <>
+      <div className={s.root} ref={terminalContainerRef} id="app-terminal" />
+      <LogPopover terminal={terminalRef.current} />
+    </>
   );
 };
 
