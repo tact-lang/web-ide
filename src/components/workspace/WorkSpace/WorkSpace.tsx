@@ -25,6 +25,7 @@ import BuildProject from '../BuildProject';
 import Editor from '../Editor';
 import Tabs from '../Tabs';
 import TestCases from '../TestCases';
+import { TonContractVerifier } from '../TonContractVerifier';
 import WorkspaceSidebar from '../WorkspaceSidebar';
 import { WorkSpaceMenu } from '../WorkspaceSidebar/WorkspaceSidebar';
 import { globalWorkspace } from '../globalWorkspace';
@@ -226,13 +227,18 @@ const WorkSpace: FC = () => {
             />
           )}
           {activeMenu === 'test-cases' && (
-            <div className={s.testCaseArea}>
+            <div className={s.section}>
               <TestCases projectId={activeProject?.path as string} />
             </div>
           )}
           {activeMenu === 'misti' && (
-            <div className={s.testCaseArea}>
+            <div className={s.section}>
               <MistiStaticAnalyzer />
+            </div>
+          )}
+          {activeMenu === 'contract-verifier' && (
+            <div className={s.section}>
+              <TonContractVerifier />
             </div>
           )}
         </div>

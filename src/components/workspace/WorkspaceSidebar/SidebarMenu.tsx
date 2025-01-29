@@ -33,6 +33,11 @@ const menuItems: IMenuItem[] = [
     value: 'misti',
     icon: 'CodeScan',
   },
+  {
+    label: 'Contract Verifier',
+    value: 'contract-verifier',
+    icon: 'TonVerifier',
+  },
 ];
 
 interface Props {

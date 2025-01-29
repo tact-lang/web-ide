@@ -12,7 +12,8 @@ export type WorkSpaceMenu =
   | 'build'
   | 'test-cases'
   | 'setting'
-  | 'misti';
+  | 'misti'
+  | 'contract-verifier';
 
 interface Props {
   activeMenu: WorkSpaceMenu;
