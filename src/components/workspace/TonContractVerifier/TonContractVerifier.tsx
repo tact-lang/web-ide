@@ -27,7 +27,26 @@ const TonContractVerifier: FC = () => {
   return (
     <div className={s.root}>
       <h3 className={`section-heading`}>Contract Verifier</h3>
-      <Form form={form} className={`${s.form} app-form`} layout="vertical">
+      <Form
+        form={form}
+        className={`${s.form} app-form`}
+        layout="vertical"
+        requiredMark={false}
+      >
+        <Form.Item
+          label="Environment"
+          className={`${s.formItem} select-search-input-dark`}
+          name="environment"
+          rules={[{ required: true }]}
+        >
+          <Select
+            placeholder="Choose an environment"
+            options={[
+              { value: 'TESTNET', label: 'Testnet' },
+              { value: 'MAINNET', label: 'Mainnet' },
+            ]}
+          />
+        </Form.Item>
         <Form.Item
           name="contractFile"
           className={s.formItem}
