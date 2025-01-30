@@ -12,3 +12,4 @@ export { default as Rocket } from './Rocket';
 export { default as Setting } from './Setting';
 export { default as Telegram } from './Telegram';
 export { default as Test } from './Test';
+export { default as TonVerifier } from './TonVerifier';
