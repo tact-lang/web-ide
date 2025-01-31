@@ -1,5 +1,6 @@
 import { ExitCodes } from '@/constant/exitCodes';
 import { WebLinkProvider } from '@/utility/terminal/xtermWebLinkProvider';
+import { EXIT_CODE_ICON_PATTERN } from '@/utility/text';
 import { Terminal } from '@xterm/xterm';
 import { Popover } from 'antd';
 import { FC, useCallback, useEffect, useRef, useState } from 'react';
@@ -69,10 +70,8 @@ export const LogPopover: FC<Props> = ({ terminal }) => {
   const onInit = useCallback(() => {
     if (!terminal) return;
 
-    const exitCodeRegex = /Exit Code:\s*\d+\s*ⓘ/;
-
     terminal.registerLinkProvider(
-      new WebLinkProvider(terminal, exitCodeRegex, () => {}, {
+      new WebLinkProvider(terminal, EXIT_CODE_ICON_PATTERN, () => {}, {
         hover: (e, text) => {
           const rect = terminal.element?.getBoundingClientRect();
           const offsetX = e.clientX - (rect?.left ?? 0);
@@ -82,7 +81,7 @@ export const LogPopover: FC<Props> = ({ terminal }) => {
           showPopover({
             text: exitCode.replace(' ⓘ', ''),
             x: offsetX,
-            y: offsetY,
+            y: offsetY + 10,
           });
         },
         leave: () => {
@@ -111,6 +110,7 @@ export const LogPopover: FC<Props> = ({ terminal }) => {
       <Popover
         open={true}
         rootClassName={s.logPopover}
+        placement="topLeft"
         content={
           <div
             className={s.content}
