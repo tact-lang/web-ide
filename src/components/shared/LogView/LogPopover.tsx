@@ -46,7 +46,7 @@ export const LogPopover: FC<Props> = ({ terminal }) => {
     [],
   );
 
-  const hideTooltip = useCallback(() => {
+  const hidePopover = useCallback(() => {
     hideTimerRef.current = window.setTimeout(() => {
       if (!isHoveringPopover) {
         setPopoverState((state) => ({ ...state, visible: false }));
@@ -72,20 +72,41 @@ export const LogPopover: FC<Props> = ({ terminal }) => {
 
     terminal.registerLinkProvider(
       new WebLinkProvider(terminal, EXIT_CODE_ICON_PATTERN, () => {}, {
-        hover: (e, text) => {
-          const rect = terminal.element?.getBoundingClientRect();
-          const offsetX = e.clientX - (rect?.left ?? 0);
-          const offsetY = e.clientY - (rect?.top ?? 0);
+        hover: (_, text, location) => {
+          const terminalRect = terminal.element?.getBoundingClientRect();
+          if (!terminalRect) return;
+
+          // Access the private _renderer property to get precise character dimensions
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const renderer = (terminal as any)._core?._renderService?._renderer;
+          const dimensions = renderer?.value?.dimensions;
+          if (!dimensions) return;
+
+          const charWidth = dimensions.css.cell.width;
+          const charHeight = dimensions.css.cell.height;
+
+          const scrollOffset = terminal.buffer.active.viewportY;
+
+          let linkX = (location.start.x - 1) * charWidth;
+          const linkY = (location.start.y - 1 - scrollOffset) * charHeight;
+
+          const popoverWidth = 400;
+
+          // Ensure the popover does not overflow beyond the terminal's right edge
+          if (linkX + popoverWidth > terminalRect.width) {
+            linkX = terminalRect.width - popoverWidth - 10;
+          }
+
           const exitCode = text.split(': ')[1];
 
           showPopover({
             text: exitCode.replace(' ⓘ', ''),
-            x: offsetX,
-            y: offsetY + 10,
+            x: linkX + 5,
+            y: linkY + 25,
           });
         },
         leave: () => {
-          hideTooltip();
+          hidePopover();
         },
       }),
     );
@@ -111,6 +132,8 @@ export const LogPopover: FC<Props> = ({ terminal }) => {
         open={true}
         rootClassName={s.logPopover}
         placement="topLeft"
+        key={x + y}
+        arrow={false}
         content={
           <div
             className={s.content}
