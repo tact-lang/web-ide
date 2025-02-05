@@ -159,7 +159,7 @@ export const LogPopover: FC<Props> = ({ terminal }) => {
               {ExitCodes[exitCode]?.description}
             </Markdown>
             <a
-              href={`https://docs.tact-lang.org/book/exit-codes/#${text}`}
+              href={`https://docs.tact-lang.org/book/exit-codes/#${exitCode}`}
               target="_blank"
               rel="noreferrer"
               className={s.readMore}
