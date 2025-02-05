@@ -144,7 +144,6 @@ export const LogPopover: FC<Props> = ({ terminal }) => {
             onMouseEnter={onPopoverMouseEnter}
             onMouseLeave={onPopoverMouseLeave}
           >
-            <h4 className={s.exitCodeHeading}>Exit Code: {exitCode}</h4>
             <Markdown
               components={{
                 a: ({ href, children, ...props }) => {
