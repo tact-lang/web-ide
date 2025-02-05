@@ -15,6 +15,7 @@ export interface ILinkProviderOptions {
   hover?(event: MouseEvent, text: string, location: IViewportRange): void;
   leave?(event: MouseEvent, text: string): void;
   urlRegex?: RegExp;
+  validator?: (match: RegExpExecArray) => boolean;
 }
 
 export class WebLinkProvider implements ILinkProvider {
@@ -34,6 +35,7 @@ export class WebLinkProvider implements ILinkProvider {
       this._regex,
       this._terminal,
       this._handler,
+      this._options.validator ?? (() => true),
     );
     callback(this._addCallbacks(links));
   }
@@ -59,6 +61,7 @@ export class LinkComputer {
     regex: RegExp,
     terminal: Terminal,
     activate: (event: MouseEvent, uri: string) => void,
+    validator: (match: RegExpExecArray) => boolean = () => true,
   ): ILink[] {
     const rex = new RegExp(regex.source, (regex.flags || '') + 'g');
 
@@ -73,6 +76,10 @@ export class LinkComputer {
 
     while ((match = rex.exec(line))) {
       const text = match[0];
+
+      if (!validator(match)) {
+        continue;
+      }
 
       // map string positions back to buffer positions
       // values are 0-based right side excluding

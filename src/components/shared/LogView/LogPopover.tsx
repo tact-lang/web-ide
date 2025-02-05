@@ -1,6 +1,6 @@
 import { ExitCodes } from '@/constant/exitCodes';
 import { WebLinkProvider } from '@/utility/terminal/xtermWebLinkProvider';
-import { EXIT_CODE_ICON_PATTERN } from '@/utility/text';
+import { EXIT_CODE_PATTERN } from '@/utility/text';
 import { Terminal } from '@xterm/xterm';
 import { Popover } from 'antd';
 import { FC, useCallback, useEffect, useRef, useState } from 'react';
@@ -13,14 +13,14 @@ interface Props {
 
 interface IPopoverState {
   visible: boolean;
-  text: string;
+  exitCode: string | null;
   x: number;
   y: number;
 }
 
 const defaultState: IPopoverState = {
   visible: false,
-  text: '',
+  exitCode: null,
   x: 0,
   y: 0,
 };
@@ -31,16 +31,16 @@ export const LogPopover: FC<Props> = ({ terminal }) => {
   const hideTimerRef = useRef<number | null>(null);
 
   const showPopover = useCallback(
-    (opts: { text: string; x: number; y: number }) => {
+    ({ exitCode, x, y }: Omit<IPopoverState, 'visible'>) => {
       if (hideTimerRef.current) {
         window.clearTimeout(hideTimerRef.current);
         hideTimerRef.current = null;
       }
       setPopoverState({
         visible: true,
-        text: opts.text,
-        x: opts.x,
-        y: opts.y,
+        exitCode,
+        x,
+        y,
       });
     },
     [],
@@ -71,7 +71,7 @@ export const LogPopover: FC<Props> = ({ terminal }) => {
     if (!terminal) return;
 
     terminal.registerLinkProvider(
-      new WebLinkProvider(terminal, EXIT_CODE_ICON_PATTERN, () => {}, {
+      new WebLinkProvider(terminal, EXIT_CODE_PATTERN, () => {}, {
         hover: (_, text, location) => {
           const terminalRect = terminal.element?.getBoundingClientRect();
           if (!terminalRect) return;
@@ -100,13 +100,17 @@ export const LogPopover: FC<Props> = ({ terminal }) => {
           const exitCode = text.split(': ')[1];
 
           showPopover({
-            text: exitCode.replace(' ⓘ', ''),
+            exitCode,
             x: linkX + 5,
             y: linkY + 25,
           });
         },
         leave: () => {
           hidePopover();
+        },
+        validator(match) {
+          const code = match[1];
+          return ExitCodes[code] !== undefined;
         },
       }),
     );
@@ -116,9 +120,9 @@ export const LogPopover: FC<Props> = ({ terminal }) => {
     onInit();
   }, [terminal]);
 
-  const { visible, text, x, y } = popoverState;
+  const { visible, exitCode, x, y } = popoverState;
 
-  if (!visible) return <></>;
+  if (!visible || !exitCode) return <></>;
 
   return (
     <div
@@ -140,7 +144,7 @@ export const LogPopover: FC<Props> = ({ terminal }) => {
             onMouseEnter={onPopoverMouseEnter}
             onMouseLeave={onPopoverMouseLeave}
           >
-            <h4 className={s.exitCodeHeading}>Exit Code: {text}</h4>
+            <h4 className={s.exitCodeHeading}>Exit Code: {exitCode}</h4>
             <Markdown
               components={{
                 a: ({ href, children, ...props }) => {
@@ -152,7 +156,7 @@ export const LogPopover: FC<Props> = ({ terminal }) => {
                 },
               }}
             >
-              {ExitCodes[text]?.description}
+              {ExitCodes[exitCode]?.description}
             </Markdown>
             <a
               href={`https://docs.tact-lang.org/book/exit-codes/#${text}`}
