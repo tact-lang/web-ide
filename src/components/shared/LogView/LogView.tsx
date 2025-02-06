@@ -1,6 +1,7 @@
 import { Filter } from '@/components/workspace/BottomPanel/BottomPanel';
 import { ANSI_CODES } from '@/constant/ansiCodes';
 import { LogEntry } from '@/interfaces/log.interface';
+import { highLightExitCode } from '@/utility/text';
 import '@xterm/xterm/css/xterm.css';
 import { FC, useCallback } from 'react';
 import useLogFilter from './hooks/useLogFilter';
@@ -21,7 +22,7 @@ const LogView: FC<Props> = ({ filter }) => {
       terminalRef.current.write(data);
       return;
     }
-    const message = `${COLOR_MAP[data.type]}${data.text}${COLOR_MAP.reset} ${formatTimestamp(data.timestamp)}`;
+    const message = `${COLOR_MAP[data.type]}${highLightExitCode(data.text)}${COLOR_MAP.reset} ${formatTimestamp(data.timestamp)}`;
     if (data.text.startsWith(ANSI_CODES.clearLine)) {
       terminalRef.current.write(message);
     } else {

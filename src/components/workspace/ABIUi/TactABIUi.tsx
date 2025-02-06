@@ -1,4 +1,5 @@
 import AppIcon from '@/components/ui/icon';
+import { ExitCodes } from '@/constant/exitCodes';
 import { UserContract, useContractAction } from '@/hooks/contract.hooks';
 import { useLogActivity } from '@/hooks/logActivity.hooks';
 import { useProject } from '@/hooks/projectV2.hooks';
@@ -10,9 +11,10 @@ import {
   Tree,
 } from '@/interfaces/workspace.interface';
 import { parseInputs } from '@/utility/abi';
+import { EXIT_CODE_PATTERN } from '@/utility/text';
 import { isIncludesTypeCellOrSlice } from '@/utility/utils';
 import { MinusCircleOutlined } from '@ant-design/icons';
-import { Address, TupleItem } from '@ton/core';
+import { Address, Contract, TupleItem } from '@ton/core';
 import { SandboxContract } from '@ton/sandbox';
 import { Button, Form, Input, Popover, Select, Switch } from 'antd';
 import { Rule, RuleObject } from 'antd/es/form';
@@ -407,6 +409,20 @@ const TactABIUi: FC<TactABI> = ({
         return;
       }
       if (error instanceof Error) {
+        const match = error.message.match(EXIT_CODE_PATTERN);
+        if (match) {
+          const code = match[1];
+          const contractError = (contract as Contract).abi?.errors?.[+code];
+          // If it's a custom error code
+          if (contractError && !ExitCodes[code]) {
+            const modifiedLog = error.message.replace(
+              EXIT_CODE_PATTERN,
+              `exit_code: ${code} (${contractError.message})`,
+            );
+            createLog(modifiedLog, 'error');
+            return;
+          }
+        }
         createLog(error.message, 'error');
         return;
       }

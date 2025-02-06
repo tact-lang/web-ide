@@ -11,7 +11,6 @@ export const COLOR_MAP: Record<LogType | 'info' | 'grey' | 'reset', string> = {
 };
 
 export const TERMINAL_OPTIONS: ITerminalOptions = {
-  fontSize: 16.5,
   cursorBlink: false,
   cursorStyle: 'bar',
   disableStdin: true,

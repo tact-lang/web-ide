@@ -1,5 +1,4 @@
 import { globalWorkspace } from '@/components/workspace/globalWorkspace';
-import { ANSI_UNDERLINE_CODES } from '@/constant/ansiCodes';
 import { ExitCodes } from '@/constant/exitCodes';
 import {
   ContractLanguage,
@@ -554,17 +553,10 @@ function terminalLogMessages(
                 ...generalErrorMessage,
               ];
 
-              const exitCodeMessage = Object.prototype.hasOwnProperty.call(
-                ExitCodes,
-                exitCode,
-              )
-                ? `${ANSI_UNDERLINE_CODES.enable}Exit Code: ${exitCode} ⓘ${ANSI_UNDERLINE_CODES.disable}`
-                : `Exit Code: ${exitCode}`;
-
               const transactionMessage = (
-                `${transactionStatus === 'success' ? '🟢' : '🔴'} Transaction Executed: ${transactionStatus}, ` +
-                `${exitCodeMessage} ${allErrorMessages.join('\n')}, ` +
-                `Gas: ${shorten(compute.gasFees, 'coins')}`
+                `${transactionStatus === 'success' ? '🟢' : '🔴'} Transaction executed: ${transactionStatus}, ` +
+                `exit_code: ${exitCode} ${allErrorMessages.join('\n')}, ` +
+                `gas: ${shorten(compute.gasFees, 'coins')}`
               ).trim();
 
               messages.push(transactionMessage);

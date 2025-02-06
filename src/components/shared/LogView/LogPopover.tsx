@@ -1,5 +1,6 @@
 import { ExitCodes } from '@/constant/exitCodes';
 import { WebLinkProvider } from '@/utility/terminal/xtermWebLinkProvider';
+import { EXIT_CODE_PATTERN } from '@/utility/text';
 import { Terminal } from '@xterm/xterm';
 import { Popover } from 'antd';
 import { FC, useCallback, useEffect, useRef, useState } from 'react';
@@ -12,14 +13,14 @@ interface Props {
 
 interface IPopoverState {
   visible: boolean;
-  text: string;
+  exitCode: string | null;
   x: number;
   y: number;
 }
 
 const defaultState: IPopoverState = {
   visible: false,
-  text: '',
+  exitCode: null,
   x: 0,
   y: 0,
 };
@@ -30,22 +31,22 @@ export const LogPopover: FC<Props> = ({ terminal }) => {
   const hideTimerRef = useRef<number | null>(null);
 
   const showPopover = useCallback(
-    (opts: { text: string; x: number; y: number }) => {
+    ({ exitCode, x, y }: Omit<IPopoverState, 'visible'>) => {
       if (hideTimerRef.current) {
         window.clearTimeout(hideTimerRef.current);
         hideTimerRef.current = null;
       }
       setPopoverState({
         visible: true,
-        text: opts.text,
-        x: opts.x,
-        y: opts.y,
+        exitCode,
+        x,
+        y,
       });
     },
     [],
   );
 
-  const hideTooltip = useCallback(() => {
+  const hidePopover = useCallback(() => {
     hideTimerRef.current = window.setTimeout(() => {
       if (!isHoveringPopover) {
         setPopoverState((state) => ({ ...state, visible: false }));
@@ -69,24 +70,47 @@ export const LogPopover: FC<Props> = ({ terminal }) => {
   const onInit = useCallback(() => {
     if (!terminal) return;
 
-    const exitCodeRegex = /Exit Code:\s*\d+\s*ⓘ/;
-
     terminal.registerLinkProvider(
-      new WebLinkProvider(terminal, exitCodeRegex, () => {}, {
-        hover: (e, text) => {
-          const rect = terminal.element?.getBoundingClientRect();
-          const offsetX = e.clientX - (rect?.left ?? 0);
-          const offsetY = e.clientY - (rect?.top ?? 0);
+      new WebLinkProvider(terminal, EXIT_CODE_PATTERN, () => {}, {
+        hover: (_, text, location) => {
+          const terminalRect = terminal.element?.getBoundingClientRect();
+          if (!terminalRect) return;
+
+          // Access the private _renderer property to get precise character dimensions
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const renderer = (terminal as any)._core?._renderService?._renderer;
+          const dimensions = renderer?.value?.dimensions;
+          if (!dimensions) return;
+
+          const charWidth = dimensions.css.cell.width;
+          const charHeight = dimensions.css.cell.height;
+
+          const scrollOffset = terminal.buffer.active.viewportY;
+
+          let linkX = (location.start.x - 1) * charWidth;
+          const linkY = (location.start.y - 1 - scrollOffset) * charHeight;
+
+          const popoverWidth = 400;
+
+          // Ensure the popover does not overflow beyond the terminal's right edge
+          if (linkX + popoverWidth > terminalRect.width) {
+            linkX = terminalRect.width - popoverWidth - 10;
+          }
+
           const exitCode = text.split(': ')[1];
 
           showPopover({
-            text: exitCode.replace(' ⓘ', ''),
-            x: offsetX,
-            y: offsetY,
+            exitCode,
+            x: linkX + 5,
+            y: linkY + 25,
           });
         },
         leave: () => {
-          hideTooltip();
+          hidePopover();
+        },
+        validator(match) {
+          const code = match[1];
+          return ExitCodes[code] !== undefined;
         },
       }),
     );
@@ -96,9 +120,9 @@ export const LogPopover: FC<Props> = ({ terminal }) => {
     onInit();
   }, [terminal]);
 
-  const { visible, text, x, y } = popoverState;
+  const { visible, exitCode, x, y } = popoverState;
 
-  if (!visible) return <></>;
+  if (!visible || !exitCode) return <></>;
 
   return (
     <div
@@ -111,13 +135,15 @@ export const LogPopover: FC<Props> = ({ terminal }) => {
       <Popover
         open={true}
         rootClassName={s.logPopover}
+        placement="topLeft"
+        key={x + y}
+        arrow={false}
         content={
           <div
             className={s.content}
             onMouseEnter={onPopoverMouseEnter}
             onMouseLeave={onPopoverMouseLeave}
           >
-            <h4 className={s.exitCodeHeading}>Exit Code: {text}</h4>
             <Markdown
               components={{
                 a: ({ href, children, ...props }) => {
@@ -129,10 +155,10 @@ export const LogPopover: FC<Props> = ({ terminal }) => {
                 },
               }}
             >
-              {ExitCodes[text]?.description}
+              {ExitCodes[exitCode]?.description}
             </Markdown>
             <a
-              href={`https://docs.tact-lang.org/book/exit-codes/#${text}`}
+              href={`https://docs.tact-lang.org/book/exit-codes/#${exitCode}`}
               target="_blank"
               rel="noreferrer"
               className={s.readMore}
