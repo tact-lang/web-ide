@@ -1,5 +1,5 @@
 import { ThemeContext } from '@/components/shared/ThemeProvider';
-import { AppLogo, Tooltip } from '@/components/ui';
+import { Tooltip } from '@/components/ui';
 import AppIcon, { AppIconType } from '@/components/ui/icon';
 import { AppData } from '@/constant/AppData';
 import { useSettingAction } from '@/hooks/setting.hooks';
@@ -215,7 +215,6 @@ const WorkspaceSidebar: FC<Props> = ({ activeMenu, onMenuClicked }) => {
   return (
     <div className={s.container}>
       <div>
-        <AppLogo className={s.brandLogo} href="/" />
         {menuItems.map((menu, i) => {
           if (menu.private) {
             return;

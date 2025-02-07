@@ -4,7 +4,7 @@ import MistiStaticAnalyzer from '@/components/MistiStaticAnalyzer';
 import { ManageGit } from '@/components/git';
 import { DownloadProject } from '@/components/project';
 import { ProjectTemplate } from '@/components/template';
-import { NonProductionNotice } from '@/components/ui';
+import { AppLogo, NonProductionNotice } from '@/components/ui';
 import { AppConfig } from '@/config/AppConfig';
 import { useFileTab } from '@/hooks';
 import { useLogActivity } from '@/hooks/logActivity.hooks';
@@ -190,7 +190,10 @@ const WorkSpace: FC = () => {
         <div className={s.tree}>
           {isLoaded && activeMenu === 'code' && (
             <div className="onboarding-file-explorer">
-              <span className={s.heading}>Explorer</span>
+              <span className={s.heading}>
+                <AppLogo className={s.brandLogo} />
+                Explorer
+              </span>
               <ManageProject />
               {activeProject?.path && (
                 <div className={s.globalAction}>
