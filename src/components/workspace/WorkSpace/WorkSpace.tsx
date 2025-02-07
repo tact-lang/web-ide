@@ -23,11 +23,11 @@ import Split from 'react-split';
 import { useEffectOnce } from 'react-use';
 import BottomPanel from '../BottomPanel/BottomPanel';
 import BuildProject from '../BuildProject';
+import { ContractVerifier } from '../ContractVerifier';
 import Editor from '../Editor';
 import CodeDiffViewer from '../Editor/CodeDiffViewer';
 import Tabs from '../Tabs';
 import TestCases from '../TestCases';
-import { TonContractVerifier } from '../TonContractVerifier';
 import WorkspaceSidebar from '../WorkspaceSidebar';
 import { WorkSpaceMenu } from '../WorkspaceSidebar/WorkspaceSidebar';
 import { globalWorkspace } from '../globalWorkspace';
@@ -245,7 +245,7 @@ const WorkSpace: FC = () => {
           )}
           {activeMenu === 'contract-verifier' && (
             <div className={s.commonContainer}>
-              <TonContractVerifier />
+              <ContractVerifier />
             </div>
           )}
         </div>

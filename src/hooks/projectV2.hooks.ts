@@ -341,6 +341,13 @@ export const useProject = () => {
     )?.value;
   }
 
+  function getContractVerifierInputs() {
+    if (!activeProject) {
+      return undefined;
+    }
+    return activeProject.contractVerificationInputs;
+  }
+
   return {
     projects,
     projectFiles,
@@ -360,6 +367,7 @@ export const useProject = () => {
     updateProjectSetting,
     getABIInputValues,
     updateABIInputValues,
+    getContractVerifierInputs,
   };
 };
 

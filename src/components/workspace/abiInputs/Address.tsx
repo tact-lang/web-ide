@@ -4,6 +4,7 @@ import { Rule, RuleObject } from 'antd/es/form';
 
 interface Props {
   name?: string;
+  label?: string;
   placeholder?: string;
   className?: string;
   rules?: Rule[];
@@ -11,6 +12,7 @@ interface Props {
 
 const AddressInput = ({
   name = 'address',
+  label,
   placeholder = 'EQDPK...0nYxC',
   className = '',
   rules = [],
@@ -31,7 +33,12 @@ const AddressInput = ({
     }),
   ];
   return (
-    <Form.Item name={name} rules={fieldRules} className={className}>
+    <Form.Item
+      name={name}
+      label={label}
+      rules={fieldRules}
+      className={className}
+    >
       <Input placeholder={placeholder} />
     </Form.Item>
   );

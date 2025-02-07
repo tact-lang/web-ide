@@ -39,6 +39,13 @@ export interface ABIFormInputValues {
   type: 'Init' | 'Getter' | 'Setter';
 }
 
+export interface ContractVerificationInputs {
+  network: Exclude<NetworkEnvironment, 'SANDBOX'>;
+  contractFilePath: Tree['path'];
+  contractAddress: string;
+  isVerified?: boolean;
+}
+
 export interface CreateProjectParams {
   name: string;
   language: ContractLanguage;
@@ -83,6 +90,7 @@ export interface ProjectSetting {
   tab?: IFileTab;
   cellABI?: CellABI;
   abiFormInputValues?: ABIFormInputValues[];
+  contractVerificationInputs?: ContractVerificationInputs;
 }
 
 export interface ABIParameter {

@@ -12,6 +12,7 @@ const TonAuth: FC = () => {
     try {
       if (isConnected) {
         await tonConnector.disconnect();
+        setIsConnected(false);
         return;
       }
       await tonConnector.connectWallet();
