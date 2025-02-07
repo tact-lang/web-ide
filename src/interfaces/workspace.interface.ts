@@ -40,6 +40,13 @@ export interface ABIFormInputValues {
   type: 'Init' | 'Getter' | 'Setter';
 }
 
+export interface ContractVerificationInputs {
+  network: Exclude<NetworkEnvironment, 'SANDBOX'>;
+  contractFilePath: Tree['path'];
+  contractAddress: string;
+  isVerified?: boolean;
+}
+
 export interface CreateProjectParams {
   name: string;
   language: ContractLanguage;
@@ -91,6 +98,7 @@ export interface ProjectSetting {
     detectors: string[];
   };
   buildContractList?: Record<string, string[]>;
+  contractVerificationInputs?: ContractVerificationInputs;
 }
 
 export interface ABIParameter {
