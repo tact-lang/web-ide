@@ -27,6 +27,7 @@ import Editor from '../Editor';
 import CodeDiffViewer from '../Editor/CodeDiffViewer';
 import Tabs from '../Tabs';
 import TestCases from '../TestCases';
+import { TonContractVerifier } from '../TonContractVerifier';
 import WorkspaceSidebar from '../WorkspaceSidebar';
 import { WorkSpaceMenu } from '../WorkspaceSidebar/WorkspaceSidebar';
 import { globalWorkspace } from '../globalWorkspace';
@@ -240,6 +241,11 @@ const WorkSpace: FC = () => {
           {activeMenu === 'git' && (
             <div className={s.commonContainer}>
               <ManageGit />
+            </div>
+          )}
+          {activeMenu === 'contract-verifier' && (
+            <div className={s.commonContainer}>
+              <TonContractVerifier />
             </div>
           )}
         </div>
