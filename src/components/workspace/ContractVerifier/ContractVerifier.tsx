@@ -274,6 +274,8 @@ const TonContractVerifier: FC = () => {
         'blob',
       );
 
+      createLog('Submitting contract verification data to the backend...');
+
       const backend = contractVerifierBackend[network];
 
       const sourceRegistry = tonClient.open(
