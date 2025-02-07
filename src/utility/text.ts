@@ -14,3 +14,11 @@ export const highLightExitCode = (message: string) => {
   }
   return message;
 };
+
+export const stripSingleQuotes = (text: string) => {
+  if (text.startsWith("'") && text.endsWith("'")) {
+    // Remove the single quotes from start and end
+    text = text.slice(1, -1);
+  }
+  return text;
+};

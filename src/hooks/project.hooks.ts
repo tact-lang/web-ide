@@ -108,7 +108,7 @@ export function useProjectActions() {
       },
     ];
     await writeFiles(projectId, buildFiles, { overwrite: true });
-    return { contractBOC: (buildResult as SuccessResult).codeBoc };
+    return buildResult;
   }
 
   async function compileTactProgram(
