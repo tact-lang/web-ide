@@ -12,7 +12,7 @@ const prodConfig = merge(commonConfig, {
       new TerserPlugin({
         parallel: true,
         terserOptions: {
-          compress: true
+          compress: true,
         },
       }),
       new CssMinimizerPlugin(),

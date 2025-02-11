@@ -19,9 +19,7 @@ const devConfig = merge(commonConfig, {
     },
   },
 
-  plugins: [
-    new ReactRefreshWebpackPlugin(),
-  ],
+  plugins: [new ReactRefreshWebpackPlugin()],
 });
 
 export default devConfig;

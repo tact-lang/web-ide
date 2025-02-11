@@ -13,20 +13,20 @@ module.exports = {
     ecmaVersion: 2020,
     project: "./tsconfig.json",
     ecmaFeatures: {
-      "jsx": true
-    }
+      jsx: true,
+    },
   },
   settings: {
     react: {
-      version: "detect" 
-    }
+      version: "detect",
+    },
   },
   ignorePatterns: [
     "*.cjs",
     "!.lintstagedrc.js",
     ".lintstagedrc.js",
     "webpack.*.mjs",
-    "babel.config.js"
+    "babel.config.js",
   ],
   plugins: ["@typescript-eslint", "react", "prettier"],
   root: true,
@@ -110,6 +110,6 @@ module.exports = {
     "@typescript-eslint/require-await": "error",
     "@typescript-eslint/unified-signatures": "error",
     "react-hooks/exhaustive-deps": "off",
-    "react/prop-types": "off"
+    "react/prop-types": "off",
   },
 };
