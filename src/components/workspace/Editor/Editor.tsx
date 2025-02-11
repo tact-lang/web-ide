@@ -212,6 +212,10 @@ const Editor: FC<Props> = ({ className = '' }) => {
   }, [monacoRef.current]);
 
   useEffect(() => {
+    window.getMonacoEditorContent = () => {
+      return editorRef.current?.getValue() ?? '';
+    };
+    
     window.onbeforeunload = () => {
       // On page reload/exit, close web socket connection
       lspWebSocket?.close();

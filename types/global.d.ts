@@ -3,7 +3,7 @@ import { Contract } from '@ton/core';
 import type { TonCrypto } from '@ton/crypto';
 import { WebContainer } from '@webcontainer/api';
 
-export {};
+export { };
 
 declare global {
   interface Window {
@@ -14,5 +14,6 @@ declare global {
     webcontainerInstance: WebContainer | null | undefined;
     TonCore: TonCore;
     TonCrypto: TonCrypto;
+    getMonacoEditorContent: () => string;
   }
 }
