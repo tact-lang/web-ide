@@ -10,10 +10,11 @@ import {
   normalizeString,
 } from 'tests/utils';
 
-test('Clone code from shared link to local', async ({ page, context }) => {
-  // Grant clipboard permissions to browser context
-  await context.grantPermissions(['clipboard-read', 'clipboard-write']);
-
+test('Clone code from shared link to local', async ({ page, browserName }) => {
+  test.skip(
+    ['firefox', 'webkit'].includes(browserName),
+    'clipboard not working on theese browsers',
+  );
   // Generate share code
   const shareCode = `contract ${randomUUID()} with Deployable {\n\n\n}`;
   const url = `https://ide.ton.org/?code=${encodeBase64(shareCode)}&lang=tact`;

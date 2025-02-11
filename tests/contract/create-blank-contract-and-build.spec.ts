@@ -1,8 +1,6 @@
 import { expect, test } from '@playwright/test';
 import { randomUUID } from 'crypto';
-import { XTERM_LOGS_LOCATOR } from 'tests/locators';
 import {
-  getElementContent,
   isCodeEditorLoaded,
   logsContain,
   openBuildAndDeployTab,
@@ -34,8 +32,7 @@ test('Create Blank Contract in Web IDE then build', async ({ page }) => {
   await isCodeEditorLoaded(page);
   await openBuildAndDeployTab(page);
 
-  const getLogs = () => getElementContent(page, XTERM_LOGS_LOCATOR);
-  await logsContain(await getLogs(), [`Project '${projectName}' is opened`]);
+  await logsContain(page, [`Project '${projectName}' is opened`]);
 
   // Build contract
   await expect(page.getByRole('button', { name: 'Build' })).toBeVisible();
@@ -43,7 +40,7 @@ test('Create Blank Contract in Web IDE then build', async ({ page }) => {
   await page.waitForTimeout(2000);
 
   // Check build logs
-  await logsContain(await getLogs(), [
+  await logsContain(page, [
     /Message sent: Deploy, from [A-Za-z0-9._-]{1,10}, to [A-Za-z0-9._-]{1,10}, value 0\.05, not bounced/,
     /Transaction Executed: success, Exit Code: 0, Gas: 0.0028824/,
     /Message sent: DeployOk, from [A-Za-z0-9._-]{1,10}, to [A-Za-z0-9._-]{1,10}, value 0.0466392/,

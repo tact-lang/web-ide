@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { MONACO_LINES_LOCATOR, XTERM_LOGS_LOCATOR } from '../locators';
+import { MONACO_LINES_LOCATOR } from '../locators';
 import {
   getElementContent,
   isCodeEditorLoaded,
@@ -35,11 +35,7 @@ test('Web IDE build and deploy template', async ({ page }) => {
     normalizeString(templateContentValue || ''),
   );
 
-  const getLogs = () => getElementContent(page, XTERM_LOGS_LOCATOR);
-
-  await expect(await getLogs()).toContain(
-    `Project '${TEMPLATE_NAME}' is opened`,
-  );
+  await logsContain(page, [`Project '${TEMPLATE_NAME}' is opened`]);
 
   // Open Build and Deploy tab
   await openBuildAndDeployTab(page);
@@ -50,7 +46,7 @@ test('Web IDE build and deploy template', async ({ page }) => {
   await page.waitForTimeout(2000);
 
   // Validate build logs
-  await logsContain(await getLogs(), [
+  await logsContain(page, [
     'Message sent: Deploy, from EQAB..wSnT, to EQBK..v0_-, value 0.05, not bounced',
     'Message sent: DeployOk, from EQBK..v0_-, to EQAB..wSnT, value 0.0465792, not bounced',
     'Transaction Executed: success, Exit Code: 0, Gas: 0.0029424',
@@ -63,7 +59,7 @@ test('Web IDE build and deploy template', async ({ page }) => {
   await page.waitForTimeout(1500);
 
   // Validate redeploy logs
-  await logsContain(await getLogs(), [
+  await logsContain(page, [
     'Deploying contract ...',
     'Contract deployed on SANDBOX  Contract address: EQ',
   ]);
@@ -74,7 +70,7 @@ test('Web IDE build and deploy template', async ({ page }) => {
   await page.waitForTimeout(500);
 
   // Validate call logs
-  await logsContain(await getLogs(), [
+  await logsContain(page, [
     'Message sent: "increment", from EQAB..wSnT, to EQBK..v0_-, value 0.05',
     'Transaction Executed: success, Exit Code: 0, Gas: 0.0014712',
   ]);
@@ -85,5 +81,5 @@ test('Web IDE build and deploy template', async ({ page }) => {
   await page.waitForTimeout(500);
 
   // Validate call logs
-  await logsContain(await getLogs(), ['"method": "value"', '"value": "1"']);
+  await logsContain(page, ['"method": "value"', '"value": "1"']);
 });

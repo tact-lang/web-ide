@@ -6,6 +6,7 @@ import {
   MONACO_LINES_LOCATOR,
   PROJECT_DROPDOWN_LOCATOR,
   UNIT_TESTS_LOCATOR,
+  XTERM_LOGS_LOCATOR,
 } from './locators';
 
 export async function getElementContent(page: Page, selector: string) {
@@ -27,11 +28,14 @@ export async function getElementContent(page: Page, selector: string) {
 }
 
 export async function logsContain(
-  logs: string,
+  page: Page,
   expectedValues: string[] | RegExp[],
 ) {
   for (const expectedValue of expectedValues) {
-    await expect(logs).toMatch(expectedValue);
+    await expect(await page.locator(XTERM_LOGS_LOCATOR)).toContainText(
+      expectedValue,
+      { useInnerText: true },
+    );
   }
 }
 
@@ -60,9 +64,10 @@ export async function isCodeEditorLoaded(page: Page) {
   await expect(page.getByText('Loading...', { exact: true }), {
     message: 'Editor should be loaded',
   }).not.toBeVisible();
+
   await expect(codeBlock, {
     message: 'Editor should be visible',
-  }).toBeVisible();
+  }).toBeInViewport();
 }
 
 export enum ProjectType {

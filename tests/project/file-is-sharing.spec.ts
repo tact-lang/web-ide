@@ -10,10 +10,11 @@ import {
   ProjectType,
 } from 'tests/utils';
 
-test('Check file is sharing', async ({ page, context }) => {
-  // Grant clipboard permissions to browser context
-  await context.grantPermissions(['clipboard-read', 'clipboard-write']);
-
+test('Check file is sharing', async ({ page, browserName }) => {
+  test.skip(
+    ['firefox', 'webkit'].includes(browserName),
+    'clipboard not working on theese browsers',
+  );
   // Open Web IDE
   await page.goto('https://ide.ton.org/');
   const projectName = randomUUID();

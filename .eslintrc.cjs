@@ -1,5 +1,3 @@
-const { all } = require("axios");
-
 /* eslint-env node */
 module.exports = {
   extends: [

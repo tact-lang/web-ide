@@ -1,9 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { randomUUID } from 'crypto';
-import { XTERM_LOGS_LOCATOR } from 'tests/locators';
 import {
   createProject,
-  getElementContent,
   isCodeEditorLoaded,
   logsContain,
   openBuildAndDeployTab,
@@ -21,15 +19,14 @@ test('Create Counter contract and run Unit test', async ({ page }) => {
   await isCodeEditorLoaded(page);
   await openBuildAndDeployTab(page);
 
-  const getLogs = () => getElementContent(page, XTERM_LOGS_LOCATOR);
-  await logsContain(await getLogs(), [`Project '${projectName}' is opened`]);
+  await logsContain(page, [`Project '${projectName}' is opened`]);
 
   // Build contract
   await expect(page.getByRole('button', { name: 'Build' })).toBeVisible();
   await page.getByRole('button', { name: 'Build' }).click();
   await page.waitForTimeout(2000);
   // Check build logs
-  await logsContain(await getLogs(), [/Built Successfully/]);
+  await logsContain(page, [/Built Successfully/]);
 
   await openUnitTests(page);
   await page.waitForTimeout(1500); // TODO: Remove this timeout after fix #249
@@ -38,7 +35,7 @@ test('Create Counter contract and run Unit test', async ({ page }) => {
   await page.getByRole('button', { name: 'Run' }).click();
 
   await page.waitForTimeout(1500);
-  await logsContain(await getLogs(), [
+  await logsContain(page, [
     `Test Suites: 1 passed, 1 total`,
     `Tests:       2 passed, 2 total`,
     `Snapshots:   0 total`,
