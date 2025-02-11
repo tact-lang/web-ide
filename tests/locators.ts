@@ -21,6 +21,9 @@ export const UNIT_TESTS_LOCATOR =
 export const GIT_TAB_LOCATOR =
   '//div[contains(@class, "WorkspaceSidebar_action_")][4]';
 
+export const SWITCH_THEME_LOCATOR =
+  '(//div[contains(@class, "WorkspaceSidebar_action_")])[6]';
+
 export const DELETE_PROJECT_LOCATOR =
   '//div[contains(@class, "ManageProject_deleteProject")]';
 
