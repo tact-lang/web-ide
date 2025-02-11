@@ -13,7 +13,8 @@
     "format:check": "prettier --check --ignore-path .prettierignore --ignore-path .gitignore .",
     "format:fix": "prettier --write --ignore-path .prettierignore --ignore-path .gitignore .",
     "postinstall": "husky",
-    "commit": "git-cz"
+    "commit": "git-cz",
+    "test": "npx playwright test"
   },
   "config": {
     "commitizen": {
@@ -59,6 +60,7 @@
     "monaco-vim": "^0.4.1",
     "next": "13.0.7",
     "onigasm": "^2.2.5",
+    "playwright": "^1.50.1",
     "react": "18.2.0",
     "react-dnd": "^16.0.1",
     "react-dom": "18.2.0",
@@ -84,6 +86,7 @@
     "@commitlint/cli": "^19.5.0",
     "@commitlint/config-conventional": "^19.5.0",
     "@commitlint/types": "^19.5.0",
+    "@playwright/test": "^1.50.1",
     "@types/bn.js": "^5.1.1",
     "@types/jsonwebtoken": "^9.0.1",
     "@types/lodash.clonedeep": "^4.5.7",

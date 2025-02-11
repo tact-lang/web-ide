@@ -1,3 +1,5 @@
+const { all } = require("axios");
+
 /* eslint-env node */
 module.exports = {
   extends: [
@@ -17,6 +19,8 @@ module.exports = {
     "!.lintstagedrc.js",
     ".lintstagedrc.js",
     "next.config.js",
+    "playwright.config.ts",
+    "tests/*",
   ],
   plugins: ["@typescript-eslint"],
   root: true,
