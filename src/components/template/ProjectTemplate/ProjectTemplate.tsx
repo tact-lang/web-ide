@@ -1,13 +1,13 @@
 /* eslint-disable react/no-children-prop */
 import { NewProject } from '@/components/project';
+import { Link } from '@/components/shared';
 import { useTheme } from '@/components/shared/ThemeProvider';
 import AppIcon from '@/components/ui/icon';
 import { AppConfig } from '@/config/AppConfig';
 import { projectExamples } from '@/constant/projectExamples';
 import { App, Drawer, Skeleton } from 'antd';
 import axios from 'axios';
-import Link from 'next/link';
-import { FC, useEffect, useState } from 'react';
+import { FC, ReactNode, useEffect, useState } from 'react';
 import Markdown from 'react-markdown';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import {
@@ -28,6 +28,11 @@ function LinkRenderer({
       {children}
     </a>
   );
+}
+
+interface CodeProps {
+  children?: ReactNode;
+  className?: string;
 }
 
 const ProjectTemplate: FC = () => {
@@ -118,11 +123,11 @@ const ProjectTemplate: FC = () => {
       </div>
       <div className={s.credit}>
         Credits for the examples go to the{' '}
-        <Link href="https://github.com/talkol" target="_blank">
+        <Link to="https://github.com/talkol" target="_blank">
           Tal Kol
         </Link>
         {' for '}
-        <Link href="https://tact-by-example.org/all" target="_blank">
+        <Link to="https://tact-by-example.org/all" target="_blank">
           Tact by example
         </Link>
       </div>
@@ -163,7 +168,7 @@ const ProjectTemplate: FC = () => {
         <Markdown
           children={contractDetails.content}
           components={{
-            code(props) {
+            code(props: CodeProps) {
               const { children, className, ...rest } = props;
               const match = /language-(\w+)/.exec(className ?? '');
               return match ? (

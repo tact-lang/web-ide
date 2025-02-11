@@ -207,8 +207,6 @@ const Editor: FC<Props> = ({ className = '' }) => {
     if (!monacoRef.current) {
       return;
     }
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [monacoRef.current]);
 
   useEffect(() => {
