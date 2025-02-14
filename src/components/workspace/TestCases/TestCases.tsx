@@ -2,11 +2,16 @@
 import { useFile } from '@/hooks';
 import { useLogActivity } from '@/hooks/logActivity.hooks';
 import { useProjectActions } from '@/hooks/project.hooks';
+import { useProject } from '@/hooks/projectV2.hooks';
 import { useWorkspaceActions } from '@/hooks/workspace.hooks';
+import { useWebContainer } from '@/state/WebContainer.context';
 import { Analytics } from '@/utility/analytics';
 import EventEmitter from '@/utility/eventEmitter';
+import { isChromiumBased } from '@/utility/utils';
+import { LoadingOutlined } from '@ant-design/icons';
 import Path from '@isomorphic-git/lightning-fs/src/path';
-import { FC } from 'react';
+import { Spin } from 'antd';
+import { FC, useEffect } from 'react';
 import ExecuteFile from '../ExecuteFile';
 import s from './TestCases.module.scss';
 
@@ -20,6 +25,15 @@ const TestCases: FC<Props> = ({ projectId }) => {
   const { compileTsFile } = useWorkspaceActions();
   const { getFile } = useFile();
   const { compileFuncProgram } = useProjectActions();
+  const { activeProject } = useProject();
+
+  const {
+    webcontainer,
+    status: webcontainerStatus,
+    init: initializeWebcontainer,
+  } = useWebContainer();
+
+  const isLoading = webcontainerStatus && webcontainerStatus !== 'loaded';
 
   const executeTestCases = async (filePath: string) => {
     let testCaseCode = '';
@@ -129,20 +143,16 @@ const TestCases: FC<Props> = ({ projectId }) => {
   };
 
   const runIt = async (filePath: string, codeBase: string) => {
-    const _webcontainerInstance = window.webcontainerInstance;
     filePath = filePath.replace('.spec.ts', '.spec.js');
 
-    if (!_webcontainerInstance?.path) {
+    if (!webcontainer?.path) {
       return;
     }
     createLog('Running test cases...', 'info', true);
     const fileName = filePath.split('/').pop();
-    await _webcontainerInstance.fs.writeFile(fileName!, codeBase);
+    await webcontainer.fs.writeFile(fileName!, codeBase);
 
-    const response = await _webcontainerInstance.spawn('npx', [
-      'jest',
-      fileName!,
-    ]);
+    const response = await webcontainer.spawn('npx', ['jest', fileName!]);
 
     await response.output.pipeTo(
       new WritableStream({
@@ -151,20 +161,70 @@ const TestCases: FC<Props> = ({ projectId }) => {
         },
       }),
     );
-    Analytics.track('Execute Test Case', { platform: 'IDE', type: 'TON-func' });
+    Analytics.track('Execute Test Case', {
+      platform: 'IDE',
+      type: `TON-${activeProject?.language}`,
+    });
   };
+
+  const displayBrowserSupportWarning = () => {
+    if (isChromiumBased()) {
+      return <></>;
+    }
+    return (
+      <div className={s.note}>
+        <p>
+          ⚠️ <strong>Best supported on Chromium-based browsers.</strong>
+        </p>
+        <p>
+          Please use <strong>Google Chrome, Edge, or Brave</strong> for the best
+          experience.
+        </p>
+
+        <p>
+          See the full{' '}
+          <a
+            href="https://webcontainers.io/guides/browser-support"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            browser support guide
+          </a>
+        </p>
+      </div>
+    );
+  };
+
+  useEffect(() => {
+    if (webcontainer) return;
+    initializeWebcontainer();
+  }, []);
 
   return (
     <div className={s.root}>
+      <h3 className={`sidebar-section-title`}>Unit Test</h3>
+
       <ExecuteFile
         projectId={projectId}
         allowedFile={['spec.ts']}
         label={`Run`}
         description="Select .spec.ts file to run test cases"
+        disabled={webcontainerStatus !== 'loaded'}
         onClick={(e, data) => {
+          if (!webcontainer) {
+            createLog('Testing environment is not initialized');
+          }
+          if (isLoading) return;
           executeTestCases(data).catch(() => {});
         }}
       />
+      {isLoading && (
+        <div className={s.webcontainerStatus}>
+          <Spin indicator={<LoadingOutlined spin />} size="small" />
+          {webcontainerStatus}
+        </div>
+      )}
+      {displayBrowserSupportWarning()}
     </div>
   );
 };

@@ -258,6 +258,12 @@ export function isErrorWithCode(error: unknown): error is ErrorWithCode {
   return typeof error === 'object' && error !== null && 'code' in error;
 }
 
+export function isChromiumBased() {
+  return (
+    !!window.chrome && /Chrome|Chromium|Edg|Brave/i.test(navigator.userAgent)
+  );
+}
+
 interface MistiResultResponse {
   type: 'info' | 'success' | 'error' | 'warning';
   message: string;
