@@ -98,6 +98,15 @@ const BuildProject: FC<Props> = ({ projectId, contract, updateContract }) => {
     packageJson.dependencies['@tact-lang/compiler'],
     '^',
   );
+  const funcVersion = stripPrefix(
+    packageJson.dependencies['@ton-community/func-js'],
+    '^',
+  );
+
+  const compilerVersionInfo =
+    activeProject?.language === 'tact'
+      ? `- Tact version: ${tactVersion}`
+      : `- FunC version: ${funcVersion}`;
 
   const [deployForm] = useForm();
 
@@ -782,10 +791,7 @@ const BuildProject: FC<Props> = ({ projectId, contract, updateContract }) => {
                 ? '- Auto-build and deploy is enabled for Sandbox and can be changed in settings. <br />'
                 : ''
             }
-            ${
-              activeProject?.language === 'tact' &&
-              '<br />- Tact version: ' + tactVersion
-            }
+            ${compilerVersionInfo}
             `}
           allowedFile={['fc', 'tact']}
           onCompile={() => {
