@@ -1,15 +1,17 @@
+import { COLOR_MAP } from '@/constant/ansiCodes';
 import { useLogActivity } from '@/hooks/logActivity.hooks';
 import { useProject } from '@/hooks/projectV2.hooks';
 import { Tree } from '@/interfaces/workspace.interface';
 import fileSystem from '@/lib/fs';
 import { normalizeRelativePath } from '@/utility/path';
+import { mistiFormatResult } from '@/utility/utils';
 import Path from '@isomorphic-git/lightning-fs/src/path';
 import {
   BuiltInDetectors,
   DEFAULT_STDLIB_PATH_ELEMENTS,
+  MISTI_VERSION,
   Severity,
 } from '@nowarp/misti/dist';
-import { resultToString } from '@nowarp/misti/dist/cli';
 import { Driver } from '@nowarp/misti/dist/cli/driver';
 import { createVirtualFileSystem } from '@nowarp/misti/dist/vfs/createVirtualFileSystem';
 import stdLibFiles from '@tact-lang/compiler/dist/imports/stdlib';
@@ -84,8 +86,16 @@ const MistiStaticAnalyzer: FC = () => {
       );
 
       const result = await driver.execute();
-
-      createLog(resultToString(result, 'plain'), 'info');
+      const formattedResult = mistiFormatResult(result);
+      for (const log of formattedResult) {
+        // Replace Misti's default light yellow with a darker yellow to ensure better visibility across both dark and light themes.
+        log.message = log.message
+          .split('\x1b[33m')
+          .join(COLOR_MAP.warning)
+          .split('\x1b[0m')
+          .join(COLOR_MAP.reset);
+        createLog(log.message, log.type);
+      }
     } catch (error) {
       if (error instanceof Error) {
         createLog(error.message, 'error');
@@ -115,6 +125,8 @@ const MistiStaticAnalyzer: FC = () => {
           Check it out
         </a>
       </p>
+      <p>- Misti Version: {MISTI_VERSION.split('-')[0]}</p>
+
       <Form
         form={form}
         className={`${s.form} app-form`}

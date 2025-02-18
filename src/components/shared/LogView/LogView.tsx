@@ -1,5 +1,5 @@
 import { Filter } from '@/components/workspace/BottomPanel/BottomPanel';
-import { ANSI_CODES } from '@/constant/ansiCodes';
+import { ANSI_CODES, COLOR_MAP } from '@/constant/ansiCodes';
 import { LogEntry } from '@/interfaces/log.interface';
 import { highLightExitCode } from '@/utility/text';
 import '@xterm/xterm/css/xterm.css';
@@ -8,7 +8,6 @@ import useLogFilter from './hooks/useLogFilter';
 import useTerminal from './hooks/useTerminal';
 import { LogPopover } from './LogPopover';
 import s from './LogView.module.scss';
-import { COLOR_MAP } from './utils/constants';
 import { formatTimestamp } from './utils/formatTimestamp';
 
 interface Props {

@@ -1,11 +1,12 @@
 import { AppConfig } from '@/config/AppConfig';
+import { COLOR_MAP } from '@/constant/ansiCodes';
 import { LogEntry } from '@/interfaces/log.interface';
 import EventEmitter from '@/utility/eventEmitter';
 import { FitAddon } from '@xterm/addon-fit';
 import { SearchAddon } from '@xterm/addon-search';
 import { Terminal } from '@xterm/xterm';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { COLOR_MAP, TERMINAL_OPTIONS } from '../utils/constants';
+import { TERMINAL_OPTIONS } from '../utils/constants';
 
 interface UseTerminalProps {
   onLogClear: () => void;
