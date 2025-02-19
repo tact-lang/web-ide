@@ -25,6 +25,18 @@ const severityOptions = Object.keys(Severity)
     value: Severity[key as keyof typeof Severity],
   }));
 
+const unSupportedDetectors = [
+  'DivideBeforeMultiply',
+  'ReadOnlyVariables',
+  'UnboundLoop',
+];
+
+const supportedDetectors = Object.fromEntries(
+  Object.entries(BuiltInDetectors).filter(
+    ([key]) => !unSupportedDetectors.includes(key),
+  ),
+);
+
 interface FormValues {
   contractFile: string;
   severity: Severity;
@@ -181,7 +193,7 @@ const MistiStaticAnalyzer: FC = () => {
                     placeholder="Enabled detectors"
                     allowClear
                     treeCheckable={true}
-                    treeData={Object.keys(BuiltInDetectors).map((key) => ({
+                    treeData={Object.keys(supportedDetectors).map((key) => ({
                       label: key,
                       value: key,
                     }))}
@@ -204,9 +216,9 @@ const MistiStaticAnalyzer: FC = () => {
         <b>Note:</b> Soufflé-related analysis will not work as it cannot run in
         the browser. The following detectors will be disabled:
         <ul>
-          <li>DivideBeforeMultiply</li>
-          <li>ReadOnlyVariables</li>
-          <li>UnboundLoop</li>
+          {unSupportedDetectors.map((item) => (
+            <li key={item}>{item}</li>
+          ))}
         </ul>
       </div>
     </div>
