@@ -15,7 +15,7 @@ import { createVirtualFileSystem } from '@nowarp/misti/dist/vfs/createVirtualFil
 import stdLibFiles from '@tact-lang/compiler/dist/imports/stdlib';
 import { Button, Form, Select, Switch, TreeSelect } from 'antd';
 import { useForm } from 'antd/lib/form/Form';
-import { FC, useState } from 'react';
+import { FC, useEffect, useState } from 'react';
 import s from './MistiStaticAnalyzer.module.scss';
 
 const severityOptions = Object.keys(Severity)
@@ -26,15 +26,15 @@ const severityOptions = Object.keys(Severity)
   }));
 
 interface FormValues {
-  contractFile: string;
-  severity: Severity;
+  selectedPath: string;
+  minSeverity: Severity;
   allDetectors: boolean;
   detectors?: string[];
 }
 
 const MistiStaticAnalyzer: FC = () => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const { projectFiles, activeProject } = useProject();
+  const { projectFiles, activeProject, updateProjectSetting } = useProject();
   const { createLog } = useLogActivity();
 
   const [form] = useForm();
@@ -43,9 +43,20 @@ const MistiStaticAnalyzer: FC = () => {
     return f?.path.endsWith('.tact');
   });
 
+  const onFormValuesChange = (_: unknown, formValues: FormValues) => {
+    const {
+      allDetectors: _allDetectors,
+      detectors = [],
+      ...finalFormValues
+    } = formValues;
+
+    updateProjectSetting({ misti: { ...finalFormValues, detectors } });
+  };
+
   const run = async (formValues: FormValues) => {
     if (!activeProject?.path) return;
-    const { contractFile, severity, allDetectors, detectors } = formValues;
+    const { selectedPath, minSeverity, allDetectors, detectors } = formValues;
+
     try {
       const vfs = createVirtualFileSystem('/', {}, false);
       setIsAnalyzing(true);
@@ -70,12 +81,12 @@ const MistiStaticAnalyzer: FC = () => {
       }
 
       const driver = await Driver.create(
-        [normalizeRelativePath(contractFile, activeProject.path)],
+        [normalizeRelativePath(selectedPath, activeProject.path)],
         {
           allDetectors,
           fs: vfs,
           enabledDetectors: detectors,
-          minSeverity: severity,
+          minSeverity: minSeverity,
           listDetectors: false,
           souffleEnabled: false,
           tactStdlibPath: Path.resolve(...DEFAULT_STDLIB_PATH_ELEMENTS),
@@ -99,6 +110,15 @@ const MistiStaticAnalyzer: FC = () => {
       setIsAnalyzing(false);
     }
   };
+
+  useEffect(() => {
+    if (!activeProject?.misti) return;
+
+    const { misti } = activeProject;
+
+    form.setFieldsValue(misti);
+    form.setFieldValue('allDetectors', misti.detectors.length === 0);
+  }, [activeProject?.path]);
 
   return (
     <div className={s.root}>
@@ -124,11 +144,12 @@ const MistiStaticAnalyzer: FC = () => {
           severity: Severity.INFO,
           allDetectors: true,
         }}
+        onValuesChange={onFormValuesChange}
       >
         <Form.Item
-          name="contractFile"
+          name="selectedPath"
           className={s.formItem}
-          rules={[{ required: true }]}
+          rules={[{ required: true, message: 'Please select contract file' }]}
           label="Contract File"
         >
           <Select
@@ -154,8 +175,11 @@ const MistiStaticAnalyzer: FC = () => {
 
         <Form.Item
           className={s.formItem}
-          name="severity"
+          name="minSeverity"
           label="Minimum Severity Level"
+          rules={[
+            { required: true, message: 'Please select minimum severity level' },
+          ]}
         >
           <Select
             placeholder="Select Minimum Severity Level"
