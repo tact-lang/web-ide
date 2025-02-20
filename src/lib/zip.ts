@@ -112,7 +112,7 @@ class ZIP {
       // The reason for adding a slash (+ '/') at the end of the directory path is to explicitly mark it as a directory in the ZIP archive.
       await writer.add(
         relativePath(dirPath, rootPath) + '/',
-        new BlobReader(new Blob([])),
+        new BlobReader(new Blob([''])),
       );
       return;
     }
