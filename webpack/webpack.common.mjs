@@ -16,6 +16,12 @@ export default {
     filename: "js/[name].[contenthash].js",
     publicPath: "/",
   },
+  cache: {
+    type: "filesystem",
+    cacheDirectory: path.resolve(process.cwd(), ".webpack_cache"),
+    compression: "gzip",
+    maxAge: 7 * 24 * 60 * 60 * 1000, // Auto-clean cache older than 7 days
+  },
   resolve: {
     alias: {
       vscode: path.resolve(
@@ -46,7 +52,15 @@ export default {
           path.resolve("node_modules/monaco-editor"), // Transpile monaco-editor
           path.resolve("node_modules/@tact-lang/opcode"), // Transpile @tact-lang/opcode
         ],
-        use: ["babel-loader"],
+        use: [
+          {
+            loader: "babel-loader",
+            options: {
+              cacheDirectory: true,
+              cacheCompression: false,
+            },
+          },
+        ],
       },
       {
         test: /\.scss$/,
@@ -68,6 +82,7 @@ export default {
               modules: {
                 namedExport: false,
                 localIdentName: "[name]__[local]--[hash:base64:5]",
+                exportLocalsConvention: "as-is"
               },
             },
           },

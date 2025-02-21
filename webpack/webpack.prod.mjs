@@ -5,12 +5,13 @@ import commonConfig from "./webpack.common.mjs";
 
 const prodConfig = merge(commonConfig, {
   mode: "production",
-  devtool: "source-map",
+  devtool: false,
   optimization: {
     minimize: true,
     minimizer: [
       new TerserPlugin({
         parallel: true,
+        extractComments: "some",
         terserOptions: {
           compress: true,
         },

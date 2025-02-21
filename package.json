@@ -6,7 +6,7 @@
     "url": "https://github.com/rahulyadav-57/"
   },
   "scripts": {
-    "dev": "webpack serve --config webpack/webpack.dev.mjs --mode development  --hot",
+    "dev": "NODE_OPTIONS='--max-old-space-size=4096' webpack serve --config webpack/webpack.dev.mjs --mode development  --hot",
     "build": "webpack --config webpack/webpack.prod.mjs --mode production --progress",
     "serve": "http-server dist -p 3000",
     "lint": "eslint 'src/**/*.{ts,tsx}' ",
@@ -59,7 +59,6 @@
     "monaco-editor-textmate": "^4.0.0",
     "monaco-textmate": "^3.0.1",
     "monaco-vim": "^0.4.1",
-    "node-polyfill-webpack-plugin": "^4.1.0",
     "onigasm": "^2.2.5",
     "react": "18.2.0",
     "react-dnd": "^16.0.1",
@@ -104,6 +103,7 @@
     "css-loader": "^7.1.2",
     "css-minimizer-webpack-plugin": "^7.0.0",
     "cz-conventional-changelog": "^3.3.0",
+    "detect-port": "^2.1.0",
     "dotenv-webpack": "^8.1.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-prettier": "^5.2.3",
@@ -115,6 +115,7 @@
     "lint-staged": "^15.2.10",
     "mini-css-extract-plugin": "^2.9.2",
     "monaco-editor-webpack-plugin": "^7.1.0",
+    "node-polyfill-webpack-plugin": "^4.1.0",
     "prettier": "^3.3.3",
     "process": "^0.11.10",
     "react-refresh": "^0.16.0",
