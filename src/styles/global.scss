@@ -170,3 +170,39 @@ hr {
   font-weight: 500;
   margin-bottom: 1rem;
 }
+
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.hmr-status {
+  position: fixed;
+  bottom: 0.5rem;
+  right: 0.5rem;
+  z-index: 100000;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 2rem;
+  height: 2rem;
+  padding: 0.5rem;
+
+  background: var(--black-500);
+  color: var(--white);
+  border-radius: 50%;
+  font-size: 1rem;
+
+  pointer-events: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+
+  svg {
+    animation: rotate 1s linear infinite;
+  }
+}
