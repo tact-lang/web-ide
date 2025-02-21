@@ -748,6 +748,7 @@ const BuildProject: FC<Props> = ({ projectId, contract, updateContract }) => {
       <Form.Item
         label="Environment"
         className={`${s.formItem} select-search-input-dark`}
+        labelAlign="left"
       >
         <Select
           value={environment}
