@@ -11,10 +11,10 @@ const COLORS = {
 
 async function getAvailablePort() {
   const availablePort = await detectPort(DEFAULT_PORT);
-  
+
   if (availablePort !== DEFAULT_PORT) {
     console.log(
-      `${COLORS.yellow}⚠️ Port ${DEFAULT_PORT} is occupied. Using available port ${availablePort} instead.${COLORS.reset}`
+      `${COLORS.yellow}⚠️ Port ${DEFAULT_PORT} is occupied. Using available port ${availablePort} instead.${COLORS.reset}`,
     );
   }
 
@@ -48,11 +48,8 @@ const devConfig = async () => {
       removeEmptyChunks: false,
       splitChunks: false,
     },
-    plugins: [
-      new ReactRefreshWebpackPlugin(),
-    ],
+    plugins: [new ReactRefreshWebpackPlugin()],
   });
-}
-
+};
 
 export default devConfig;

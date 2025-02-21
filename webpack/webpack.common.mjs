@@ -82,7 +82,7 @@ export default {
               modules: {
                 namedExport: false,
                 localIdentName: "[name]__[local]--[hash:base64:5]",
-                exportLocalsConvention: "as-is"
+                exportLocalsConvention: "as-is",
               },
             },
           },
