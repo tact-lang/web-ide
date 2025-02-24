@@ -4,6 +4,7 @@ import {
   TactInputFields,
 } from '@/interfaces/workspace.interface';
 import { CompilerContext } from '@tact-lang/compiler/dist/context';
+import { parseAndEvalExpression } from '@tact-lang/compiler/dist/interpreter';
 import { getType } from '@tact-lang/compiler/dist/types/resolveDescriptors';
 
 import {
@@ -92,8 +93,7 @@ export class ABIParser {
         .filter(
           (item) =>
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            (item.message as any).type !== 'Deploy' &&
-            item.message.kind !== 'any',
+            (item.message as any).type !== 'Deploy',
         )
         .map((receiver) => {
           let argumentName: string;
@@ -103,10 +103,10 @@ export class ABIParser {
               argumentName = receiver.message.type;
               break;
             case 'text':
-              argumentName = receiver.message.text ?? '';
+              argumentName = receiver.message.text ?? 'String';
               break;
             case 'any':
-              argumentName = 'any';
+              argumentName = 'Slice';
               break;
             case 'empty':
               argumentName = 'empty';
@@ -115,6 +115,8 @@ export class ABIParser {
               argumentName = 'unknown';
               break;
           }
+
+          const nonDefaultArguments = ['String', 'Slice'];
 
           if (receiver.message.kind !== 'typed') {
             return {
@@ -130,7 +132,9 @@ export class ABIParser {
                   type: {
                     kind: 'simple',
                     type: receiver.message.kind,
-                    defaultValue: argumentName,
+                    defaultValue: nonDefaultArguments.includes(argumentName)
+                      ? null
+                      : argumentName,
                   },
                 },
               ],
@@ -318,6 +322,13 @@ export async function parseInputs(
           return value;
         case 'text':
           return value;
+        case 'any': {
+          const parsedExpression = parseAndEvalExpression(value as string);
+          if (parsedExpression.kind === 'ok') {
+            return parsedExpression.value;
+          }
+          throw new Error(parsedExpression.message);
+        }
         case 'empty':
           return null;
         default:

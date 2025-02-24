@@ -103,6 +103,10 @@ function FieldItem(
           {renderFilesForCell()}
         </Select>
       );
+    case 'any':
+      return (
+        <Input.TextArea className={s.sliceInput} placeholder={placeholder} />
+      );
     default:
       return (
         <Input
@@ -328,7 +332,7 @@ const TactABIUi: FC<TactABI> = ({
 
   const getItemHeading = (item: TactType) => {
     if (item.type?.kind === 'simple') {
-      if (item.type.type === 'text') {
+      if (item.type.type === 'text' && item.name !== 'String') {
         return `"${item.name}"`;
       }
     }
