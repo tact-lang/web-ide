@@ -30,6 +30,7 @@ import ContractInteraction from '../ContractInteraction';
 import ExecuteFile from '../ExecuteFile/ExecuteFile';
 import s from './BuildProject.module.scss';
 
+import { AppLogo } from '@/components/ui';
 import AppIcon from '@/components/ui/icon';
 import { useFile } from '@/hooks';
 import { useProject } from '@/hooks/projectV2.hooks';
@@ -740,7 +741,9 @@ const BuildProject: FC<Props> = ({ projectId, contract, updateContract }) => {
 
   return (
     <div className={`${s.root} onboarding-build-deploy`}>
-      <h3 className={`${s.heading} sidebar-section-title`}>Build & Deploy</h3>
+      <h3 className={`section-heading`}>
+        <AppLogo /> Build & Deploy
+      </h3>
       <iframe
         className={`${s.cellBuilderRef} cell-builder-ref`}
         ref={cellBuilderRef}

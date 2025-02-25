@@ -150,11 +150,13 @@ hr {
 
 .section-heading {
   color: var(--color-light);
-  text-align: center;
-  display: block;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   font-size: 0.875rem;
   font-weight: 500;
   padding: 0.5rem 0;
+  gap: 0.5rem;
 }
 
 .color-warn {
@@ -163,12 +165,4 @@ hr {
 
 .text-center {
   text-align: center;
-}
-.sidebar-section-title {
-  color: var(--color-light);
-  text-align: center;
-  display: block;
-  font-size: 0.875rem;
-  font-weight: 500;
-  margin-bottom: 1rem;
 }

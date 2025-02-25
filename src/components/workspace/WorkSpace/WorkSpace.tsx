@@ -4,7 +4,7 @@ import MistiStaticAnalyzer from '@/components/MistiStaticAnalyzer';
 import { ManageGit } from '@/components/git';
 import { DownloadProject } from '@/components/project';
 import { ProjectTemplate } from '@/components/template';
-import { NonProductionNotice } from '@/components/ui';
+import { AppLogo, NonProductionNotice } from '@/components/ui';
 import { AppConfig } from '@/config/AppConfig';
 import { useFileTab } from '@/hooks';
 import { useLogActivity } from '@/hooks/logActivity.hooks';
@@ -189,8 +189,11 @@ const WorkSpace: FC = () => {
       >
         <div className={s.tree}>
           {isLoaded && activeMenu === 'code' && (
-            <div className="onboarding-file-explorer">
-              <span className={s.heading}>Explorer</span>
+            <div className={s.commonContainer}>
+              <h3 className={`section-heading`}>
+                <AppLogo />
+                Explorer
+              </h3>
               <ManageProject />
               {activeProject?.path && (
                 <div className={s.globalAction}>
@@ -218,14 +221,16 @@ const WorkSpace: FC = () => {
             </div>
           )}
           {activeMenu === 'build' && globalWorkspace.sandboxBlockchain && (
-            <BuildProject
-              projectId={activeProject?.path as string}
-              onCodeCompile={(_codeBOC) => {}}
-              contract={contract}
-              updateContract={(contractInstance) => {
-                setContract(contractInstance);
-              }}
-            />
+            <div className={s.commonContainer}>
+              <BuildProject
+                projectId={activeProject?.path as string}
+                onCodeCompile={(_codeBOC) => {}}
+                contract={contract}
+                updateContract={(contractInstance) => {
+                  setContract(contractInstance);
+                }}
+              />
+            </div>
           )}
           {activeMenu === 'test-cases' && (
             <div className={s.commonContainer}>
