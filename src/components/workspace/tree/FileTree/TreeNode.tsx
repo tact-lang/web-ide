@@ -3,7 +3,9 @@ import { useLogActivity } from '@/hooks/logActivity.hooks';
 import { useProject } from '@/hooks/projectV2.hooks';
 import { Project, Tree } from '@/interfaces/workspace.interface';
 import EventEmitter from '@/utility/eventEmitter';
+import { relativePath } from '@/utility/filePath';
 import { encodeBase64, fileTypeFromFileName } from '@/utility/utils';
+import Path from '@isomorphic-git/lightning-fs/src/path';
 import { NodeModel } from '@minoru/react-dnd-treeview';
 import { App } from 'antd';
 import cn from 'clsx';
@@ -31,7 +33,8 @@ const TreeNode: FC<Props> = ({ node, depth, isOpen, onToggle }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [newItemAdd, setNewItemAdd] = useState<Tree['type'] | ''>('');
 
-  const { deleteProjectFile, renameProjectFile, newFileFolder } = useProject();
+  const { deleteProjectFile, renameProjectFile, newFileFolder, activeProject } =
+    useProject();
   const { open: openTab } = useFileTab();
   const { createLog } = useLogActivity();
   const { getFile } = useFile();
@@ -78,10 +81,13 @@ const TreeNode: FC<Props> = ({ node, depth, isOpen, onToggle }) => {
   };
 
   const commitItemCreation = async (name: string) => {
-    if (!newItemAdd) return;
-    const path = `${node.data?.path}/${name}`;
+    if (!newItemAdd || !node.data || !activeProject?.path) return;
+
+    const absolutePath = Path.join(node.data.path, name);
+    const relativeFilePath = relativePath(absolutePath, activeProject.path);
+
     try {
-      await newFileFolder(path, newItemAdd);
+      await newFileFolder(relativeFilePath, newItemAdd);
       reset();
     } catch (error) {
       createLog((error as Error).message, 'error');

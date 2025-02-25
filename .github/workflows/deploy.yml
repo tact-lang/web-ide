@@ -6,13 +6,18 @@ on:
       - main
       - canary
       - staging
+      - td-nature
+      - td-book
+      - td-art
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    environment: "${{ github.ref == 'refs/heads/main' && 'production' || github.ref == 'refs/heads/canary' && 'canary' || github.ref == 'refs/heads/staging' && 'staging' || startsWith(github.ref, 'refs/heads/td-') && 'testing' || 'unknown' }}"
     env:
-      APP_ENV: ${{ github.ref == 'refs/heads/main' && 'production' || github.ref == 'refs/heads/canary' && 'canary' || github.ref == 'refs/heads/staging' && 'staging' || 'unknown' }}
-      APP_DOMAIN: ${{ github.ref == 'refs/heads/staging' && vars.APP_DOMAIN_STAGING || vars.APP_DOMAIN }}
+      JOB_ENV: "${{ github.ref == 'refs/heads/main' && 'production' || github.ref == 'refs/heads/canary' && 'canary' || github.ref == 'refs/heads/staging' && 'staging' || startsWith(github.ref, 'refs/heads/td-') && 'testing' || 'unknown' }}"
+      APP_ENV: "${{ github.ref == 'refs/heads/main' && 'production' || github.ref == 'refs/heads/canary' && 'canary' || github.ref == 'refs/heads/staging' && 'staging' || startsWith(github.ref, 'refs/heads/td-') && format('{0}{1}', 'testing-', github.ref_name) || 'unknown' }}"
+      APP_DOMAIN: "${{ startsWith(github.ref, 'refs/heads/td-') && format('{0}{1}', github.ref_name, vars.APP_DOMAIN_TESTING) || github.ref == 'refs/heads/staging' && vars.APP_DOMAIN_STAGING || vars.APP_DOMAIN }}"
 
     permissions:
       packages: write
@@ -64,7 +69,7 @@ jobs:
           build-args: |
             sha=${{ github.sha }}
             sha_short=${{ env.GITHUB_SHA_SHORT }}
-            app_env=${{ vars.APP_ENV }}
+            app_env=${{ env.APP_ENV }}
             NEXT_PUBLIC_PROXY_KEY=${{ secrets.NEXT_PUBLIC_PROXY_KEY }}
             NEXT_PUBLIC_MIXPANEL_TOKEN=${{ secrets.NEXT_PUBLIC_MIXPANEL_TOKEN }}
             NEXT_PUBLIC_ANALYTICS_ENABLED=${{ secrets.NEXT_PUBLIC_ANALYTICS_ENABLED }}
@@ -74,25 +79,25 @@ jobs:
 
       - name: Create namespace
         run: |
-          kubectl create ns ${{ vars.APP_NAME }}-${{ env.APP_ENV }} || echo "Namespace $EKS_NAMESPACE already exists"
+          kubectl create ns ${{ vars.APP_NAME }}-${{ env.APP_ENV }} || echo "Namespace already exists"
 
       - name: Deploy ${{ vars.APP_NAME }} to Kubernetes
         run: |
           helm upgrade --install ${{ vars.APP_NAME }} ./helm/app \
           --namespace ${{ vars.APP_NAME }}-${{ env.APP_ENV }} \
           --values ./helm/app/values.yaml \
-          --values ./helm/app/values-${{ env.APP_ENV }}.yaml \
+          --values ./helm/app/values-${{ env.JOB_ENV }}.yaml \
           --set imageRepo="ghcr.io/${{ steps.lower-repo.outputs.repository }}" \
           --set imageTag="${{ env.GITHUB_SHA_SHORT }}" \
           --set host=${{ env.APP_DOMAIN }} \
           --set appName=${{ vars.APP_NAME }} \
-          --set ghcrSecret=${{ secrets.GHCR_SECRET  }}
+          --set ghcrSecret=${{ secrets.GHCR_SECRET }}
 
       - name: Verify deployment
         run: |
-          kubectl -n ${{ vars.APP_NAME }}-${{ env.APP_ENV }} rollout status deployment/${{ vars.APP_NAME }}-${{ env.APP_ENV }}
+          kubectl -n ${{ vars.APP_NAME }}-${{ env.APP_ENV }} rollout status deployment/${{ vars.APP_NAME }}-${{ env.JOB_ENV }}
 
-      - name: Telegram Notify
+      - name: Telegram Notify (Success)
         uses: appleboy/telegram-action@v1.0.0
         if: success() && contains('${{ vars.ENABLE_DEPLOY_BOT }}', 1)
         with:
@@ -103,10 +108,10 @@ jobs:
             🚂 The application from repository [${{ steps.lower-repo.outputs.repository }}](https://github.com/${{ steps.lower-repo.outputs.repository }}) has been successfully deployed by [${{ github.actor }}](https://github.com/users/${{ github.actor }}) on ${{ env.APP_ENV }}.
 
             🏗️ [GitHub Actions Build](https://github.com/${{ steps.lower-repo.outputs.repository }}/actions/runs/${{ github.run_id }})
-            🐳 [Image](https://ghcr.io/${{ steps.lower-repo.outputs.repository }}:${{ env.GITHUB_SHA_SHORT }}
+            🐳 [Image](https://ghcr.io/${{ steps.lower-repo.outputs.repository }}:${{ env.GITHUB_SHA_SHORT }})
             🔗 [Link](https://${{ env.APP_DOMAIN }})
 
-      - name: Telegram Notify
+      - name: Telegram Notify (Failure)
         uses: appleboy/telegram-action@v1.0.0
         if: failure()
         with:
@@ -114,13 +119,8 @@ jobs:
           token: ${{ secrets.TELEGRAM_DEPLOY_TOKEN }}
           format: markdown
           message: |
-            🚨Deploy of the application from repository [${{ steps.lower-repo.outputs.repository }}](https://github.com/${{ steps.lower-repo.outputs.repository }}) on ${{ env.APP_ENV }} has been failed.
+            🚨 Deploy of the application from repository [${{ steps.lower-repo.outputs.repository }}](https://github.com/${{ steps.lower-repo.outputs.repository }}) on ${{ env.APP_ENV }} has failed.
 
             🏗️ [GitHub Actions Build](https://github.com/${{ steps.lower-repo.outputs.repository }}/actions/runs/${{ github.run_id }})
-            🐳 [Image](https://ghcr.io/${{ steps.lower-repo.outputs.repository }}:${{ env.GITHUB_SHA_SHORT }}
+            🐳 [Image](https://ghcr.io/${{ steps.lower-repo.outputs.repository }}:${{ env.GITHUB_SHA_SHORT }})
             🔗 [Link](https://${{ env.APP_DOMAIN }})
-
-
-
-
-

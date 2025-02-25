@@ -1,4 +1,5 @@
 import { IFileTab } from '@/state/IDE.context';
+import { Severity } from '@nowarp/misti/dist';
 import { ABITypeRef } from '@ton/core';
 import { Maybe } from '@ton/core/dist/utils/maybe';
 import { RcFile } from 'antd/es/upload';
@@ -83,6 +84,11 @@ export interface ProjectSetting {
   tab?: IFileTab;
   cellABI?: CellABI;
   abiFormInputValues?: ABIFormInputValues[];
+  misti?: {
+    selectedPath?: string;
+    minSeverity: Severity;
+    detectors: string[];
+  };
 }
 
 export interface ABIParameter {
