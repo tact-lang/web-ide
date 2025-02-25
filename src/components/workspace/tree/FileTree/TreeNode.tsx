@@ -26,7 +26,7 @@ export interface TreeNodeData {
 
 const TreeNode: FC<Props> = ({ node, depth, isOpen, onToggle }) => {
   const { droppable } = node;
-  const indent = (depth + 1) * 15;
+  const indent = depth * 15;
 
   const [isEditing, setIsEditing] = useState(false);
   const [newItemAdd, setNewItemAdd] = useState<Tree['type'] | ''>('');

@@ -189,11 +189,11 @@ const WorkSpace: FC = () => {
       >
         <div className={s.tree}>
           {isLoaded && activeMenu === 'code' && (
-            <div className="onboarding-file-explorer">
-              <span className={s.heading}>
-                <AppLogo className={s.brandLogo} />
+            <div className={s.commonContainer}>
+              <h3 className={`section-heading`}>
+                <AppLogo />
                 Explorer
-              </span>
+              </h3>
               <ManageProject />
               {activeProject?.path && (
                 <div className={s.globalAction}>
@@ -221,14 +221,16 @@ const WorkSpace: FC = () => {
             </div>
           )}
           {activeMenu === 'build' && globalWorkspace.sandboxBlockchain && (
-            <BuildProject
-              projectId={activeProject?.path as string}
-              onCodeCompile={(_codeBOC) => {}}
-              contract={contract}
-              updateContract={(contractInstance) => {
-                setContract(contractInstance);
-              }}
-            />
+            <div className={s.commonContainer}>
+              <BuildProject
+                projectId={activeProject?.path as string}
+                onCodeCompile={(_codeBOC) => {}}
+                contract={contract}
+                updateContract={(contractInstance) => {
+                  setContract(contractInstance);
+                }}
+              />
+            </div>
           )}
           {activeMenu === 'test-cases' && (
             <div className={s.commonContainer}>
