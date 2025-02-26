@@ -1,3 +1,4 @@
+import { Tooltip } from '@/components/ui';
 import AppIcon from '@/components/ui/icon';
 import { ExitCodes } from '@/constant/exitCodes';
 import { UserContract, useContractAction } from '@/hooks/contract.hooks';
@@ -16,12 +17,19 @@ import { isIncludesTypeCellOrSlice } from '@/utility/utils';
 import { MinusCircleOutlined } from '@ant-design/icons';
 import { Address, Contract, TupleItem } from '@ton/core';
 import { SandboxContract } from '@ton/sandbox';
-import { Button, Form, Input, Popover, Select, Switch } from 'antd';
+import { Button, Form, Input, Popover, Radio, Select, Switch } from 'antd';
 import { Rule, RuleObject } from 'antd/es/form';
 import { useForm } from 'antd/lib/form/Form';
 import { FC, Fragment, useEffect, useState } from 'react';
 import { ABIUiProps } from './ABIUi';
 import s from './ABIUi.module.scss';
+
+const comptimeSliceDescriptions: Record<'slice' | 'rawSlice', string> = {
+  slice:
+    'A compile-time function that embeds a base64-encoded BoC (bocBase64) as a Slice into the contract.',
+  rawSlice:
+    'A compile-time function that converts hex String with hex-encoded and optionally bit-padded contents as a Slice and embeds it into the contract.',
+};
 
 function getValidtionRule(field: TactABIField) {
   let rules: Rule[] = [];
@@ -102,6 +110,10 @@ function FieldItem(
         <Select placeholder="Select a TS file" allowClear>
           {renderFilesForCell()}
         </Select>
+      );
+    case 'any':
+      return (
+        <Input.TextArea className={s.sliceInput} placeholder={placeholder} />
       );
     default:
       return (
@@ -269,8 +281,41 @@ export default cell;`}
     );
   };
 
+  const comptimeSliceInfo = (type: keyof typeof comptimeSliceDescriptions) => {
+    return (
+      <>
+        {comptimeSliceDescriptions[type]}{' '}
+        <a
+          href={`https://docs.tact-lang.org/ref/core-comptime/#${type}`}
+          target="_blank"
+          rel="noreferrer"
+        >
+          Learn more
+        </a>
+      </>
+    );
+  };
+
   return (
     <>
+      {fieldKind === 'simple' && field.type.type === 'any' && (
+        <Form.Item
+          key={`${name.join('.')}-prefix`}
+          name={[...name, 'sliceType']}
+          rules={[{ required: true, message: 'Please select slice type' }]}
+          className={s.formItemABI}
+          initialValue="slice"
+        >
+          <Radio.Group>
+            {(['slice', 'rawSlice'] as const).map((type) => (
+              <Tooltip key={type} title={comptimeSliceInfo(type)}>
+                <Radio value={type}>{type}</Radio>
+              </Tooltip>
+            ))}
+          </Radio.Group>
+        </Form.Item>
+      )}
+
       <Form.Item
         key={name.join('.')}
         label={field.name}
@@ -328,7 +373,7 @@ const TactABIUi: FC<TactABI> = ({
 
   const getItemHeading = (item: TactType) => {
     if (item.type?.kind === 'simple') {
-      if (item.type.type === 'text') {
+      if (item.type.type === 'text' && item.name !== 'String') {
         return `"${item.name}"`;
       }
     }
@@ -446,7 +491,7 @@ const TactABIUi: FC<TactABI> = ({
         className={`${s.form} ${s.nestedForm} app-form`}
         layout="vertical"
         onFinish={(values) => {
-          onSubmit(values, abiType.name).catch(() => {});
+          onSubmit(values, abiType.name);
         }}
       >
         <h4 className={s.abiHeading}>{getItemHeading(abiType)}:</h4>
