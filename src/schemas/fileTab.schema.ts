@@ -4,7 +4,7 @@ const iTabItemsSchema = z.object({
   name: z.string(),
   path: z.string(),
   type: z.union([z.literal('default'), z.literal('git')]).default('default'),
-  isDirty: z.boolean(),
+  isDirty: z.boolean().optional(),
 });
 
 const activeTabSchema = z.preprocess(

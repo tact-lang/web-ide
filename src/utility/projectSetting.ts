@@ -42,7 +42,6 @@ export async function updateProjectTabSetting(
           {
             name: defaultFilePath.split('/').pop() ?? defaultFilePath,
             path: defaultFilePath,
-            isDirty: false,
             type: 'default',
           },
         ],

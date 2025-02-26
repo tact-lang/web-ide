@@ -4,7 +4,6 @@ import {
   DEFAULT_PROJECT_SETTING,
   updateProjectTabSetting,
 } from '@/utility/projectSetting';
-import cloneDeep from 'lodash.clonedeep';
 import { useContext } from 'react';
 
 const useFileTab = () => {
@@ -31,7 +30,7 @@ const useFileTab = () => {
         }),
       );
     } else {
-      const newTab = { name, path, isDirty: false, type };
+      const newTab = { name, path, type };
       const updatedTab = {
         ...fileTab,
         items: [...fileTab.items, newTab],
@@ -88,31 +87,11 @@ const useFileTab = () => {
     EventEmitter.emit('FORCE_UPDATE_FILE', newPath);
   };
 
-  const updateFileDirty = async (filePath: string, isDirty: boolean) => {
-    const updatedItems = cloneDeep(fileTab).items.map((item) => {
-      if (item.path === filePath) {
-        return { ...item, isDirty: isDirty };
-      }
-      return item;
-    });
-
-    const updatedTab = { ...fileTab, items: updatedItems };
-    updateTabs(
-      await updateProjectTabSetting(activeProject?.path as string, updatedTab),
-    );
-  };
-
-  const hasDirtyFiles = () => {
-    return fileTab.items.some((item) => item.isDirty);
-  };
-
   return {
     fileTab,
     open,
     close,
     rename,
-    updateFileDirty,
-    hasDirtyFiles,
   };
 };
 
