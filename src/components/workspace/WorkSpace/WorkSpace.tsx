@@ -10,7 +10,7 @@ import { useFileTab } from '@/hooks';
 import { useLogActivity } from '@/hooks/logActivity.hooks';
 import { useProject } from '@/hooks/projectV2.hooks';
 import { useSettingAction } from '@/hooks/setting.hooks';
-import { Project, Tree } from '@/interfaces/workspace.interface';
+import { Project } from '@/interfaces/workspace.interface';
 import { Analytics } from '@/utility/analytics';
 import EventEmitter from '@/utility/eventEmitter';
 import * as TonCore from '@ton/core';
@@ -48,21 +48,11 @@ const WorkSpace: FC = () => {
   const splitVerticalRef = useRef<SplitInstance | null>(null);
 
   const { tab } = router.query;
-  const { activeProject, setActiveProject, loadProjectFiles, newFileFolder } =
-    useProject();
+  const { activeProject, setActiveProject, loadProjectFiles } = useProject();
 
   const { fileTab } = useFileTab();
 
   const { init: initGlobalSetting } = useSettingAction();
-
-  const commitItemCreation = async (type: Tree['type'], name: string) => {
-    if (!name) return;
-    try {
-      await newFileFolder(name, type);
-    } catch (error) {
-      createLog((error as Error).message, 'error');
-    }
-  };
 
   const createSandbox = async (force: boolean = false) => {
     if (globalWorkspace.sandboxBlockchain && !force) {
@@ -200,10 +190,13 @@ const WorkSpace: FC = () => {
                       className={s.visible}
                       allowedActions={['NewFile', 'NewFolder']}
                       onNewFile={() => {
-                        commitItemCreation('file', 'new file');
+                        EventEmitter.emit('CREATE_ROOT_FILE_OR_FOLDER', 'file');
                       }}
                       onNewDirectory={() => {
-                        commitItemCreation('directory', 'new folder');
+                        EventEmitter.emit(
+                          'CREATE_ROOT_FILE_OR_FOLDER',
+                          'directory',
+                        );
                       }}
                     />
                     <DownloadProject
