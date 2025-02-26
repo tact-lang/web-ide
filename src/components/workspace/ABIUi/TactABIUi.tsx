@@ -290,7 +290,7 @@ export default cell;`}
           target="_blank"
           rel="noreferrer"
         >
-          Learn More
+          Learn more
         </a>
       </>
     );
