@@ -12,7 +12,6 @@ export interface Tree {
   isOpen?: boolean;
   path: string;
   content?: string;
-  isDirty?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
 }

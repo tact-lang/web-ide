@@ -8,7 +8,7 @@ export interface EventEmitterPayloads {
   LOG_CLEAR: undefined;
   LOG: LogEntry | string | Uint8Array;
   ON_SPLIT_DRAG_END: { position?: number };
-  SAVE_FILE: undefined | { fileId: string; content: string };
+  SAVE_FILE: undefined;
   FORCE_UPDATE_FILE: string | { oldPath: string; newPath: string };
   FILE_SAVED: { filePath: string };
   FILE_RENAMED: { oldPath: string; newPath: string };

@@ -44,7 +44,7 @@ const contextMenuItems: IContextMenuItems['items'] = [
 ];
 
 const Tabs: FC = () => {
-  const { fileTab, open, close, rename, updateFileDirty } = useFileTab();
+  const { fileTab, open, close, rename } = useFileTab();
 
   const closeTab = (e: React.MouseEvent, filePath: string) => {
     e.preventDefault();
@@ -57,12 +57,6 @@ const Tabs: FC = () => {
       close(filePath, info.key as ContextMenuKeys);
     },
     [close],
-  );
-  const onFileSave = useCallback(
-    ({ filePath }: { filePath: string }) => {
-      updateFileDirty(filePath, false);
-    },
-    [updateFileDirty],
   );
 
   const onFileRename = useCallback(
@@ -88,24 +82,21 @@ const Tabs: FC = () => {
 
   const renderCloseButton = (item: ITabItems) => (
     <span
-      className={cn(s.close, { [s.isDirty]: item.isDirty })}
+      className={s.close}
       onClick={(e) => {
         closeTab(e, item.path);
       }}
     >
-      {item.isDirty && <span className={s.fileDirtyIcon}></span>}
       <AppIcon name="Close" className={s.closeIcon} />
     </span>
   );
 
   useEffect(() => {
-    EventEmitter.on('FILE_SAVED', onFileSave);
     EventEmitter.on('FILE_RENAMED', onFileRename);
     return () => {
-      EventEmitter.off('FILE_SAVED', onFileSave);
       EventEmitter.off('FILE_RENAMED', onFileRename);
     };
-  }, [updateFileDirty]);
+  }, []);
 
   if (fileTab.items.length === 0) {
     return <></>;

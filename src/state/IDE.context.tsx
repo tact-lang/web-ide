@@ -14,7 +14,6 @@ export interface ITabItems {
   name: string;
   path: string;
   type: 'default' | 'git';
-  isDirty: boolean;
 }
 
 export interface IFileTab {
