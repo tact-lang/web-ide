@@ -295,11 +295,7 @@ export async function parseInputs(
   if (typeof inputFields === 'object' && !Array.isArray(inputFields)) {
     // Check if both `value` and `type` are present in the current object. If not, then it may be a map or struct.
     if ('value' in inputFields && 'type' in inputFields) {
-      const value = inputFields['value'] as
-        | string
-        | undefined
-        | number
-        | boolean;
+      let value = inputFields['value'] as string | undefined | number | boolean;
       if (value === undefined) return;
       const valueType = inputFields['type'] as string;
 
@@ -323,7 +319,13 @@ export async function parseInputs(
         case 'text':
           return value;
         case 'any': {
-          const parsedExpression = parseAndEvalExpression(value as string);
+          if (typeof inputFields.sliceType === 'string') {
+            value = `${inputFields.sliceType}("${value}")`;
+            delete inputFields.sliceType;
+          }
+
+          const parsedExpression = parseAndEvalExpression(String(value));
+
           if (parsedExpression.kind === 'ok') {
             return parsedExpression.value;
           }
