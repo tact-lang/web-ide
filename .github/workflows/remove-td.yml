@@ -1,0 +1,38 @@
+name: Remove test domain
+
+on:
+  delete:
+    branches:
+      - td-nature
+      - td-book
+      - td-art
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    environment: "${{ github.ref == 'refs/heads/main' && 'production' || github.ref == 'refs/heads/canary' && 'canary' || github.ref == 'refs/heads/staging' && 'staging' || startsWith(github.ref, 'refs/heads/td-') && 'testing' || 'unknown' }}"
+    env:
+      JOB_ENV: "${{ github.ref == 'refs/heads/main' && 'production' || github.ref == 'refs/heads/canary' && 'canary' || github.ref == 'refs/heads/staging' && 'staging' || startsWith(github.ref, 'refs/heads/td-') && 'testing' || 'unknown' }}"
+      APP_ENV: "${{ github.ref == 'refs/heads/main' && 'production' || github.ref == 'refs/heads/canary' && 'canary' || github.ref == 'refs/heads/staging' && 'staging' || startsWith(github.ref, 'refs/heads/td-') && format('{0}{1}', 'testing-', github.ref_name) || 'unknown' }}"
+      APP_DOMAIN: "${{ startsWith(github.ref, 'refs/heads/td-') && format('{0}{1}', github.ref_name, vars.APP_DOMAIN_TESTING) || github.ref == 'refs/heads/staging' && vars.APP_DOMAIN_STAGING || vars.APP_DOMAIN }}"
+
+    permissions:
+      packages: write
+      contents: read
+
+    steps:
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - id: lower-repo
+        name: Repository to lowercase
+        run: |
+          echo "repository=${GITHUB_REPOSITORY@L}" >> $GITHUB_OUTPUT
+
+      - name: Remove ${{ vars.APP_NAME }} from Kubernetes
+        run: |
+          helm uninstall ${{ vars.APP_NAME }} ./helm/app --namespace ${{ vars.APP_NAME }}-${{ env.APP_ENV }}
