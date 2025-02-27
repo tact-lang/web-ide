@@ -32,7 +32,7 @@ const FileTree: FC<Props> = ({ projectId }) => {
   const { open: openTab } = useFileTab();
   const { createLog } = useLogActivity();
 
-  const [newItem, setNewItem] = useState<INewItem | null>(null);
+  const [newItemToCreate, setNewItemToCreate] = useState<INewItem | null>(null);
 
   const getProjectFiles = (): NodeModel[] => {
     if (!activeProject?.path) return [];
@@ -57,14 +57,14 @@ const FileTree: FC<Props> = ({ projectId }) => {
   };
 
   const commitItemCreation = async (name?: string) => {
-    if (!newItem || !activeProject?.path) return;
+    if (!newItemToCreate || !activeProject?.path) return;
 
-    const itemName = name ?? newItem.name;
-    const absolutePath = Path.join(newItem.parentPath, itemName);
+    const itemName = name ?? newItemToCreate.name;
+    const absolutePath = Path.join(newItemToCreate.parentPath, itemName);
     const relativeFilePath = relativePath(absolutePath, activeProject.path);
     try {
-      await newFileFolder(relativeFilePath, newItem.type);
-      if (newItem.type === 'file') {
+      await newFileFolder(relativeFilePath, newItemToCreate.type);
+      if (newItemToCreate.type === 'file') {
         openTab(itemName, absolutePath);
       }
       reset();
@@ -75,12 +75,12 @@ const FileTree: FC<Props> = ({ projectId }) => {
 
   const reset = () => {
     document.body.classList.remove('editing-file-folder');
-    setNewItem(null);
+    setNewItemToCreate(null);
   };
 
   const handleRootItemCreation = (type: ITree['type']) => {
     if (!activeProject?.path) return;
-    setNewItem({
+    setNewItemToCreate({
       type,
       parentPath: activeProject.path,
       name: '',
@@ -113,15 +113,15 @@ const FileTree: FC<Props> = ({ projectId }) => {
                 depth={depth}
                 isOpen={isOpen}
                 onToggle={onToggle}
-                newItem={newItem}
+                newItemToCreate={newItemToCreate}
                 commitItemCreation={commitItemCreation}
-                setNewItem={(data: INewItem | null) => {
+                setNewItemToCreate={(data: INewItem | null) => {
                   if (!data) {
                     reset();
                     return;
                   }
                   const { name, type, parentPath } = data;
-                  setNewItem({
+                  setNewItemToCreate({
                     name,
                     type,
                     parentPath,
@@ -132,12 +132,12 @@ const FileTree: FC<Props> = ({ projectId }) => {
           }}
         />
       </DndProvider>
-      {newItem?.parentPath === activeProject.path && (
+      {newItemToCreate?.parentPath === activeProject.path && (
         <TreePlaceholderInput
           style={{ paddingInlineStart: 15 }}
           onSubmit={commitItemCreation}
           onCancel={reset}
-          type={newItem.type}
+          type={newItemToCreate.type}
         />
       )}
     </div>

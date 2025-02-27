@@ -19,8 +19,8 @@ interface Props {
   isOpen: boolean;
   onToggle: (id: NodeModel['id']) => void;
   projectId: Project['id'];
-  newItem: INewItem | null;
-  setNewItem: (data: INewItem | null) => void;
+  newItemToCreate: INewItem | null;
+  setNewItemToCreate: (data: INewItem | null) => void;
   commitItemCreation: () => void;
 }
 
@@ -33,8 +33,8 @@ const TreeNode: FC<Props> = ({
   depth,
   isOpen,
   onToggle,
-  newItem,
-  setNewItem,
+  newItemToCreate,
+  setNewItemToCreate,
   commitItemCreation,
 }) => {
   const { droppable } = node;
@@ -94,13 +94,13 @@ const TreeNode: FC<Props> = ({
       onToggle(node.id);
     }
     if (!node.data) return;
-    setNewItem({ type, parentPath: node.data.path, name: '' });
+    setNewItemToCreate({ type, parentPath: node.data.path, name: '' });
   };
 
   const reset = () => {
     document.body.classList.remove('editing-file-folder');
     setIsEditing(false);
-    setNewItem(null);
+    setNewItemToCreate(null);
   };
 
   const isSystemFile = (fileName: string) => {
@@ -229,12 +229,12 @@ const TreeNode: FC<Props> = ({
           />
         )}
       </div>
-      {newItem && newItem.parentPath === node.data?.path && (
+      {newItemToCreate && newItemToCreate.parentPath === node.data?.path && (
         <TreePlaceholderInput
           style={{ paddingInlineStart: 15 * (depth + 2) }}
           onSubmit={commitItemCreation}
           onCancel={reset}
-          type={newItem.type}
+          type={newItemToCreate.type}
         />
       )}
     </>
