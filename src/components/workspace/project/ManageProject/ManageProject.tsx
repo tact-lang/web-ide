@@ -10,16 +10,16 @@ import { baseProjectPath, useProject } from '@/hooks/projectV2.hooks';
 import { Project } from '@/interfaces/workspace.interface';
 import EventEmitter from '@/utility/eventEmitter';
 import { App, Button, Modal, Select } from 'antd';
-import Router, { useRouter } from 'next/router';
 import { FC, useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import s from './ManageProject.module.scss';
 
 const ManageProject: FC = () => {
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
-  const router = useRouter();
   const { message } = App.useApp();
 
-  const { importURL } = router.query;
+  const { importURL } = useParams();
+  const navigate = useNavigate();
 
   const {
     projects,
@@ -34,7 +34,7 @@ const ManageProject: FC = () => {
       await deleteProject(id);
       setActiveProject(null);
       setIsDeleteConfirmOpen(false);
-      Router.push('/');
+      navigate('/');
     } catch (error) {
       await message.error('Failed to delete project');
     }
@@ -98,7 +98,10 @@ const ManageProject: FC = () => {
         }}
         notFoundContent="No project found"
         filterOption={(inputValue, option) => {
-          return option?.title.toLowerCase().includes(inputValue.toLowerCase());
+          return (
+            option?.title?.toLowerCase().includes(inputValue.toLowerCase()) ??
+            false
+          );
         }}
       >
         {[...projects].reverse().map((project) => (

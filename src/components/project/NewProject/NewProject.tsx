@@ -13,8 +13,8 @@ import { downloadRepo } from '@/utility/gitRepoDownloader';
 import { App, Button, Form, Input, Modal, Radio, Upload } from 'antd';
 import { useForm } from 'antd/lib/form/Form';
 import type { RcFile } from 'antd/lib/upload';
-import { useRouter } from 'next/router';
 import { FC, useCallback, useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
 import s from './NewProject.module.scss';
 
 interface Props {
@@ -57,8 +57,7 @@ const NewProject: FC<Props> = ({
   const { importEncodedCode, removeImportParams } = useCodeImport();
   const { message } = App.useApp();
 
-  const router = useRouter();
-
+  const queryParams = useParams();
   const [form] = useForm();
 
   const language = [
@@ -129,7 +128,7 @@ const NewProject: FC<Props> = ({
       name: projectName,
       lang: importLanguage,
       code: codeToImport,
-    } = router.query as RouterParams;
+    } = queryParams as RouterParams;
     if (codeToImport) {
       // Default to 'func' as the language if none is provided in the query parameters.
       // This ensures backward compatibility for cases where the language was not included in the query params initially.
@@ -167,13 +166,12 @@ const NewProject: FC<Props> = ({
       language: importLanguage ?? 'func',
     });
     setIsActive(true);
-    await removeImportParams();
-  }, [router.isReady, form]);
+    removeImportParams();
+  }, [form]);
 
   useEffect(() => {
-    if (!router.isReady) return;
     onRouterReady();
-  }, [router.isReady, onRouterReady]);
+  }, [onRouterReady]);
 
   const closeModal = () => {
     setIsActive(false);

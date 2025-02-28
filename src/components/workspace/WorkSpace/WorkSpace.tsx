@@ -4,7 +4,7 @@ import MistiStaticAnalyzer from '@/components/MistiStaticAnalyzer';
 import { ManageGit } from '@/components/git';
 import { DownloadProject } from '@/components/project';
 import { ProjectTemplate } from '@/components/template';
-import { NonProductionNotice } from '@/components/ui';
+import { HmrStatus, NonProductionNotice } from '@/components/ui';
 import { AppConfig } from '@/config/AppConfig';
 import { useFileTab } from '@/hooks';
 import { useLogActivity } from '@/hooks/logActivity.hooks';
@@ -17,8 +17,8 @@ import * as TonCore from '@ton/core';
 import * as TonCrypto from '@ton/crypto';
 import { Blockchain } from '@ton/sandbox';
 import { Buffer } from 'buffer';
-import { useRouter } from 'next/router';
 import { FC, useEffect, useMemo, useRef, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import Split from 'react-split';
 import { useEffectOnce } from 'react-use';
 import BottomPanel from '../BottomPanel/BottomPanel';
@@ -40,14 +40,15 @@ type SplitInstance = Split & { split: Split.Instance };
 const WorkSpace: FC = () => {
   const { clearLog, createLog } = useLogActivity();
 
-  const router = useRouter();
   const [activeMenu, setActiveMenu] = useState<WorkSpaceMenu>('code');
   const [isLoaded, setIsLoaded] = useState(false);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [contract, setContract] = useState<any>('');
   const splitVerticalRef = useRef<SplitInstance | null>(null);
 
-  const { tab } = router.query;
+  const { tab, ...queryParams } = useParams();
+  const navigate = useNavigate();
+
   const { activeProject, setActiveProject, loadProjectFiles, newFileFolder } =
     useProject();
 
@@ -168,11 +169,11 @@ const WorkSpace: FC = () => {
           projectName={activeProject?.path ?? ''}
           onMenuClicked={(name) => {
             setActiveMenu(name);
-            router
-              .replace({
-                query: { ...router.query, tab: name },
-              })
-              .catch(() => {});
+            const searchParams = new URLSearchParams({
+              ...queryParams,
+              tab: name,
+            } as Record<string, string>).toString();
+            navigate(`${location.pathname}?${searchParams}`, { replace: true });
           }}
         />
       </div>
@@ -281,6 +282,7 @@ const WorkSpace: FC = () => {
           )}
         </div>
       </Split>
+      <HmrStatus />
     </div>
   );
 };

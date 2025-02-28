@@ -1,5 +1,4 @@
-import Image from 'next/image';
-import Link from 'next/link';
+import { Image, Link } from '@/components/shared';
 import { FC } from 'react';
 import s from './AppLogo.module.scss';
 
@@ -16,7 +15,7 @@ const AppLogo: FC<Props> = ({
 }) => {
   return (
     <Link
-      href={href}
+      to={href}
       className={`${s.root} ${className}`}
       onClick={(e) => {
         if (href === '#') {

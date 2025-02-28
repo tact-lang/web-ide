@@ -1,15 +1,13 @@
-import { Layout, ThemeProvider } from '@/components/shared';
+import { ThemeProvider } from '@/components/shared';
 import { AppConfig } from '@/config/AppConfig';
 import { IDEProvider } from '@/state/IDE.context';
-import '@/styles/theme.scss';
 import { THEME } from '@tonconnect/ui';
 import { TonConnectUIProvider } from '@tonconnect/ui-react';
 import { WebContainer } from '@webcontainer/api';
 import mixpanel from 'mixpanel-browser';
-import type { AppProps } from 'next/app';
-import Head from 'next/head';
 import { useEffect } from 'react';
 import { RecoilRoot } from 'recoil';
+import AppRoutes from './Routes';
 
 mixpanel.init(AppConfig.analytics.MIXPANEL_TOKEN, {
   debug: false,
@@ -17,17 +15,16 @@ mixpanel.init(AppConfig.analytics.MIXPANEL_TOKEN, {
   persistence: 'localStorage',
 });
 
-export default function App({
-  Component,
-  pageProps: { ...pageProps },
-}: AppProps) {
+export default function App() {
   useEffect(() => {
-    if (process.env.NEXT_PUBLIC_DISABLE_WEBCONTAINER) return;
+    if (process.env.REACT_APP_DISABLE_WEBCONTAINER === 'true') return;
+
     (async () => {
       try {
         window.webcontainerInstance = await WebContainer.boot({
           coep: 'credentialless',
         });
+
         await window.webcontainerInstance.mount({
           'package.json': {
             file: {
@@ -45,6 +42,7 @@ export default function App({
             },
           },
         });
+
         const installProcess = await window.webcontainerInstance.spawn('npm', [
           'install',
         ]);
@@ -73,27 +71,17 @@ export default function App({
   }, []);
 
   return (
-    <>
-      <Head>
-        <title>{AppConfig.seo.title}</title>
-        <meta name="description" content="" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="icon" type="image/image/svg+xml" href="/images/logo.svg" />
-      </Head>
-      <RecoilRoot>
-        <IDEProvider>
-          <ThemeProvider>
-            <TonConnectUIProvider
-              uiPreferences={{ theme: THEME.LIGHT }}
-              manifestUrl="https://ide.ton.org/assets/ton/tonconnect-manifest.json"
-            >
-              <Layout>
-                <Component {...pageProps} />
-              </Layout>
-            </TonConnectUIProvider>
-          </ThemeProvider>
-        </IDEProvider>
-      </RecoilRoot>
-    </>
+    <RecoilRoot>
+      <IDEProvider>
+        <ThemeProvider>
+          <TonConnectUIProvider
+            uiPreferences={{ theme: THEME.LIGHT }}
+            manifestUrl="https://ide.ton.org/assets/ton/tonconnect-manifest.json"
+          >
+            <AppRoutes />
+          </TonConnectUIProvider>
+        </ThemeProvider>
+      </IDEProvider>
+    </RecoilRoot>
   );
 }
