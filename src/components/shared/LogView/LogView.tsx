@@ -1,23 +1,36 @@
 import { Filter } from '@/components/workspace/BottomPanel/BottomPanel';
-import { ANSI_CODES } from '@/constant/ansiCodes';
+import { ANSI_CODES, COLOR_MAP } from '@/constant/ansiCodes';
 import { LogEntry } from '@/interfaces/log.interface';
 import { highLightExitCode } from '@/utility/text';
+import { Terminal } from '@xterm/xterm';
 import '@xterm/xterm/css/xterm.css';
 import { FC, useCallback } from 'react';
 import useLogFilter from './hooks/useLogFilter';
 import useTerminal from './hooks/useTerminal';
 import { LogPopover } from './LogPopover';
 import s from './LogView.module.scss';
-import { COLOR_MAP } from './utils/constants';
 import { formatTimestamp } from './utils/formatTimestamp';
 
 interface Props {
   filter: Filter;
 }
 
+const ensureAutoScroll = (terminal: Terminal) => {
+  const buffer = terminal.buffer.active;
+
+  const isScrolledUp = buffer.viewportY < buffer.baseY;
+
+  if (isScrolledUp) {
+    terminal.scrollToBottom();
+  }
+};
+
 const LogView: FC<Props> = ({ filter }) => {
   const printLog = useCallback((data: LogEntry | string | Uint8Array) => {
     if (!terminalRef.current) return;
+
+    ensureAutoScroll(terminalRef.current);
+
     if (typeof data === 'string' || data instanceof Uint8Array) {
       terminalRef.current.write(data);
       return;
