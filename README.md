@@ -44,10 +44,10 @@ To set up the project locally for development, ensure that Node.js v18 LTS or hi
 
    This will load the local version of the IDE.
 
-Ensure that you configure any necessary environment variables in a `.env.local` file. You can create this file by copying `.env.example` and modifying it with your own values.
+Ensure that you configure any necessary environment variables in a `.env` file. You can create this file by copying `.env.example` and modifying it with your own values.
 
 ```bash
-cp .env.example .env.local
+cp .env.example .env
 ```
 
 ### Building for Production
