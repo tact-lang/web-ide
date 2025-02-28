@@ -12,7 +12,7 @@ minReplicas: 2
 maxReplicas: 40
 
 # docker
-containerPort: 3000
+containerPort: 80
 nodePort: 80
 
 # from github deploy
