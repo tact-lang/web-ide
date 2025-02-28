@@ -17,7 +17,7 @@ mixpanel.init(AppConfig.analytics.MIXPANEL_TOKEN, {
 
 export default function App() {
   useEffect(() => {
-    if (process.env.REACT_APP_DISABLE_WEBCONTAINER) return;
+    if (process.env.REACT_APP_DISABLE_WEBCONTAINER === 'true') return;
 
     (async () => {
       try {
