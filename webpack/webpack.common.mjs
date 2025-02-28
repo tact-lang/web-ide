@@ -18,7 +18,6 @@ export default {
   },
   cache: {
     type: "filesystem",
-    cacheDirectory: path.resolve(process.cwd(), ".webpack_cache"),
     compression: "gzip",
     maxAge: 7 * 24 * 60 * 60 * 1000, // Auto-clean cache older than 7 days
   },
