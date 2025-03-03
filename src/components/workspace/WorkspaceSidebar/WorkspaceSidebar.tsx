@@ -41,12 +41,10 @@ const WorkspaceSidebar: FC<Props> = ({ activeMenu, onMenuClicked }) => {
     getSettingStateByKey,
     updateEditorMode,
     toggleExternalMessage,
-    toggleMasterChain,
   } = useSettingAction();
 
   const editorMode = getSettingStateByKey('editorMode');
   const isExternalMessage = getSettingStateByKey('isExternalMessage');
-  const isMasterChainEnabled = getSettingStateByKey('masterchain');
 
   const themeContext = useContext(ThemeContext);
 
@@ -106,16 +104,6 @@ const WorkspaceSidebar: FC<Props> = ({ activeMenu, onMenuClicked }) => {
             checked={!!isExternalMessage}
             onChange={(toggleState) => {
               toggleExternalMessage(toggleState);
-            }}
-          />
-        </Form.Item>
-      </div>
-      <div className={s.settingItem}>
-        <Form.Item label="Masterchain" valuePropName="checked">
-          <Switch
-            checked={!!isMasterChainEnabled}
-            onChange={(toggleState) => {
-              toggleMasterChain(toggleState);
             }}
           />
         </Form.Item>
