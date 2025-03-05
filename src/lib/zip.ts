@@ -1,4 +1,5 @@
 import { Tree } from '@/interfaces/workspace.interface';
+import { relativePath } from '@/utility/filePath';
 import { BlobReader, BlobWriter, ZipReader, ZipWriter } from '@zip.js/zip.js';
 import { RcFile } from 'antd/es/upload';
 import { FileSystem } from './fs';
@@ -105,6 +106,17 @@ class ZIP {
     rootPath: string,
   ) {
     const files = await this.fs.readdir(dirPath);
+
+    // Include empty directory
+    if (files.length === 0) {
+      // The reason for adding a slash (+ '/') at the end of the directory path is to explicitly mark it as a directory in the ZIP archive.
+      await writer.add(
+        relativePath(dirPath, rootPath) + '/',
+        new BlobReader(new Blob([''])),
+      );
+      return;
+    }
+
     for (const file of files) {
       const fullPath = `${dirPath}/${file}`;
       const stat = await this.fs.stat(fullPath);
