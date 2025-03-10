@@ -23,6 +23,7 @@ export function WebContainerProvider({
   children: React.ReactNode;
 }) {
   const webcontainerRef = useRef<WebContainer | null>(null);
+  const isInitializedRef = useRef(false);
   const { createLog } = useLogActivity();
   const [status, setStatus] = useState('');
 
@@ -104,11 +105,14 @@ export function WebContainerProvider({
 
   const init = async () => {
     if (
+      isInitializedRef.current ||
       status === 'loaded' ||
       (process.env.NEXT_PUBLIC_DISABLE_WEBCONTAINER ?? !isChromiumBased())
     ) {
       return;
     }
+
+    isInitializedRef.current = true;
 
     await initializeWebContainer();
     await installPackages();
