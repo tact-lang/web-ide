@@ -174,7 +174,7 @@ const TestCases: FC<Props> = ({ projectId }) => {
     return (
       <div className={s.note}>
         <p>
-          ⚠️ <strong>Best supported on Chromium-based browsers.</strong>
+          ⚠️ <strong>Supported on Chromium-based browsers.</strong>
         </p>
         <p>
           Please use <strong>Google Chrome, Edge, or Brave</strong> for the best
