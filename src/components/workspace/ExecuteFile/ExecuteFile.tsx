@@ -14,7 +14,9 @@ import s from './ExecuteFile.module.scss';
 
 type ButtonClick =
   | React.MouseEvent<HTMLButtonElement, MouseEvent>
-  | React.MouseEvent<HTMLAnchorElement, MouseEvent>;
+  | React.MouseEvent<HTMLAnchorElement, MouseEvent>
+  | React.MouseEvent<HTMLElement, MouseEvent>;
+
 interface Props {
   projectId: Project['id'];
   onCompile?: () => void;
@@ -53,7 +55,7 @@ const ExecuteFile: FC<Props> = ({
     return allowedFile.includes(_fileExtension as string);
   });
 
-  const buildFile = async (e: ButtonClick) => {
+  const buildFile = async (e: React.MouseEvent<HTMLElement, MouseEvent>) => {
     if (hasDirtyFiles()) {
       message.warning({
         content: 'You have unsaved changes',
@@ -172,7 +174,9 @@ const ExecuteFile: FC<Props> = ({
         value={selectedFile?.path}
         onChange={selectFile}
         filterOption={(inputValue, option) => {
-          return option?.title.toLowerCase().includes(inputValue.toLowerCase());
+          return !!option?.title
+            ?.toLowerCase()
+            .includes(inputValue.toLowerCase());
         }}
       >
         {fileList.map((f) => (
