@@ -99,6 +99,11 @@ export default {
         test: /\.(png|jpe?g|gif|svg|woff2?|eot|ttf|otf)$/,
         type: "asset/resource",
       },
+      {
+        test: /\.wasm$/,
+        loader: "file-loader",
+        type: "javascript/auto",
+      },
     ],
   },
   plugins: [
