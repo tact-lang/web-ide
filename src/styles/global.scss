@@ -26,8 +26,11 @@
     rgba(0, 0, 0, 0.6) 100%
   );
   --grey-900: #232328;
-  --modal-bg:
-    linear-gradient(0deg, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0.5) 100%),
+  --modal-bg: linear-gradient(
+      0deg,
+      rgba(0, 0, 0, 0.5) 0%,
+      rgba(0, 0, 0, 0.5) 100%
+    ),
     #232328;
 }
 
@@ -51,8 +54,7 @@
     rgba(255, 255, 255, 0.6) 0%,
     rgba(255, 255, 255, 0.6) 100%
   );
-  --modal-bg:
-    linear-gradient(
+  --modal-bg: linear-gradient(
       0deg,
       rgba(255, 255, 255, 0.5) 0%,
       rgba(255, 255, 255, 0.5) 100%
@@ -148,11 +150,13 @@ hr {
 
 .section-heading {
   color: var(--color-light);
-  text-align: center;
-  display: block;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   font-size: 0.875rem;
   font-weight: 500;
   padding: 0.5rem 0;
+  gap: 0.5rem;
 }
 
 .color-warn {
@@ -161,14 +165,6 @@ hr {
 
 .text-center {
   text-align: center;
-}
-.sidebar-section-title {
-  color: var(--color-light);
-  text-align: center;
-  display: block;
-  font-size: 0.875rem;
-  font-weight: 500;
-  margin-bottom: 1rem;
 }
 
 @keyframes rotate {
