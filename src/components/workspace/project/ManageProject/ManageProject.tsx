@@ -11,14 +11,14 @@ import { Project } from '@/interfaces/workspace.interface';
 import EventEmitter from '@/utility/eventEmitter';
 import { App, Button, Modal, Select } from 'antd';
 import { FC, useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import s from './ManageProject.module.scss';
 
 const ManageProject: FC = () => {
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   const { message } = App.useApp();
+  const [importURL, setImportURL] = useState<string | null>(null);
 
-  const { importURL } = useParams();
   const navigate = useNavigate();
 
   const {
@@ -60,7 +60,7 @@ const ManageProject: FC = () => {
           heading="Import from GitHub"
           icon="GitHub"
           className={s.git}
-          active={!!importURL}
+          active={importURL !== null}
         />
         <NewProject
           label="Import"
@@ -123,6 +123,8 @@ const ManageProject: FC = () => {
 
   useEffect(() => {
     loadProjects();
+    const searchParams = new URLSearchParams(window.location.search);
+    setImportURL(searchParams.get('importURL'));
   }, []);
 
   return (

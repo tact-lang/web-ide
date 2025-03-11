@@ -14,7 +14,6 @@ import { App, Button, Form, Input, Modal, Radio, Upload } from 'antd';
 import { useForm } from 'antd/lib/form/Form';
 import type { RcFile } from 'antd/lib/upload';
 import { FC, useCallback, useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
 import s from './NewProject.module.scss';
 
 interface Props {
@@ -57,7 +56,6 @@ const NewProject: FC<Props> = ({
   const { importEncodedCode, removeImportParams } = useCodeImport();
   const { message } = App.useApp();
 
-  const queryParams = useParams();
   const [form] = useForm();
 
   const language = [
@@ -106,8 +104,8 @@ const NewProject: FC<Props> = ({
         sourceType: newProjectType,
         template: values.template,
       });
-      // eslint-disable-next-line @typescript-eslint/no-floating-promises
       message.success(`Project '${projectName}' created`);
+      removeImportParams();
     } catch (error) {
       let errorMessage = 'Error in creating project';
       if (typeof error === 'string') {
@@ -115,7 +113,6 @@ const NewProject: FC<Props> = ({
       } else {
         errorMessage = (error as Error).message || errorMessage;
       }
-      // eslint-disable-next-line @typescript-eslint/no-floating-promises
       message.error(errorMessage);
     } finally {
       setIsLoading(false);
@@ -123,12 +120,15 @@ const NewProject: FC<Props> = ({
   };
 
   const onRouterReady = useCallback(async () => {
+    const searchParams = new URLSearchParams(window.location.search);
+
     const {
       importURL,
       name: projectName,
       lang: importLanguage,
       code: codeToImport,
-    } = queryParams as RouterParams;
+    } = { ...(Object.fromEntries(searchParams) as RouterParams) };
+
     if (codeToImport) {
       // Default to 'func' as the language if none is provided in the query parameters.
       // This ensures backward compatibility for cases where the language was not included in the query params initially.
@@ -165,16 +165,15 @@ const NewProject: FC<Props> = ({
       name: projectName ?? '',
       language: importLanguage ?? 'func',
     });
-    setIsActive(true);
-    removeImportParams();
-  }, [form]);
+  }, []);
 
   useEffect(() => {
     onRouterReady();
-  }, [onRouterReady]);
+  }, []);
 
   const closeModal = () => {
     setIsActive(false);
+    removeImportParams();
   };
 
   return (

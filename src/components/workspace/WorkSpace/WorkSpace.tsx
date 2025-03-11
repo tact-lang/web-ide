@@ -18,7 +18,7 @@ import * as TonCrypto from '@ton/crypto';
 import { Blockchain } from '@ton/sandbox';
 import { Buffer } from 'buffer';
 import { FC, useEffect, useMemo, useRef, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import Split from 'react-split';
 import { useEffectOnce } from 'react-use';
 import BottomPanel from '../BottomPanel/BottomPanel';
@@ -46,7 +46,9 @@ const WorkSpace: FC = () => {
   const [contract, setContract] = useState<any>('');
   const splitVerticalRef = useRef<SplitInstance | null>(null);
 
-  const { tab, ...queryParams } = useParams();
+  const [searchParams] = useSearchParams();
+  const tab = searchParams.get('tab');
+
   const navigate = useNavigate();
 
   const { activeProject, setActiveProject, loadProjectFiles } = useProject();
@@ -75,7 +77,7 @@ const WorkSpace: FC = () => {
 
   const cachedProjectPath = useMemo(() => {
     return activeProject?.path as string;
-  }, [activeProject]);
+  }, [activeProject?.path]);
 
   const onKeydown = (e: KeyboardEvent) => {
     if ((e.ctrlKey || e.metaKey) && e.key === 's') {
@@ -90,7 +92,7 @@ const WorkSpace: FC = () => {
   };
 
   useEffect(() => {
-    if (!cachedProjectPath) return;
+    if (!cachedProjectPath || searchParams.get('code')) return;
     openProject(cachedProjectPath).catch(() => {});
   }, [cachedProjectPath]);
 
@@ -159,11 +161,13 @@ const WorkSpace: FC = () => {
           projectName={activeProject?.path ?? ''}
           onMenuClicked={(name) => {
             setActiveMenu(name);
-            const searchParams = new URLSearchParams({
-              ...queryParams,
+            const newSearchParams = new URLSearchParams({
+              ...Object.fromEntries(searchParams.entries()),
               tab: name,
             } as Record<string, string>).toString();
-            navigate(`${location.pathname}?${searchParams}`, { replace: true });
+            navigate(`${location.pathname}?${newSearchParams}`, {
+              replace: true,
+            });
           }}
         />
       </div>
