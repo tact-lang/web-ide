@@ -20,7 +20,8 @@ const prodConfig = merge(commonConfig, {
     ],
     splitChunks: {
       chunks: "all",
-      maxSize: 250000,
+      maxSize: 5000000,
+      minSize: 100000,
       cacheGroups: {
         vendor: {
           test: /[\\/]node_modules[\\/]/,
