@@ -6,7 +6,7 @@
     "url": "https://github.com/rahulyadav-57/"
   },
   "scripts": {
-    "dev": "NODE_OPTIONS='--max-old-space-size=4096' webpack serve --config webpack/webpack.dev.mjs --mode development  --hot",
+    "dev": "NODE_ENV=development NODE_OPTIONS='--max-old-space-size=4096' webpack serve --config webpack/webpack.dev.mjs --mode development  --hot",
     "build": "webpack --config webpack/webpack.prod.mjs --mode production --progress",
     "serve": "serve -c ../serve.json -s dist -p ${PORT:-3000}",
     "lint": "eslint 'src/**/*.{ts,tsx}' ",

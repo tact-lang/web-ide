@@ -1,4 +1,7 @@
 /* eslint-env node */
+
+const isDev = process.env.NODE_ENV === "development";
+
 module.exports = {
   extends: [
     "eslint:recommended",
@@ -35,14 +38,16 @@ module.exports = {
     browser: true,
   },
   rules: {
-    "@typescript-eslint/no-unused-vars": [
-      "error",
-      {
-        argsIgnorePattern: "^_",
-        varsIgnorePattern: "^_",
-        caughtErrorsIgnorePattern: "^_",
-      },
-    ],
+    "@typescript-eslint/no-unused-vars": isDev
+      ? "off"
+      : [
+          "error",
+          {
+            argsIgnorePattern: "^_",
+            varsIgnorePattern: "^_",
+            caughtErrorsIgnorePattern: "^_",
+          },
+        ],
     "@typescript-eslint/no-var-requires": [
       "error",
       {
