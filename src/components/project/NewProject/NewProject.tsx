@@ -224,7 +224,7 @@ const NewProject: FC<Props> = ({
             onFormFinish(formValues).catch(() => {});
           }}
           autoComplete="off"
-          initialValues={{ template: 'tonCounter', language: 'tact' }}
+          initialValues={{ template: 'tonBlank', language: 'tact' }}
           requiredMark="optional"
         >
           <div className="top-header">

@@ -1,4 +1,5 @@
 import { LogEntry } from '@/interfaces/log.interface';
+import { Tree } from '@/interfaces/workspace.interface';
 import EventEmitterDefault from 'eventemitter3';
 
 const eventEmitter = new EventEmitterDefault();
@@ -15,6 +16,7 @@ export interface EventEmitterPayloads {
   OPEN_PROJECT: string;
   PROJECT_MIGRATED: undefined;
   GIT_PULL_FINISHED: string;
+  CREATE_ROOT_FILE_OR_FOLDER: Tree['type'];
 }
 
 const EventEmitter = {

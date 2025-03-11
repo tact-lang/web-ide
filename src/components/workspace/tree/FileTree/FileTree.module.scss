@@ -7,6 +7,9 @@
     list-style: none;
     padding-left: 0;
   }
+  > ul {
+    margin-bottom: 0;
+  }
 }
 
 .treeNode {
