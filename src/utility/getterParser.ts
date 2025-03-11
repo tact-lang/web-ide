@@ -1,16 +1,15 @@
 import Parser from 'web-tree-sitter';
+import TreeSitterWasm from 'web-tree-sitter/tree-sitter.wasm';
 import { isWebAssemblySupported } from './utils';
 
 let language: Parser.Language | null = null;
 
-export const initParser = async (treeSitterUri: string, langUri: string) => {
+export const initParser = async (langUri: string) => {
   if (language) {
     return;
   }
-  const options: object | undefined = {
-    locateFile() {
-      return treeSitterUri;
-    },
+  const options = {
+    locateFile: () => TreeSitterWasm,
   };
   await Parser.init(options);
   language = await Parser.Language.load(langUri);
@@ -40,10 +39,7 @@ export async function parseGetters(code: string): Promise<Getter[]> {
     return [];
   }
 
-  await initParser(
-    '/assets/ton/tree-sitter.wasm',
-    '/assets/ton//tree-sitter-func.wasm',
-  );
+  await initParser('/assets/ton/tree-sitter-func.wasm');
   const p = createParser();
   const parsed = p.parse(code);
 
@@ -85,10 +81,7 @@ export async function extractCompilerDiretive(code: string): Promise<string[]> {
     return [];
   }
 
-  await initParser(
-    '/assets/ton/tree-sitter.wasm',
-    '/assets/ton//tree-sitter-func.wasm',
-  );
+  await initParser('/assets/ton/tree-sitter-func.wasm');
   const p = createParser();
   const parsed = p.parse(code);
 

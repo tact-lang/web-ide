@@ -26,11 +26,8 @@
     rgba(0, 0, 0, 0.6) 100%
   );
   --grey-900: #232328;
-  --modal-bg: linear-gradient(
-      0deg,
-      rgba(0, 0, 0, 0.5) 0%,
-      rgba(0, 0, 0, 0.5) 100%
-    ),
+  --modal-bg:
+    linear-gradient(0deg, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0.5) 100%),
     #232328;
 }
 
@@ -54,7 +51,8 @@
     rgba(255, 255, 255, 0.6) 0%,
     rgba(255, 255, 255, 0.6) 100%
   );
-  --modal-bg: linear-gradient(
+  --modal-bg:
+    linear-gradient(
       0deg,
       rgba(255, 255, 255, 0.5) 0%,
       rgba(255, 255, 255, 0.5) 100%
@@ -165,4 +163,40 @@ hr {
 
 .text-center {
   text-align: center;
+}
+
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.hmr-status {
+  position: fixed;
+  bottom: 0.5rem;
+  right: 0.5rem;
+  z-index: 100000;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 2rem;
+  height: 2rem;
+  padding: 0.5rem;
+
+  background: var(--black-500);
+  color: var(--white);
+  border-radius: 50%;
+  font-size: 1rem;
+
+  pointer-events: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+
+  svg {
+    animation: rotate 1s linear infinite;
+  }
 }

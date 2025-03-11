@@ -1,10 +1,10 @@
+import { Link } from '@/components/shared';
 import { ThemeContext } from '@/components/shared/ThemeProvider';
 import { Tooltip } from '@/components/ui';
 import AppIcon, { AppIconType } from '@/components/ui/icon';
 import { AppData } from '@/constant/AppData';
 import { useSettingAction } from '@/hooks/setting.hooks';
 import { Form, Input, Popover, Select, Switch } from 'antd';
-import Link from 'next/link';
 import { FC, useContext } from 'react';
 import s from './WorkspaceSidebar.module.scss';
 
@@ -226,7 +226,7 @@ const WorkspaceSidebar: FC<Props> = ({ activeMenu, onMenuClicked }) => {
       <div>
         {AppData.socials.map((menu, i) => (
           <Tooltip key={i} title={menu.label} placement="right">
-            <Link href={menu.url} className={s.action} target="_blank">
+            <Link to={menu.url} className={s.action} target="_blank">
               <AppIcon className={s.icon} name={menu.icon as AppIconType} />
             </Link>
           </Tooltip>

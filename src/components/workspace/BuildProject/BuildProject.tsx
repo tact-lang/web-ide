@@ -24,12 +24,12 @@ import { ABIArgument, Cell } from '@ton/core';
 import { Blockchain, SandboxContract } from '@ton/sandbox';
 import { CHAIN, useTonAddress, useTonConnectUI } from '@tonconnect/ui-react';
 import { Button, Form, Select } from 'antd';
-import Link from 'next/link';
 import { FC, Fragment, useEffect, useRef, useState } from 'react';
 import ContractInteraction from '../ContractInteraction';
 import ExecuteFile from '../ExecuteFile/ExecuteFile';
 import s from './BuildProject.module.scss';
 
+import { Link } from '@/components/shared';
 import { AppLogo } from '@/components/ui';
 import AppIcon from '@/components/ui/icon';
 import { useFile } from '@/hooks';
@@ -42,8 +42,8 @@ import { replaceFileExtension } from '@/utility/filePath';
 import { Maybe } from '@ton/core/dist/utils/maybe';
 import { TonClient } from '@ton/ton';
 import { useForm } from 'antd/lib/form/Form';
-import packageJson from 'package.json';
 import { OutputChunk } from 'rollup';
+import packageJson from '../../../../package.json';
 import { renderField } from '../ABIUi/TactABIUi';
 import { globalWorkspace } from '../globalWorkspace';
 import CellBuilder, { CellValues, generateCellCode } from './CellBuilder';
@@ -658,7 +658,6 @@ const BuildProject: FC<Props> = ({ projectId, contract, updateContract }) => {
 
   useEffect(() => {
     updateABI().catch(() => {});
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedContract, contract]);
 
   useEffect(() => {
@@ -667,7 +666,6 @@ const BuildProject: FC<Props> = ({ projectId, contract, updateContract }) => {
     } catch (e) {
       /* empty */
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedContract]);
 
   useEffect(() => {
@@ -753,6 +751,7 @@ const BuildProject: FC<Props> = ({ projectId, contract, updateContract }) => {
       <Form.Item
         label="Environment"
         className={`${s.formItem} select-search-input-dark`}
+        labelAlign="left"
       >
         <Select
           value={environment}
@@ -815,7 +814,7 @@ const BuildProject: FC<Props> = ({ projectId, contract, updateContract }) => {
       {activeProject?.contractAddress && environment !== 'SANDBOX' && (
         <div className={`${s.contractAddress} wrap`}>
           <Link
-            href={`https://${
+            to={`https://${
               chain === CHAIN.TESTNET ? 'testnet.' : ''
             }tonviewer.com/${activeProject.contractAddress}`}
             target="_blank"

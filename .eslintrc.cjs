@@ -1,9 +1,13 @@
 /* eslint-env node */
+
+const isDev = process.env.NODE_ENV === "development";
+
 module.exports = {
   extends: [
     "eslint:recommended",
     "plugin:@typescript-eslint/recommended",
-    "next/core-web-vitals",
+    "plugin:react/recommended",
+    "plugin:react/jsx-runtime",
     "prettier",
   ],
   parser: "@typescript-eslint/parser",
@@ -11,28 +15,39 @@ module.exports = {
     sourceType: "module",
     ecmaVersion: 2020,
     project: "./tsconfig.json",
+    ecmaFeatures: {
+      jsx: true,
+    },
+  },
+  settings: {
+    react: {
+      version: "detect",
+    },
   },
   ignorePatterns: [
     "*.cjs",
     "!.lintstagedrc.js",
     ".lintstagedrc.js",
-    "next.config.js",
+    "webpack.*.mjs",
+    "babel.config.js",
   ],
-  plugins: ["@typescript-eslint"],
+  plugins: ["@typescript-eslint", "react", "prettier"],
   root: true,
   env: {
-    node: true,
     es2021: true,
+    browser: true,
   },
   rules: {
-    "@typescript-eslint/no-unused-vars": [
-      "error",
-      {
-        argsIgnorePattern: "^_",
-        varsIgnorePattern: "^_",
-        caughtErrorsIgnorePattern: "^_",
-      },
-    ],
+    "@typescript-eslint/no-unused-vars": isDev
+      ? "off"
+      : [
+          "error",
+          {
+            argsIgnorePattern: "^_",
+            varsIgnorePattern: "^_",
+            caughtErrorsIgnorePattern: "^_",
+          },
+        ],
     "@typescript-eslint/no-var-requires": [
       "error",
       {
@@ -100,5 +115,6 @@ module.exports = {
     "@typescript-eslint/require-await": "error",
     "@typescript-eslint/unified-signatures": "error",
     "react-hooks/exhaustive-deps": "off",
+    "react/prop-types": "off",
   },
 };

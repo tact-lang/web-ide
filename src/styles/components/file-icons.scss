@@ -25,13 +25,13 @@
 }
 .show-file-icons .folder-icon::before {
   content: '';
-  background-image: url('/images/icon/file/default_folder.svg');
+  background-image: url('../assets/images/icon/file/default_folder.svg');
   background-position: 37% 51%;
   background-size: 60%;
 }
 .show-file-icons .folder-icon-open::before {
   content: '';
-  background-image: url('/images/icon/file/default_folder_opened.svg');
+  background-image: url('../assets/images/icon/file/default_folder_opened.svg');
 }
 .show-file-icons .file-icon,
 .show-file-icons .txt-ext-file-icon.ext-file-icon.file-icon {

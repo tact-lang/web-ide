@@ -1,14 +1,14 @@
 import { Result } from 'antd';
-import Link from 'next/link';
+import { Link } from 'react-router-dom';
 
-const pageNotFound = () => {
+const PageNotFound = () => {
   return (
     <Result
       status="404"
       title="404"
       subTitle="Sorry, the page you visited does not exist."
       extra={
-        <Link type="link" href="/">
+        <Link type="link" to="/">
           Back Home
         </Link>
       }
@@ -16,4 +16,4 @@ const pageNotFound = () => {
   );
 };
 
-export default pageNotFound;
+export default PageNotFound;

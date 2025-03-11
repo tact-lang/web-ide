@@ -74,6 +74,7 @@ export const IDEProvider: FC<{ children: React.ReactNode }> = ({
   );
   const [setting, setSetting] = useState<SettingInterface>(defaultSetting);
   const [isLoaded, setIsLoaded] = useState(false);
+  const searchParams = new URLSearchParams(window.location.search);
 
   const value = useMemo(
     () => ({
@@ -93,12 +94,16 @@ export const IDEProvider: FC<{ children: React.ReactNode }> = ({
 
   const onInit = () => {
     const storedActiveProject = localStorage.getItem('IDE_activeProject');
-    if (storedActiveProject) {
+
+    if (storedActiveProject && !searchParams.get('code')) {
       setActiveProject(JSON.parse(storedActiveProject));
     }
   };
 
   const handleActiveProjectChange = useCallback(async () => {
+    if (searchParams.get('code')) {
+      return;
+    }
     const mainFile = projectFiles.find((file) =>
       ['main.tact', 'main.fc'].includes(file.name),
     );
@@ -112,21 +117,18 @@ export const IDEProvider: FC<{ children: React.ReactNode }> = ({
   }, [projectFiles, activeProject?.path]);
 
   useEffect(() => {
-    handleActiveProjectChange();
-  }, [activeProject]);
-
-  useEffect(() => {
     onInit();
     setIsLoaded(true);
   }, []);
 
   useEffect(() => {
     if (!isLoaded) return;
+    handleActiveProjectChange();
     localStorage.setItem(
       'IDE_activeProject',
       JSON.stringify(activeProject ?? {}),
     );
-  }, [activeProject]);
+  }, [activeProject?.path]);
 
   return <IDEContext.Provider value={value}>{children}</IDEContext.Provider>;
 };

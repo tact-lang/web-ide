@@ -5,6 +5,7 @@ import { useProject } from '@/hooks/projectV2.hooks';
 import { IGitWorkerMessage, InitRepo } from '@/interfaces/git.interface';
 import GitManager from '@/lib/git';
 import EventEmitter from '@/utility/eventEmitter';
+import GitWorker from '@/workers/git.worker.ts?worker';
 import { CaretRightOutlined } from '@ant-design/icons';
 import { Button, Collapse, theme } from 'antd';
 import { ReadCommitResult } from 'isomorphic-git';
@@ -133,12 +134,7 @@ const ManageGit: FC = () => {
 
   useEffect(() => {
     onMount();
-    workerRef.current = new Worker(
-      new URL('@/workers/git.ts', import.meta.url),
-      {
-        type: 'module',
-      },
-    );
+    workerRef.current = new GitWorker();
     workerRef.current.onmessage = (e) => {
       const { type, projectPath } = e.data;
 

@@ -1,16 +1,19 @@
+import { FileSystem } from '@/lib/fs';
 import GitManager from '@/lib/git';
 
-self.onmessage = async (e) => {
-  const gitManager = new GitManager();
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const ctx: Worker = self as any;
+
+ctx.onmessage = async (e) => {
+  const gitManager = new GitManager(FileSystem.getInstance().fsInstance);
 
   const { projectPath } = e.data.payload.data;
   switch (e.data.type) {
     case 'init': {
       try {
-        console.log('Initializing repo projectPath', projectPath);
         await gitManager.init(projectPath);
         // as we cannot use EventEmitter here, we will post message to main thread
-        self.postMessage({ type: 'GIT_INITIALIZED', projectPath });
+        ctx.postMessage({ type: 'GIT_INITIALIZED', projectPath });
       } catch (error) {
         console.log('error', error);
       }
@@ -83,6 +86,8 @@ self.onmessage = async (e) => {
   }
 };
 
-self.onerror = (e) => {
+ctx.onerror = (e) => {
   console.error('Worker error:', e);
 };
+
+export default {} as typeof Worker;

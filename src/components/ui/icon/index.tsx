@@ -13,6 +13,7 @@ import {
   AiOutlineSave,
 } from 'react-icons/ai';
 import { BsShare } from 'react-icons/bs';
+import { RiRefreshLine } from 'react-icons/ri';
 
 import { BsFillPlayFill } from 'react-icons/bs';
 import { FaMoon, FaRegClone, FaSun } from 'react-icons/fa';
@@ -83,7 +84,8 @@ export type AppIconType =
   | 'GitBranch'
   | 'Moon'
   | 'Sun'
-  | 'CodeScan';
+  | 'CodeScan'
+  | 'Refresh';
 
 export interface AppIconInterface {
   name: AppIconType;
@@ -130,6 +132,7 @@ const Components = {
   Moon: FaMoon,
   Sun: FaSun,
   CodeScan: GoCodescan,
+  Refresh: RiRefreshLine,
 };
 
 const AppIcon: FC<AppIconInterface> = ({ name, className = '' }) => {
