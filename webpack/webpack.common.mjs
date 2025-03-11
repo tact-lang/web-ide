@@ -44,11 +44,11 @@ export default {
         test: /\.json$/,
         type: "json",
       },
-       {
-          test: /\.worker\.ts$/, 
-          use: { loader: "worker-loader" },
-          exclude: /node_modules/,
-        },
+      {
+        test: /\.worker\.ts$/,
+        use: { loader: "worker-loader" },
+        exclude: /node_modules/,
+      },
       {
         test: /\.(js|jsx|ts|tsx)$/,
         exclude: /node_modules/,
