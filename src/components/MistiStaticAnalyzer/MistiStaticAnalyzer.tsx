@@ -165,7 +165,7 @@ const MistiStaticAnalyzer: FC = () => {
         onFinish={run}
         layout="vertical"
         initialValues={{
-          severity: Severity.INFO,
+          minSeverity: Severity.INFO,
           allDetectors: true,
         }}
         onValuesChange={onFormValuesChange}
