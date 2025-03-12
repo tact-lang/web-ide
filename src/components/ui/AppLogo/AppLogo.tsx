@@ -24,7 +24,7 @@ const AppLogo: FC<Props> = ({
         }
       }}
     >
-      <Image className={s.brandImage} src={src} width={45} height={45} alt="" />
+      <Image className={s.brandImage} src={src} width={20} height={20} alt="" />
     </Link>
   );
 };

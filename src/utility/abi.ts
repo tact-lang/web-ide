@@ -3,10 +3,9 @@ import {
   TactABIField,
   TactInputFields,
 } from '@/interfaces/workspace.interface';
-import { CompilerContext } from '@tact-lang/compiler/dist/context';
-import { parseAndEvalExpression } from '@tact-lang/compiler/dist/interpreter';
 import { getType } from '@tact-lang/compiler/dist/types/resolveDescriptors';
 
+import { CompilerContext, parseAndEvalExpression } from '@tact-lang/compiler';
 import {
   ABIArgument,
   ABIField,
