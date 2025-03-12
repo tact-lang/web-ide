@@ -207,7 +207,6 @@ const MistiStaticAnalyzer: FC = () => {
         >
           <Select
             placeholder="Select Minimum Severity Level"
-            allowClear
             options={severityOptions}
           />
         </Form.Item>
