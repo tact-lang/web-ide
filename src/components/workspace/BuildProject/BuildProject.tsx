@@ -64,7 +64,6 @@ const BuildProject: FC<Props> = ({ projectId, contract, updateContract }) => {
   const [isLoading, setIsLoading] = useState('');
   const [buildCount, setBuildCount] = useState(0);
   const { createLog } = useLogActivity();
-  const [environment, setEnvironment] = useState<NetworkEnvironment>('SANDBOX');
   const [buildOutput, setBuildoutput] = useState<{
     contractBOC: string | null;
     dataCell: Cell | null;
@@ -99,6 +98,8 @@ const BuildProject: FC<Props> = ({ projectId, contract, updateContract }) => {
     packageJson.dependencies['@tact-lang/compiler'],
     '^',
   );
+
+  const environment = activeProject?.network ?? 'SANDBOX';
 
   const [deployForm] = useForm();
 
@@ -526,7 +527,6 @@ const BuildProject: FC<Props> = ({ projectId, contract, updateContract }) => {
     updateProjectSetting({
       network,
     } as ProjectSetting);
-    setEnvironment(network);
   };
 
   const updateSelectedContract = (contract: string | undefined) => {
@@ -671,10 +671,6 @@ const BuildProject: FC<Props> = ({ projectId, contract, updateContract }) => {
   }, [selectedContract]);
 
   useEffect(() => {
-    if (activeProject?.network) {
-      setEnvironment(activeProject.network);
-    }
-
     const contractABIPath = getSelectedContractABIPath();
     if (contractABIPath) {
       deployForm.setFieldsValue({
@@ -772,6 +768,7 @@ const BuildProject: FC<Props> = ({ projectId, contract, updateContract }) => {
 
       <div className={s.actionWrapper}>
         <ExecuteFile
+          key={`${projectId}-${environment}`}
           projectId={projectId as string}
           icon="Build"
           label={
@@ -794,7 +791,7 @@ const BuildProject: FC<Props> = ({ projectId, contract, updateContract }) => {
           onCompile={() => {
             (async () => {
               if (
-                environment == 'SANDBOX' &&
+                environment === 'SANDBOX' &&
                 activeProject?.language === 'tact'
               ) {
                 setBuildCount((prevCount) => prevCount + 1);
