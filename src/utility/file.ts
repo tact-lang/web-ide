@@ -1,19 +1,29 @@
-import { ContractLanguage, Tree } from '@/interfaces/workspace.interface';
-import { replaceFileExtension } from './filePath';
+import { ProjectSetting, Tree } from '@/interfaces/workspace.interface';
+import { relativePath, replaceFileExtension } from './filePath';
 import { getFileExtension, stripPrefix, stripSuffix } from './utils';
 
-export function filterABIFiles(
-  files: Tree[],
-  basePath: string,
-  lang: ContractLanguage,
-) {
+export function filterABIFiles(files: Tree[], project: ProjectSetting) {
   return files
     .filter((file) => {
       const fileExtension = getFileExtension(file.name);
-      const isAbiFile =
-        file.path.startsWith(`${basePath}/dist`) && fileExtension === 'abi';
+      const projectBuildDir = project.path + '/dist';
+      const relativeFilePath = relativePath(file.path, projectBuildDir);
 
-      if (lang === 'func') {
+      const isAbiFile =
+        file.path.startsWith(projectBuildDir) && fileExtension === 'abi';
+
+      if (isAbiFile && project.buildContractList && project.selectedContract) {
+        const abiCollection =
+          project.buildContractList[
+            relativePath(project.selectedContract, project.path!)
+          ];
+        return (
+          Array.isArray(abiCollection) &&
+          abiCollection.includes(relativeFilePath)
+        );
+      }
+
+      if (project.language === 'func') {
         return isAbiFile;
       }
 

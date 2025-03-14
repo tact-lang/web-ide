@@ -25,6 +25,11 @@ export interface FileNode {
   content?: string;
 }
 
+interface ContractBuildParams {
+  contractFile: string;
+  abiCollection: string[];
+}
+
 export const baseProjectPath = '/projects';
 
 export const useProject = () => {
@@ -341,6 +346,18 @@ export const useProject = () => {
     )?.value;
   }
 
+  async function updateContractBuild({
+    contractFile,
+    abiCollection,
+  }: ContractBuildParams) {
+    await updateProjectSetting({
+      buildContractList: {
+        ...activeProject?.buildContractList,
+        [contractFile]: abiCollection,
+      },
+    });
+  }
+
   return {
     projects,
     projectFiles,
@@ -360,6 +377,7 @@ export const useProject = () => {
     updateProjectSetting,
     getABIInputValues,
     updateABIInputValues,
+    updateContractBuild,
   };
 };
 

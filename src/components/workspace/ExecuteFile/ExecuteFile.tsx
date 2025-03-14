@@ -7,6 +7,7 @@ import { useSettingAction } from '@/hooks/setting.hooks';
 import { useWorkspaceActions } from '@/hooks/workspace.hooks';
 import { Project, Tree } from '@/interfaces/workspace.interface';
 import EventEmitter from '@/utility/eventEmitter';
+import { relativePath } from '@/utility/filePath';
 import { getFileExtension } from '@/utility/utils';
 import { App, Button, Select } from 'antd';
 import { FC, useEffect, useRef, useState } from 'react';
@@ -35,23 +36,65 @@ const ExecuteFile: FC<Props> = ({
   allowedFile = [],
 }) => {
   const { compileTsFile } = useWorkspaceActions();
-  const { projectFiles } = useProject();
+  const {
+    projectFiles,
+    updateContractBuild,
+    activeProject,
+    updateProjectSetting,
+  } = useProject();
   const { compileFuncProgram, compileTactProgram } = useProjectActions();
   const { createLog } = useLogActivity();
   const { hasDirtyFiles } = useFileTab();
-  const [selectedFile, setSelectedFile] = useState<Tree | undefined>();
-  const selectedFileRef = useRef<Tree | undefined>();
+  const [selectedFile, setSelectedFile] = useState<Tree['path'] | undefined>();
+  const selectedFileRef = useRef<Tree['path'] | undefined>();
   const isAutoBuildAndDeployEnabled =
     useSettingAction().isAutoBuildAndDeployEnabled();
   const { message } = App.useApp();
 
   const isAutoBuildAndDeployEnabledRef = useRef(false);
 
-  const fileList = projectFiles.filter((f: Tree | null) => {
-    const _fileExtension = getFileExtension(f?.name ?? '');
-    if (f?.name === 'stdlib.fc') return false;
-    return allowedFile.includes(_fileExtension as string);
+  const fileList = projectFiles.filter((file: Tree | null) => {
+    if (!file || !activeProject?.path) {
+      return false;
+    }
+    const fileExtension = getFileExtension(file.name);
+    const relativeFilePath = relativePath(file.path, activeProject.path);
+    if (file.name === 'stdlib.fc' || relativeFilePath.startsWith('dist/'))
+      return false;
+    return allowedFile.includes(fileExtension as string);
   });
+
+  async function handleContractCompilation(
+    compileFn: (
+      args: { path: string },
+      projectId: string,
+    ) => Promise<Map<string, Buffer>>,
+    entryFile: string,
+  ) {
+    if (!entryFile) return;
+    try {
+      const outputFiles = await compileFn({ path: entryFile }, projectId);
+
+      const abiCollection = Array.from(outputFiles.keys())
+        .filter((file) => getFileExtension(file) === 'abi')
+        .map((f) => f.replace(/^\/?dist\/?/, ''));
+
+      await updateContractBuild({
+        contractFile: relativePath(entryFile, activeProject?.path as string),
+        abiCollection: abiCollection,
+      });
+
+      if (onCompile) {
+        onCompile();
+      }
+      createLog('Contract Built Successfully', 'success');
+    } catch (error) {
+      const errorMessage = (error as Error).message.split('\n');
+      for (const message of errorMessage) {
+        createLog(message, 'error', true, true);
+      }
+    }
+  }
 
   const buildFile = async (e: ButtonClick) => {
     if (hasDirtyFiles()) {
@@ -60,47 +103,28 @@ const ExecuteFile: FC<Props> = ({
         key: 'unsaved_changes',
       });
     }
-    const selectedFile = selectedFileRef.current;
-    if (!selectedFile) {
+    const entryFile = selectedFileRef.current;
+    if (!entryFile) {
       createLog('Please select a file', 'error');
       return;
     }
-    const _fileExtension = getFileExtension(selectedFile.name) ?? '';
+    const fileExtension = getFileExtension(entryFile) ?? '';
 
     try {
-      switch (_fileExtension) {
+      switch (fileExtension) {
         case 'ts':
-          await compileTsFile(selectedFile.path, projectId);
+          await compileTsFile(entryFile, projectId);
           break;
         case 'spec.ts':
-          if (!onClick || !selectedFile.path) return;
-          onClick(e, selectedFile.path);
+          if (!onClick || !entryFile) return;
+          onClick(e, entryFile);
           break;
-        case 'fc':
-          await compileFuncProgram(selectedFile, projectId);
-          if (onCompile) {
-            onCompile();
-          }
-          createLog('Contract Built Successfully', 'success');
+        case 'fc': {
+          await handleContractCompilation(compileFuncProgram, entryFile);
           break;
-
+        }
         case 'tact':
-          try {
-            (await compileTactProgram(selectedFile, projectId)) as Map<
-              string,
-              Buffer
-            >;
-
-            if (onCompile) {
-              onCompile();
-            }
-            createLog('Built Successfully', 'success');
-          } catch (error) {
-            const errorMessage = (error as Error).message.split('\n');
-            for (const message of errorMessage) {
-              createLog(message, 'error', true, true);
-            }
-          }
+          await handleContractCompilation(compileTactProgram, entryFile);
           break;
       }
     } catch (error) {
@@ -115,10 +139,20 @@ const ExecuteFile: FC<Props> = ({
     }
   };
 
+  const updateSelectedContract = (path?: string) => {
+    if (path && !['tact', 'fc'].includes(getFileExtension(path) ?? '')) {
+      path = undefined;
+    }
+    updateProjectSetting({
+      selectedContract: path,
+    });
+  };
+
   const selectFile = (
     e: number | string | undefined | React.ChangeEvent<HTMLSelectElement>,
   ) => {
     if (e === undefined) {
+      updateSelectedContract(undefined);
       setSelectedFile(undefined);
       return;
     }
@@ -129,7 +163,8 @@ const ExecuteFile: FC<Props> = ({
         f.id === (e as React.ChangeEvent<HTMLSelectElement>)?.target?.value
       );
     });
-    setSelectedFile(selectedFile);
+    updateSelectedContract(selectedFile?.path);
+    setSelectedFile(selectedFile?.path);
   };
 
   const onFileSaved = () => {
@@ -140,6 +175,9 @@ const ExecuteFile: FC<Props> = ({
 
   useEffect(() => {
     selectedFileRef.current = selectedFile;
+    if (selectedFile) {
+      updateSelectedContract(selectedFile);
+    }
   }, [selectedFile]);
 
   useEffect(() => {
@@ -147,8 +185,18 @@ const ExecuteFile: FC<Props> = ({
   }, [isAutoBuildAndDeployEnabled]);
 
   useEffect(() => {
-    setSelectedFile(fileList[0]);
+    if (fileList.length > 0) {
+      setSelectedFile(fileList[0].path);
+    }
     EventEmitter.on('FILE_SAVED', onFileSaved);
+    if (
+      activeProject?.selectedContract &&
+      allowedFile.includes(
+        getFileExtension(activeProject.selectedContract) ?? '',
+      )
+    ) {
+      setSelectedFile(activeProject.selectedContract);
+    }
     return () => {
       EventEmitter.off('FILE_SAVED', onFileSaved);
     };
@@ -169,7 +217,7 @@ const ExecuteFile: FC<Props> = ({
         showSearch
         className="w-100"
         defaultActiveFirstOption
-        value={selectedFile?.path}
+        value={fileList.length > 0 ? selectedFile : undefined}
         onChange={selectFile}
         filterOption={(inputValue, option) => {
           return option?.title.toLowerCase().includes(inputValue.toLowerCase());

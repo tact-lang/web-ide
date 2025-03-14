@@ -79,10 +79,10 @@ const TestCases: FC<Props> = ({ projectId }) => {
           { path: contractAbsolutePath },
           projectId,
         );
-        contractBOC = contract.contractBOC;
+        contractBOC = contract.get('contractBOC');
         testCaseCode = testCaseCode.replace(
           contractCompileBlock[0],
-          `bocToCell("${contractBOC}")`,
+          `bocToCell("${contractBOC?.toString('utf-8')}")`,
         );
         testCaseCode = `
         const {
