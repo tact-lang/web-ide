@@ -618,12 +618,16 @@ const BuildProject: FC<Props> = ({ projectId, contract, updateContract }) => {
   };
 
   const autoSelectFirstContract = () => {
-    const _contractsToDeploy = contractsToDeploy();
-    if (_contractsToDeploy.length > 0 && !selectedContract) {
+    const deployableContracts = contractsToDeploy();
+    const isSelectedContractExists = deployableContracts.some(
+      (file) => file.path === selectedContract,
+    );
+
+    if (deployableContracts.length > 0 && !isSelectedContractExists) {
       deployForm.setFieldsValue({
-        contract: _contractsToDeploy[0]?.path, // Set the first contract as default
+        contract: deployableContracts[0]?.path, // Set the first contract as default
       });
-      updateSelectedContract(_contractsToDeploy[0]?.path);
+      updateSelectedContract(deployableContracts[0]?.path);
     }
   };
 
@@ -675,7 +679,13 @@ const BuildProject: FC<Props> = ({ projectId, contract, updateContract }) => {
     }
 
     const contractABIPath = getSelectedContractABIPath();
-    if (contractABIPath) {
+    const deployableContracts = contractsToDeploy();
+
+    const isSelectedContractExists = deployableContracts.some(
+      (file) => file.path === contractABIPath,
+    );
+
+    if (isSelectedContractExists) {
       deployForm.setFieldsValue({
         contract: contractABIPath,
       });

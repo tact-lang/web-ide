@@ -69,17 +69,18 @@ const ExecuteFile: FC<Props> = ({
       args: { path: string },
       projectId: string,
     ) => Promise<Map<string, Buffer>>,
+    entryFile: string,
   ) {
-    if (!selectedFile) return;
+    if (!entryFile) return;
     try {
-      const outputFiles = await compileFn({ path: selectedFile }, projectId);
+      const outputFiles = await compileFn({ path: entryFile }, projectId);
 
       const abiCollection = Array.from(outputFiles.keys())
         .filter((file) => getFileExtension(file) === 'abi')
         .map((f) => f.replace(/^\/?dist\/?/, ''));
 
       await updateContractBuild({
-        contractFile: relativePath(selectedFile, activeProject?.path as string),
+        contractFile: relativePath(entryFile, activeProject?.path as string),
         abiCollection: abiCollection,
       });
 
@@ -102,28 +103,28 @@ const ExecuteFile: FC<Props> = ({
         key: 'unsaved_changes',
       });
     }
-    const selectedFile = selectedFileRef.current;
-    if (!selectedFile) {
+    const entryFile = selectedFileRef.current;
+    if (!entryFile) {
       createLog('Please select a file', 'error');
       return;
     }
-    const fileExtension = getFileExtension(selectedFile) ?? '';
+    const fileExtension = getFileExtension(entryFile) ?? '';
 
     try {
       switch (fileExtension) {
         case 'ts':
-          await compileTsFile(selectedFile, projectId);
+          await compileTsFile(entryFile, projectId);
           break;
         case 'spec.ts':
-          if (!onClick || !selectedFile) return;
-          onClick(e, selectedFile);
+          if (!onClick || !entryFile) return;
+          onClick(e, entryFile);
           break;
         case 'fc': {
-          await handleContractCompilation(compileFuncProgram);
+          await handleContractCompilation(compileFuncProgram, entryFile);
           break;
         }
         case 'tact':
-          await handleContractCompilation(compileTactProgram);
+          await handleContractCompilation(compileTactProgram, entryFile);
           break;
       }
     } catch (error) {
@@ -216,7 +217,7 @@ const ExecuteFile: FC<Props> = ({
         showSearch
         className="w-100"
         defaultActiveFirstOption
-        value={selectedFile}
+        value={fileList.length > 0 ? selectedFile : undefined}
         onChange={selectFile}
         filterOption={(inputValue, option) => {
           return option?.title.toLowerCase().includes(inputValue.toLowerCase());
