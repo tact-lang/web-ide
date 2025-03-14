@@ -5,7 +5,7 @@
   &.tact .form:not(:last-child)::before {
     content: '';
     position: absolute;
-    bottom: -0.8rem;
+    bottom: 0;
     left: 0;
     right: 0;
     width: 5rem;

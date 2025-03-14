@@ -79,6 +79,8 @@ const BuildProject: FC<Props> = ({ projectId, contract, updateContract }) => {
     undefined,
   );
 
+  const previouslySelectedContract = useRef<string | null>();
+
   const { isAutoBuildAndDeployEnabled } = useSettingAction();
   const {
     projectFiles,
@@ -105,14 +107,10 @@ const BuildProject: FC<Props> = ({ projectId, contract, updateContract }) => {
   const { deployContract } = useContractAction();
 
   const contractsToDeploy = () => {
-    if (!activeProject?.path || !activeProject.language) {
+    if (!activeProject?.path) {
       return [];
     }
-    return filterABIFiles(
-      projectFiles,
-      activeProject.path,
-      activeProject.language,
-    );
+    return filterABIFiles(projectFiles, activeProject);
   };
 
   const cellBuilder = (info: string) => {
@@ -529,11 +527,12 @@ const BuildProject: FC<Props> = ({ projectId, contract, updateContract }) => {
     setEnvironment(network);
   };
 
-  const updateSelectedContract = (contract: string | undefined) => {
+  const updateSelectedContract = async (contract: string | undefined) => {
     setSelectedContract(contract);
+    await delay(500);
     updateProjectSetting({
-      selectedContract: contract,
-    } as ProjectSetting);
+      selectedContractABI: contract,
+    });
   };
 
   const fromJSModule = (jsModuleCode: string) => {
@@ -629,7 +628,7 @@ const BuildProject: FC<Props> = ({ projectId, contract, updateContract }) => {
   };
 
   const getSelectedContractABIPath = () => {
-    const previousSelectedABIPath = activeProject?.selectedContract;
+    const previousSelectedABIPath = activeProject?.selectedContractABI;
     if (!previousSelectedABIPath) return;
 
     const correspondingScriptPath = replaceFileExtension(
@@ -739,6 +738,20 @@ const BuildProject: FC<Props> = ({ projectId, contract, updateContract }) => {
     autoSelectFirstContract();
   }, [buildCount]);
 
+  useEffect(() => {
+    if (
+      previouslySelectedContract.current &&
+      activeProject?.selectedContract !== previouslySelectedContract.current
+    ) {
+      updateSelectedContract(undefined);
+      deployForm.setFieldsValue({
+        contract: undefined,
+      });
+
+      previouslySelectedContract.current = activeProject?.selectedContract;
+    }
+  }, [activeProject?.selectedContract]);
+
   return (
     <div className={`${s.root} onboarding-build-deploy`}>
       <h3 className={`section-heading`}>
@@ -790,7 +803,7 @@ const BuildProject: FC<Props> = ({ projectId, contract, updateContract }) => {
               '<br />- Tact version: ' + tactVersion
             }
             `}
-          allowedFile={['fc', 'tact']}
+          allowedFile={activeProject?.language === 'tact' ? ['tact'] : ['fc']}
           onCompile={() => {
             (async () => {
               if (
@@ -809,7 +822,7 @@ const BuildProject: FC<Props> = ({ projectId, contract, updateContract }) => {
             })().catch(() => {});
           }}
         />
-        {deployView()}
+        {activeProject?.selectedContract && deployView()}
       </div>
 
       {activeProject?.contractAddress && environment !== 'SANDBOX' && (
