@@ -2,6 +2,11 @@
   display: flex;
   height: 100vh;
   overflow: hidden;
+  .brandLogo {
+    width: 1.5rem;
+    margin-right: 0.5rem;
+    pointer-events: none;
+  }
   .sidebar {
     flex: 0 0 70px;
     width: 70px;
@@ -54,14 +59,6 @@
     flex-direction: column;
     justify-content: space-between;
   }
-  .heading {
-    color: var(--color-light);
-    text-align: center;
-    display: block;
-    font-size: 0.875rem;
-    font-weight: 500;
-    padding: 0.5rem 0;
-  }
   .actionWrapper {
     display: flex;
     align-items: center;
@@ -72,13 +69,10 @@
     display: flex;
     justify-content: space-between;
     padding: 0.5rem;
-    padding-left: 0.7rem;
-    padding: 0.5rem 0.5rem 0 0.7rem;
+    padding: 0.5rem 0.5rem 0 0;
     font-size: 0.875rem;
-    // border-bottom: 1px solid var(--black-500);
     align-items: center;
     font-weight: 600;
-    // margin-bottom: 0.8rem;
 
     svg {
       font-size: 1.2rem;
@@ -91,7 +85,7 @@
     }
   }
   .commonContainer {
-    padding: 1rem;
+    padding: 0.5rem;
     height: 100%;
   }
   .tabsWrapper {

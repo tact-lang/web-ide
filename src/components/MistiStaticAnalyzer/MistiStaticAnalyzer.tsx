@@ -14,7 +14,7 @@ import {
 } from '@nowarp/misti/dist';
 import { Driver } from '@nowarp/misti/dist/cli/driver';
 import { createVirtualFileSystem } from '@nowarp/misti/dist/vfs/createVirtualFileSystem';
-import stdLibFiles from '@tact-lang/compiler/dist/imports/stdlib';
+import stdLibFiles from '@tact-lang/compiler/dist/stdlib/stdlib';
 import { Button, Form, Select, Switch, TreeSelect } from 'antd';
 import { useForm } from 'antd/lib/form/Form';
 import { FC, useEffect, useState } from 'react';
@@ -165,7 +165,7 @@ const MistiStaticAnalyzer: FC = () => {
         onFinish={run}
         layout="vertical"
         initialValues={{
-          severity: Severity.INFO,
+          minSeverity: Severity.INFO,
           allDetectors: true,
         }}
         onValuesChange={onFormValuesChange}
@@ -207,7 +207,6 @@ const MistiStaticAnalyzer: FC = () => {
         >
           <Select
             placeholder="Select Minimum Severity Level"
-            allowClear
             options={severityOptions}
           />
         </Form.Item>

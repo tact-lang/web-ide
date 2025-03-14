@@ -315,9 +315,7 @@ const ManageGit: FC = () => {
 
   return (
     <div className={s.root}>
-      <span className={`text-center sidebar-section-title`}>
-        Git Version Control
-      </span>
+      <h3 className={`text-center section-heading`}>Git Version Control</h3>
       {!isGitInitialized && (
         <Button
           type="primary"
