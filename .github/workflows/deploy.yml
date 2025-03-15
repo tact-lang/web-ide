@@ -18,6 +18,9 @@ jobs:
       JOB_ENV: "${{ github.ref == 'refs/heads/main' && 'production' || github.ref == 'refs/heads/canary' && 'canary' || github.ref == 'refs/heads/staging' && 'staging' || startsWith(github.ref, 'refs/heads/td-') && 'testing' || 'unknown' }}"
       APP_ENV: "${{ github.ref == 'refs/heads/main' && 'production' || github.ref == 'refs/heads/canary' && 'canary' || github.ref == 'refs/heads/staging' && 'staging' || startsWith(github.ref, 'refs/heads/td-') && format('{0}{1}', 'testing-', github.ref_name) || 'unknown' }}"
       APP_DOMAIN: "${{ startsWith(github.ref, 'refs/heads/td-') && format('{0}{1}', github.ref_name, vars.APP_DOMAIN_TESTING) || github.ref == 'refs/heads/staging' && vars.APP_DOMAIN_STAGING || vars.APP_DOMAIN }}"
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: false
 
     permissions:
       packages: write

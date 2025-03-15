@@ -165,7 +165,7 @@ const MistiStaticAnalyzer: FC = () => {
         onFinish={run}
         layout="vertical"
         initialValues={{
-          severity: Severity.INFO,
+          minSeverity: Severity.INFO,
           allDetectors: true,
         }}
         onValuesChange={onFormValuesChange}
@@ -207,7 +207,6 @@ const MistiStaticAnalyzer: FC = () => {
         >
           <Select
             placeholder="Select Minimum Severity Level"
-            allowClear
             options={severityOptions}
           />
         </Form.Item>
