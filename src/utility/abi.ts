@@ -3,9 +3,9 @@ import {
   TactABIField,
   TactInputFields,
 } from '@/interfaces/workspace.interface';
-import { CompilerContext } from '@tact-lang/compiler/dist/context/context';
 import { getType } from '@tact-lang/compiler/dist/types/resolveDescriptors';
 
+import { CompilerContext, parseAndEvalExpression } from '@tact-lang/compiler';
 import {
   ABIArgument,
   ABIField,
@@ -92,8 +92,7 @@ export class ABIParser {
         .filter(
           (item) =>
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            (item.message as any).type !== 'Deploy' &&
-            item.message.kind !== 'any',
+            (item.message as any).type !== 'Deploy',
         )
         .map((receiver) => {
           let argumentName: string;
@@ -103,10 +102,10 @@ export class ABIParser {
               argumentName = receiver.message.type;
               break;
             case 'text':
-              argumentName = receiver.message.text ?? '';
+              argumentName = receiver.message.text ?? 'String';
               break;
             case 'any':
-              argumentName = 'any';
+              argumentName = 'Slice';
               break;
             case 'empty':
               argumentName = 'empty';
@@ -115,6 +114,8 @@ export class ABIParser {
               argumentName = 'unknown';
               break;
           }
+
+          const nonDefaultArguments = ['String', 'Slice'];
 
           if (receiver.message.kind !== 'typed') {
             return {
@@ -130,7 +131,9 @@ export class ABIParser {
                   type: {
                     kind: 'simple',
                     type: receiver.message.kind,
-                    defaultValue: argumentName,
+                    defaultValue: nonDefaultArguments.includes(argumentName)
+                      ? null
+                      : argumentName,
                   },
                 },
               ],
@@ -291,11 +294,7 @@ export async function parseInputs(
   if (typeof inputFields === 'object' && !Array.isArray(inputFields)) {
     // Check if both `value` and `type` are present in the current object. If not, then it may be a map or struct.
     if ('value' in inputFields && 'type' in inputFields) {
-      const value = inputFields['value'] as
-        | string
-        | undefined
-        | number
-        | boolean;
+      let value = inputFields['value'] as string | undefined | number | boolean;
       if (value === undefined) return;
       const valueType = inputFields['type'] as string;
 
@@ -318,6 +317,19 @@ export async function parseInputs(
           return value;
         case 'text':
           return value;
+        case 'any': {
+          if (typeof inputFields.sliceType === 'string') {
+            value = `${inputFields.sliceType}("${value}")`;
+            delete inputFields.sliceType;
+          }
+
+          const parsedExpression = parseAndEvalExpression(String(value));
+
+          if (parsedExpression.kind === 'ok') {
+            return parsedExpression.value;
+          }
+          throw new Error(parsedExpression.message);
+        }
         case 'empty':
           return null;
         default:

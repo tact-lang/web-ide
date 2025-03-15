@@ -3,7 +3,7 @@ import { TooltipPlacement } from 'antd/es/tooltip';
 import { FC } from 'react';
 
 interface Props {
-  title: string;
+  title: React.ReactNode;
   placement?: TooltipPlacement;
   children: React.ReactNode;
 }
