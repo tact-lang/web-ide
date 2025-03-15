@@ -39,6 +39,7 @@ import { ABIParser, parseInputs } from '@/utility/abi';
 import { extractContractName } from '@/utility/contract';
 import { filterABIFiles } from '@/utility/file';
 import { replaceFileExtension } from '@/utility/filePath';
+import { compilerVersion } from '@ton-community/func-js';
 import { Maybe } from '@ton/core/dist/utils/maybe';
 import { TonClient } from '@ton/ton';
 import { useForm } from 'antd/lib/form/Form';
@@ -63,6 +64,7 @@ interface Props {
 const BuildProject: FC<Props> = ({ projectId, contract, updateContract }) => {
   const [isLoading, setIsLoading] = useState('');
   const [buildCount, setBuildCount] = useState(0);
+  const [compilerInfo, setCompilerInfo] = useState('');
   const { createLog } = useLogActivity();
   const [environment, setEnvironment] = useState<NetworkEnvironment>('SANDBOX');
   const [buildOutput, setBuildoutput] = useState<{
@@ -103,6 +105,18 @@ const BuildProject: FC<Props> = ({ projectId, contract, updateContract }) => {
   const [deployForm] = useForm();
 
   const { deployContract } = useContractAction();
+
+  const updateCompilerInfo = async () => {
+    let versionInfo;
+    if (activeProject?.language === 'tact') {
+      versionInfo = `- Tact version: ${tactVersion}`;
+    } else {
+      const funcCompilerVersion = await compilerVersion();
+      versionInfo = `- FunC version: ${funcCompilerVersion.funcVersion}`;
+    }
+
+    setCompilerInfo(versionInfo);
+  };
 
   const contractsToDeploy = () => {
     if (!activeProject?.path || !activeProject.language) {
@@ -662,6 +676,10 @@ const BuildProject: FC<Props> = ({ projectId, contract, updateContract }) => {
   }, [selectedContract, contract]);
 
   useEffect(() => {
+    updateCompilerInfo();
+  }, [activeProject]);
+
+  useEffect(() => {
     try {
       updateContractInstance().catch(() => {});
     } catch (e) {
@@ -784,11 +802,8 @@ const BuildProject: FC<Props> = ({ projectId, contract, updateContract }) => {
               isAutoBuildAndDeployEnabled()
                 ? '- Auto-build and deploy is enabled for Sandbox and can be changed in settings. <br />'
                 : ''
-            }
-            ${
-              activeProject?.language === 'tact' &&
-              '<br />- Tact version: ' + tactVersion
-            }
+            } 
+            ${compilerInfo}
             `}
           allowedFile={['fc', 'tact']}
           onCompile={() => {
