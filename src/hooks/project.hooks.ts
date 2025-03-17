@@ -18,7 +18,6 @@ import {
 import { featureEnable } from '@tact-lang/compiler/dist/config/features';
 import { CompilerContext } from '@tact-lang/compiler/dist/context/context';
 import { Parser, getParser } from '@tact-lang/compiler/dist/grammar';
-import { defaultParser } from '@tact-lang/compiler/dist/grammar/grammar';
 import stdLibFiles from '@tact-lang/compiler/dist/stdlib/stdlib';
 import {
   CompileResult,
@@ -154,7 +153,7 @@ export function useProjectActions() {
     const entryFile = relativePath(file.path, activeProject?.path as string);
 
     const ast: FactoryAst = getAstFactory();
-    const parser: Parser = getParser(ast, defaultParser);
+    const parser: Parser = getParser(ast);
 
     ctx = precompile(ctx, fs, stdlib, entryFile, parser, ast);
 
