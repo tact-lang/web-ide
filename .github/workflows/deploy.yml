@@ -73,7 +73,6 @@ jobs:
             sha=${{ github.sha }}
             sha_short=${{ env.GITHUB_SHA_SHORT }}
             app_env=${{ env.APP_ENV }}
-            NEXT_PUBLIC_PROXY_KEY=${{ secrets.NEXT_PUBLIC_PROXY_KEY }}
             NEXT_PUBLIC_MIXPANEL_TOKEN=${{ secrets.NEXT_PUBLIC_MIXPANEL_TOKEN }}
             NEXT_PUBLIC_ANALYTICS_ENABLED=${{ secrets.NEXT_PUBLIC_ANALYTICS_ENABLED }}
 

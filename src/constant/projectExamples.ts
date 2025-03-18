@@ -1,6 +1,7 @@
+import { AppConfig } from '@/config/AppConfig';
+
 export const projectExamples = {
-  baseURL:
-    'https://raw.githubusercontent.com/tact-lang/tact-by-example/main/src/routes/(examples)/',
+  baseURL: `${AppConfig.proxy.GIT_RAW_CONTENT}/tact-lang/tact-by-example/main/src/routes/(examples)/`,
   examples: [
     {
       link: '01-the-deployable-trait',
