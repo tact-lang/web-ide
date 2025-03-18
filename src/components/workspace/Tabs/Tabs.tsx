@@ -1,9 +1,14 @@
+import { ContextMenu } from '@/components/ui';
 import AppIcon from '@/components/ui/icon';
 import { useFileTab } from '@/hooks';
-import { useProject } from '@/hooks/projectV2.hooks';
+import { Tree } from '@/interfaces/workspace.interface';
+import { ITabItems } from '@/state/IDE.context';
 import EventEmitter from '@/utility/eventEmitter';
-import { delay, fileTypeFromFileName } from '@/utility/utils';
-import { FC, useEffect } from 'react';
+import { fileTypeFromFileName } from '@/utility/utils';
+import type { MenuProps } from 'antd';
+import cn from 'clsx';
+import type { MenuInfo } from 'rc-menu/lib/interface';
+import { FC, useCallback, useEffect } from 'react';
 import s from './Tabs.module.scss';
 
 interface IRenameFile {
@@ -11,10 +16,35 @@ interface IRenameFile {
   newPath: string;
 }
 
+type ContextMenuKeys = 'close' | 'closeOthers' | 'closeAll';
+
+interface ContextMenuItem {
+  key: ContextMenuKeys;
+  label: string;
+}
+
+interface IContextMenuItems extends MenuProps {
+  key: ContextMenuKeys;
+  items: ContextMenuItem[];
+}
+
+const contextMenuItems: IContextMenuItems['items'] = [
+  {
+    key: 'close',
+    label: 'Close',
+  },
+  {
+    key: 'closeOthers',
+    label: 'Close Others',
+  },
+  {
+    key: 'closeAll',
+    label: 'Close All',
+  },
+];
+
 const Tabs: FC = () => {
-  const { fileTab, open, close, rename, syncTabSettings, updateFileDirty } =
-    useFileTab();
-  const { activeProject } = useProject();
+  const { fileTab, open, close, rename, updateFileDirty } = useFileTab();
 
   const closeTab = (e: React.MouseEvent, filePath: string) => {
     e.preventDefault();
@@ -22,20 +52,50 @@ const Tabs: FC = () => {
     close(filePath);
   };
 
-  const onFileSave = ({ filePath }: { filePath: string }) => {
-    updateFileDirty(filePath, false);
+  const onMenuItemClick = useCallback(
+    (info: MenuInfo, filePath: Tree['path']) => {
+      close(filePath, info.key as ContextMenuKeys);
+    },
+    [close],
+  );
+  const onFileSave = useCallback(
+    ({ filePath }: { filePath: string }) => {
+      updateFileDirty(filePath, false);
+    },
+    [updateFileDirty],
+  );
+
+  const onFileRename = useCallback(
+    ({ oldPath, newPath }: IRenameFile) => {
+      rename(oldPath, newPath);
+    },
+    [rename],
+  );
+
+  const computeTabClassNames = (item: ITabItems) => {
+    const fileExtension = item.name.split('.').pop() ?? '';
+    const fileTypeClass = fileTypeFromFileName(item.name);
+
+    return cn(
+      s.item,
+      'file-icon',
+      `${fileExtension}-lang-file-icon`,
+      `${fileTypeClass}-lang-file-icon`,
+      { [s.isActive]: item.path === fileTab.active?.path },
+    );
   };
 
-  const onFileRename = ({ oldPath, newPath }: IRenameFile) => {
-    rename(oldPath, newPath);
-  };
-
-  useEffect(() => {
-    (async () => {
-      await delay(200);
-      syncTabSettings();
-    })();
-  }, [activeProject]);
+  const renderCloseButton = (item: ITabItems) => (
+    <span
+      className={cn(s.close, { [s.isDirty]: item.isDirty })}
+      onClick={(e) => {
+        closeTab(e, item.path);
+      }}
+    >
+      {item.isDirty && <span className={s.fileDirtyIcon}></span>}
+      <AppIcon name="Close" className={s.closeIcon} />
+    </span>
+  );
 
   useEffect(() => {
     EventEmitter.on('FILE_SAVED', onFileSave);
@@ -53,30 +113,26 @@ const Tabs: FC = () => {
     <div className={s.container}>
       <div className={s.tabList}>
         {fileTab.items.map((item) => (
-          <div
-            onClick={() => {
-              open(item.name, item.path, item.type);
-            }}
-            className={`${s.item} 
-            file-icon
-            ${item.name.split('.').pop()}-lang-file-icon
-            ${fileTypeFromFileName(item.name)}-lang-file-icon
-               ${item.path === fileTab.active?.path ? s.isActive : ''}
-              `}
+          <ContextMenu
             key={item.path}
+            menu={{
+              items: contextMenuItems,
+              onClick: (info) => {
+                onMenuItemClick(info, item.path);
+              },
+            }}
           >
-            {item.name}
-            {item.type === 'git' && ' (git)'}
-            <span
-              className={`${s.close} ${item.isDirty ? s.isDirty : ''}`}
-              onClick={(e) => {
-                closeTab(e, item.path);
+            <div
+              onClick={() => {
+                open(item.name, item.path, item.type);
               }}
+              className={computeTabClassNames(item)}
             >
-              <span className={s.fileDirtyIcon}></span>
-              <AppIcon name="Close" className={s.closeIcon} />
-            </span>
-          </div>
+              {item.name}
+              {item.type === 'git' && ' (git)'}
+              {renderCloseButton(item)}
+            </div>
+          </ContextMenu>
         ))}
       </div>
     </div>

@@ -1,15 +1,16 @@
 'use client';
 
+import MistiStaticAnalyzer from '@/components/MistiStaticAnalyzer';
 import { ManageGit } from '@/components/git';
 import { DownloadProject } from '@/components/project';
 import { ProjectTemplate } from '@/components/template';
-import { NonProductionNotice } from '@/components/ui';
+import { AppLogo, NonProductionNotice } from '@/components/ui';
 import { AppConfig } from '@/config/AppConfig';
 import { useFileTab } from '@/hooks';
 import { useLogActivity } from '@/hooks/logActivity.hooks';
 import { useProject } from '@/hooks/projectV2.hooks';
 import { useSettingAction } from '@/hooks/setting.hooks';
-import { Project, Tree } from '@/interfaces/workspace.interface';
+import { Project } from '@/interfaces/workspace.interface';
 import { Analytics } from '@/utility/analytics';
 import EventEmitter from '@/utility/eventEmitter';
 import * as TonCore from '@ton/core';
@@ -17,7 +18,7 @@ import * as TonCrypto from '@ton/crypto';
 import { Blockchain } from '@ton/sandbox';
 import { Buffer } from 'buffer';
 import { useRouter } from 'next/router';
-import { FC, useEffect, useMemo, useState } from 'react';
+import { FC, useEffect, useMemo, useRef, useState } from 'react';
 import Split from 'react-split';
 import { useEffectOnce } from 'react-use';
 import BottomPanel from '../BottomPanel/BottomPanel';
@@ -34,6 +35,8 @@ import FileTree from '../tree/FileTree';
 import ItemAction from '../tree/FileTree/ItemActions';
 import s from './WorkSpace.module.scss';
 
+type SplitInstance = Split & { split: Split.Instance };
+
 const WorkSpace: FC = () => {
   const { clearLog, createLog } = useLogActivity();
 
@@ -42,28 +45,14 @@ const WorkSpace: FC = () => {
   const [isLoaded, setIsLoaded] = useState(false);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [contract, setContract] = useState<any>('');
+  const splitVerticalRef = useRef<SplitInstance | null>(null);
 
   const { tab } = router.query;
-  const {
-    activeProject,
-    setActiveProject,
-    projectFiles,
-    loadProjectFiles,
-    newFileFolder,
-  } = useProject();
+  const { activeProject, setActiveProject, loadProjectFiles } = useProject();
 
-  const { fileTab, open: openTab } = useFileTab();
+  const { fileTab } = useFileTab();
 
   const { init: initGlobalSetting } = useSettingAction();
-
-  const commitItemCreation = async (type: Tree['type'], name: string) => {
-    if (!name) return;
-    try {
-      await newFileFolder(name, type);
-    } catch (error) {
-      createLog((error as Error).message, 'error');
-    }
-  };
 
   const createSandbox = async (force: boolean = false) => {
     if (globalWorkspace.sandboxBlockchain && !force) {
@@ -81,7 +70,6 @@ const WorkSpace: FC = () => {
       return;
     }
     await setActiveProject(selectedProjectPath);
-    await loadProjectFiles(selectedProjectPath);
   };
 
   const cachedProjectPath = useMemo(() => {
@@ -112,13 +100,7 @@ const WorkSpace: FC = () => {
     createLog(`Project '${activeProject.name}' is opened`);
     createSandbox(true).catch(() => {});
 
-    if (fileTab.active) return;
-    // Open main file on project switch
-    const mainFile = projectFiles.find((file) =>
-      ['main.tact', 'main.fc'].includes(file.name),
-    );
-    if (!mainFile) return;
-    openTab(mainFile.name, mainFile.path);
+    loadProjectFiles(cachedProjectPath);
   }, [cachedProjectPath]);
 
   useEffect(() => {
@@ -155,6 +137,17 @@ const WorkSpace: FC = () => {
     window.TonCore = TonCore;
     window.TonCrypto = TonCrypto;
     window.Buffer = Buffer;
+
+    const handleResize = () => {
+      if (!splitVerticalRef.current) return;
+
+      splitVerticalRef.current.split.setSizes([5, 95]);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
   });
 
   return (
@@ -174,8 +167,10 @@ const WorkSpace: FC = () => {
         />
       </div>
       <Split
-        className={s.splitHorizontal}
+        ref={splitVerticalRef}
+        className={s.splitVertical}
         minSize={250}
+        expandToMin={true}
         gutterSize={4}
         sizes={[5, 95]}
         onDragEnd={() => {
@@ -184,8 +179,11 @@ const WorkSpace: FC = () => {
       >
         <div className={s.tree}>
           {isLoaded && activeMenu === 'code' && (
-            <div className="onboarding-file-explorer">
-              <span className={s.heading}>Explorer</span>
+            <div className={s.commonContainer}>
+              <h3 className={`section-heading`}>
+                <AppLogo />
+                Explorer
+              </h3>
               <ManageProject />
               {activeProject?.path && (
                 <div className={s.globalAction}>
@@ -195,10 +193,13 @@ const WorkSpace: FC = () => {
                       className={s.visible}
                       allowedActions={['NewFile', 'NewFolder']}
                       onNewFile={() => {
-                        commitItemCreation('file', 'new file');
+                        EventEmitter.emit('CREATE_ROOT_FILE_OR_FOLDER', 'file');
                       }}
                       onNewDirectory={() => {
-                        commitItemCreation('directory', 'new folder');
+                        EventEmitter.emit(
+                          'CREATE_ROOT_FILE_OR_FOLDER',
+                          'directory',
+                        );
                       }}
                     />
                     <DownloadProject
@@ -213,18 +214,25 @@ const WorkSpace: FC = () => {
             </div>
           )}
           {activeMenu === 'build' && globalWorkspace.sandboxBlockchain && (
-            <BuildProject
-              projectId={activeProject?.path as string}
-              onCodeCompile={(_codeBOC) => {}}
-              contract={contract}
-              updateContract={(contractInstance) => {
-                setContract(contractInstance);
-              }}
-            />
+            <div className={s.commonContainer}>
+              <BuildProject
+                projectId={activeProject?.path as string}
+                onCodeCompile={(_codeBOC) => {}}
+                contract={contract}
+                updateContract={(contractInstance) => {
+                  setContract(contractInstance);
+                }}
+              />
+            </div>
           )}
           {activeMenu === 'test-cases' && (
             <div className={s.commonContainer}>
               <TestCases projectId={activeProject?.path as string} />
+            </div>
+          )}
+          {activeMenu === 'misti' && (
+            <div className={s.commonContainer}>
+              <MistiStaticAnalyzer />
             </div>
           )}
           {activeMenu === 'git' && (
@@ -237,7 +245,7 @@ const WorkSpace: FC = () => {
           {isLoaded && (
             <>
               <Split
-                className={s.splitVertical}
+                className={s.splitHorizontal}
                 minSize={50}
                 gutterSize={4}
                 sizes={[80, 20]}

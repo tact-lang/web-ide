@@ -79,10 +79,10 @@ const TestCases: FC<Props> = ({ projectId }) => {
           { path: contractAbsolutePath },
           projectId,
         );
-        contractBOC = contract.contractBOC;
+        contractBOC = contract.get('contractBOC');
         testCaseCode = testCaseCode.replace(
           contractCompileBlock[0],
-          `bocToCell("${contractBOC}")`,
+          `bocToCell("${contractBOC?.toString('utf-8')}")`,
         );
         testCaseCode = `
         const {
@@ -147,7 +147,7 @@ const TestCases: FC<Props> = ({ projectId }) => {
     await response.output.pipeTo(
       new WritableStream({
         write(data) {
-          EventEmitter.emit('TEST_CASE_LOG', data);
+          EventEmitter.emit('LOG', data);
         },
       }),
     );

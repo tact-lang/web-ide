@@ -1,80 +1,35 @@
-import fileSystem from '@/lib/fs';
-import { iFileTabSchema } from '@/schemas/fileTab.schema';
 import { IDEContext, IFileTab } from '@/state/IDE.context';
 import EventEmitter from '@/utility/eventEmitter';
+import {
+  DEFAULT_PROJECT_SETTING,
+  updateProjectTabSetting,
+} from '@/utility/projectSetting';
 import cloneDeep from 'lodash.clonedeep';
 import { useContext } from 'react';
 
 const useFileTab = () => {
   const { fileTab, setFileTab, activeProject } = useContext(IDEContext);
 
-  const syncTabSettings = async (updatedTab?: IFileTab) => {
-    if (!activeProject || Object.keys(activeProject).length === 0) return;
-
-    const defaultSetting = {
-      tab: {
-        items: [],
-        active: null,
-      },
-    };
-
-    try {
-      const settingPath = `${activeProject.path}/.ide/setting.json`;
-      if (!(await fileSystem.exists(settingPath))) {
-        await fileSystem.writeFile(
-          settingPath,
-          JSON.stringify(defaultSetting, null, 4),
-          {
-            overwrite: true,
-          },
-        );
-      }
-      const setting = (await fileSystem.readFile(settingPath)) as string;
-
-      let parsedSetting = setting ? JSON.parse(setting) : defaultSetting;
-
-      if (updatedTab) {
-        parsedSetting.tab = updatedTab;
-      } else {
-        parsedSetting = {
-          ...defaultSetting,
-          ...parsedSetting,
-        };
-      }
-
-      try {
-        parsedSetting.tab = iFileTabSchema.parse(parsedSetting.tab);
-      } catch (error) {
-        parsedSetting.tab = defaultSetting.tab;
-      }
-
-      setFileTab(cloneDeep(parsedSetting.tab));
-
-      await fileSystem.writeFile(
-        settingPath,
-        JSON.stringify(parsedSetting, null, 2),
-        {
-          overwrite: true,
-        },
-      );
-      EventEmitter.emit('FORCE_UPDATE_FILE', settingPath);
-    } catch (error) {
-      console.error('Error syncing tab settings:', error);
-    }
+  const updateTabs = (tabs: IFileTab) => {
+    setFileTab(tabs);
   };
 
-  const open = (
+  const open = async (
     name: string,
     path: string,
     type: 'default' | 'git' = 'default',
   ) => {
-    if (fileTab.active?.path === path) return;
+    if (fileTab.active?.path === path || !activeProject?.path) return;
 
     const existingTab = fileTab.items.find((item) => item.path === path);
 
     if (existingTab) {
-      const updatedTab = { ...fileTab, active: { path, type }, type };
-      syncTabSettings(updatedTab);
+      updateTabs(
+        await updateProjectTabSetting(activeProject.path, {
+          ...fileTab,
+          active: { path, type },
+        }),
+      );
     } else {
       const newTab = { name, path, isDirty: false, type };
       const updatedTab = {
@@ -82,45 +37,30 @@ const useFileTab = () => {
         items: [...fileTab.items, newTab],
         active: { path, type },
       };
-      syncTabSettings(updatedTab);
+      updateTabs(await updateProjectTabSetting(activeProject.path, updatedTab));
     }
   };
 
-  const close = (filePath: string, closeAll: boolean = false) => {
+  const close = async (
+    filePath: string | null,
+    action: 'close' | 'closeAll' | 'closeOthers' = 'close',
+  ) => {
     let updatedTab: IFileTab;
 
-    if (closeAll) {
-      updatedTab = { items: [], active: null };
+    if (action === 'closeAll') {
+      updatedTab = DEFAULT_PROJECT_SETTING.tab;
+    } else if (action === 'closeOthers' && filePath) {
+      updatedTab = closeOtherTabs(filePath, fileTab);
     } else {
-      const updatedItems = fileTab.items.filter(
-        (item) => item.path !== filePath,
-      );
-
-      let newActiveTab = fileTab.active;
-      if (fileTab.active?.path === filePath) {
-        const closedTabIndex = fileTab.items.findIndex(
-          (item) => item.path === filePath,
-        );
-        if (updatedItems.length > 0 && newActiveTab) {
-          if (closedTabIndex > 0) {
-            newActiveTab.path = updatedItems[closedTabIndex - 1].path;
-            newActiveTab.type = updatedItems[closedTabIndex - 1].type;
-          } else {
-            newActiveTab.path = updatedItems[0].path;
-            newActiveTab.type = updatedItems[0].type;
-          }
-        } else {
-          newActiveTab = null; // No more tabs open
-        }
-      }
-
-      updatedTab = { items: updatedItems, active: newActiveTab };
+      updatedTab = closeSingleTab(filePath, fileTab);
     }
 
-    syncTabSettings(updatedTab);
+    updateTabs(
+      await updateProjectTabSetting(activeProject?.path as string, updatedTab),
+    );
   };
 
-  const rename = (oldPath: string, newPath: string) => {
+  const rename = async (oldPath: string, newPath: string) => {
     const updatedItems = fileTab.items.map((item) => {
       if (item.path === oldPath) {
         return {
@@ -142,11 +82,13 @@ const useFileTab = () => {
         : { path: fileTab.active?.path ?? '', type: 'default' as const }, // Set the active tab to the new path if it was renamed
     };
 
-    syncTabSettings(updatedTab);
+    updateTabs(
+      await updateProjectTabSetting(activeProject?.path as string, updatedTab),
+    );
     EventEmitter.emit('FORCE_UPDATE_FILE', newPath);
   };
 
-  const updateFileDirty = (filePath: string, isDirty: boolean) => {
+  const updateFileDirty = async (filePath: string, isDirty: boolean) => {
     const updatedItems = cloneDeep(fileTab).items.map((item) => {
       if (item.path === filePath) {
         return { ...item, isDirty: isDirty };
@@ -155,7 +97,9 @@ const useFileTab = () => {
     });
 
     const updatedTab = { ...fileTab, items: updatedItems };
-    syncTabSettings(updatedTab);
+    updateTabs(
+      await updateProjectTabSetting(activeProject?.path as string, updatedTab),
+    );
   };
 
   const hasDirtyFiles = () => {
@@ -167,10 +111,50 @@ const useFileTab = () => {
     open,
     close,
     rename,
-    syncTabSettings,
     updateFileDirty,
     hasDirtyFiles,
   };
 };
+
+/**
+ * Close all tabs except the specified one.
+ */
+function closeOtherTabs(filePath: string, fileTab: IFileTab): IFileTab {
+  const updatedItems = fileTab.items.filter((item) => item.path === filePath);
+  return {
+    items: updatedItems,
+    active:
+      updatedItems.length > 0
+        ? { path: updatedItems[0].path, type: updatedItems[0].type }
+        : null,
+  };
+}
+
+/**
+ * Close a single tab and determine the next active tab.
+ */
+function closeSingleTab(filePath: string | null, fileTab: IFileTab): IFileTab {
+  const updatedItems = fileTab.items.filter((item) => item.path !== filePath);
+
+  let newActiveTab = fileTab.active;
+  if (fileTab.active?.path === filePath) {
+    const closedTabIndex = fileTab.items.findIndex(
+      (item) => item.path === filePath,
+    );
+    if (updatedItems.length > 0) {
+      newActiveTab =
+        closedTabIndex > 0
+          ? {
+              path: updatedItems[closedTabIndex - 1].path,
+              type: updatedItems[closedTabIndex - 1].type,
+            }
+          : { path: updatedItems[0].path, type: updatedItems[0].type };
+    } else {
+      newActiveTab = null; // No more tabs open
+    }
+  }
+
+  return { items: updatedItems, active: newActiveTab };
+}
 
 export default useFileTab;

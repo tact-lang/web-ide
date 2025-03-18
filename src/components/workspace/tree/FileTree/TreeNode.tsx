@@ -5,9 +5,10 @@ import { Project, Tree } from '@/interfaces/workspace.interface';
 import EventEmitter from '@/utility/eventEmitter';
 import { encodeBase64, fileTypeFromFileName } from '@/utility/utils';
 import { NodeModel } from '@minoru/react-dnd-treeview';
-import { message } from 'antd';
+import { App } from 'antd';
 import cn from 'clsx';
 import { FC, useState } from 'react';
+import { INewItem } from './FileTree';
 import s from './FileTree.module.scss';
 import ItemAction, { actionsTypes } from './ItemActions';
 import TreePlaceholderInput from './TreePlaceholderInput';
@@ -18,23 +19,34 @@ interface Props {
   isOpen: boolean;
   onToggle: (id: NodeModel['id']) => void;
   projectId: Project['id'];
+  newItemToCreate: INewItem | null;
+  setNewItemToCreate: (data: INewItem | null) => void;
+  commitItemCreation: () => void;
 }
 
 export interface TreeNodeData {
   path: string;
 }
 
-const TreeNode: FC<Props> = ({ node, depth, isOpen, onToggle }) => {
+const TreeNode: FC<Props> = ({
+  node,
+  depth,
+  isOpen,
+  onToggle,
+  newItemToCreate,
+  setNewItemToCreate,
+  commitItemCreation,
+}) => {
   const { droppable } = node;
-  const indent = (depth + 1) * 15;
+  const indent = depth * 15;
 
   const [isEditing, setIsEditing] = useState(false);
-  const [newItemAdd, setNewItemAdd] = useState<Tree['type'] | ''>('');
 
-  const { deleteProjectFile, renameProjectFile, newFileFolder } = useProject();
+  const { deleteProjectFile, renameProjectFile } = useProject();
   const { open: openTab } = useFileTab();
   const { createLog } = useLogActivity();
   const { getFile } = useFile();
+  const { message } = App.useApp();
 
   const disallowedFile = [
     'message.cell.ts',
@@ -76,29 +88,19 @@ const TreeNode: FC<Props> = ({ node, depth, isOpen, onToggle }) => {
     }
   };
 
-  const commitItemCreation = async (name: string) => {
-    if (!newItemAdd) return;
-    const path = `${node.data?.path}/${name}`;
-    try {
-      await newFileFolder(path, newItemAdd);
-      reset();
-    } catch (error) {
-      createLog((error as Error).message, 'error');
-    }
-  };
-
   const updateItemTypeCreation = (type: Tree['type']) => {
     if (!isAllowed()) return;
     if (node.droppable && !isOpen) {
       onToggle(node.id);
     }
-    setNewItemAdd(type);
+    if (!node.data) return;
+    setNewItemToCreate({ type, parentPath: node.data.path, name: '' });
   };
 
   const reset = () => {
     document.body.classList.remove('editing-file-folder');
-    setNewItemAdd('');
     setIsEditing(false);
+    setNewItemToCreate(null);
   };
 
   const isSystemFile = (fileName: string) => {
@@ -227,12 +229,12 @@ const TreeNode: FC<Props> = ({ node, depth, isOpen, onToggle }) => {
           />
         )}
       </div>
-      {newItemAdd && (
+      {newItemToCreate && newItemToCreate.parentPath === node.data?.path && (
         <TreePlaceholderInput
           style={{ paddingInlineStart: 15 * (depth + 2) }}
           onSubmit={commitItemCreation}
           onCancel={reset}
-          type={newItemAdd}
+          type={newItemToCreate.type}
         />
       )}
     </>

@@ -1,8 +1,8 @@
-FROM node:21-alpine AS build
+FROM node:22-alpine AS build
 
 WORKDIR /app
 COPY package*.json ./
-RUN npm install
+RUN npm install --ignore-engines
 COPY . .
 
 ARG NEXT_PUBLIC_PROXY_KEY=redacted_next_public_proxy_key
@@ -15,7 +15,7 @@ RUN NEXT_PUBLIC_PROXY_KEY=${NEXT_PUBLIC_PROXY_KEY} \
     npm run build
 
 
-FROM node:21-alpine AS runtime
+FROM node:22-alpine AS runtime
 
 WORKDIR /app
 

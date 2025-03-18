@@ -13,7 +13,11 @@ const nextConfig = withTM({
     unoptimized: true,
   },
   webpack: (config, options) => {
-    config.resolve.fallback = { fs: false };
+    config.resolve.fallback = {
+      fs: false,
+      child_process: false,
+      "timers/promises": false,
+    };
     config.resolve.alias = {
       ...config.resolve.alias,
       vscode: require.resolve(

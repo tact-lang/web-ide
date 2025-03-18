@@ -1,5 +1,5 @@
 import { ThemeContext } from '@/components/shared/ThemeProvider';
-import { AppLogo, Tooltip } from '@/components/ui';
+import { Tooltip } from '@/components/ui';
 import AppIcon, { AppIconType } from '@/components/ui/icon';
 import { AppData } from '@/constant/AppData';
 import { useSettingAction } from '@/hooks/setting.hooks';
@@ -8,7 +8,13 @@ import Link from 'next/link';
 import { FC, useContext } from 'react';
 import s from './WorkspaceSidebar.module.scss';
 
-export type WorkSpaceMenu = 'code' | 'build' | 'test-cases' | 'setting' | 'git';
+export type WorkSpaceMenu =
+  | 'code'
+  | 'build'
+  | 'test-cases'
+  | 'setting'
+  | 'misti'
+  | 'git';
 interface MenuItem {
   label: string;
   value: WorkSpaceMenu;
@@ -35,12 +41,10 @@ const WorkspaceSidebar: FC<Props> = ({ activeMenu, onMenuClicked }) => {
     getSettingStateByKey,
     updateEditorMode,
     toggleExternalMessage,
-    toggleMasterChain,
   } = useSettingAction();
 
   const editorMode = getSettingStateByKey('editorMode');
   const isExternalMessage = getSettingStateByKey('isExternalMessage');
-  const isMasterChainEnabled = getSettingStateByKey('masterchain');
 
   const themeContext = useContext(ThemeContext);
 
@@ -59,6 +63,11 @@ const WorkspaceSidebar: FC<Props> = ({ activeMenu, onMenuClicked }) => {
       label: 'Unit Test',
       value: 'test-cases',
       icon: 'Test',
+    },
+    {
+      label: 'Misti Static Analyzer',
+      value: 'misti',
+      icon: 'CodeScan',
     },
     {
       label: 'Git',
@@ -95,16 +104,6 @@ const WorkspaceSidebar: FC<Props> = ({ activeMenu, onMenuClicked }) => {
             checked={!!isExternalMessage}
             onChange={(toggleState) => {
               toggleExternalMessage(toggleState);
-            }}
-          />
-        </Form.Item>
-      </div>
-      <div className={s.settingItem}>
-        <Form.Item label="Masterchain" valuePropName="checked">
-          <Switch
-            checked={!!isMasterChainEnabled}
-            onChange={(toggleState) => {
-              toggleMasterChain(toggleState);
             }}
           />
         </Form.Item>
@@ -204,7 +203,6 @@ const WorkspaceSidebar: FC<Props> = ({ activeMenu, onMenuClicked }) => {
   return (
     <div className={s.container}>
       <div>
-        <AppLogo className={s.brandLogo} href="/" />
         {menuItems.map((menu, i) => {
           if (menu.private) {
             return;

@@ -14,9 +14,9 @@ import { Analytics } from '@/utility/analytics';
 import { buildTs } from '@/utility/typescriptHelper';
 import {
   delay,
-  getFileExtension,
   htmlToAnsi,
   isIncludesTypeCellOrSlice,
+  stripPrefix,
   tonHttpEndpoint,
 } from '@/utility/utils';
 import { Network } from '@orbs-network/ton-access';
@@ -30,11 +30,16 @@ import ContractInteraction from '../ContractInteraction';
 import ExecuteFile from '../ExecuteFile/ExecuteFile';
 import s from './BuildProject.module.scss';
 
+import { AppLogo } from '@/components/ui';
 import AppIcon from '@/components/ui/icon';
 import { useFile } from '@/hooks';
 import { useProject } from '@/hooks/projectV2.hooks';
 import { useSettingAction } from '@/hooks/setting.hooks';
 import { ABIParser, parseInputs } from '@/utility/abi';
+import { extractContractName } from '@/utility/contract';
+import { filterABIFiles } from '@/utility/file';
+import { replaceFileExtension } from '@/utility/filePath';
+import { compilerVersion } from '@ton-community/func-js';
 import { Maybe } from '@ton/core/dist/utils/maybe';
 import { TonClient } from '@ton/ton';
 import { useForm } from 'antd/lib/form/Form';
@@ -59,6 +64,7 @@ interface Props {
 const BuildProject: FC<Props> = ({ projectId, contract, updateContract }) => {
   const [isLoading, setIsLoading] = useState('');
   const [buildCount, setBuildCount] = useState(0);
+  const [compilerInfo, setCompilerInfo] = useState('');
   const { createLog } = useLogActivity();
   const [environment, setEnvironment] = useState<NetworkEnvironment>('SANDBOX');
   const [buildOutput, setBuildoutput] = useState<{
@@ -74,6 +80,8 @@ const BuildProject: FC<Props> = ({ projectId, contract, updateContract }) => {
   const [selectedContract, setSelectedContract] = useState<string | undefined>(
     undefined,
   );
+
+  const previouslySelectedContract = useRef<string | null>();
 
   const { isAutoBuildAndDeployEnabled } = useSettingAction();
   const {
@@ -91,34 +99,32 @@ const BuildProject: FC<Props> = ({ projectId, contract, updateContract }) => {
   const connectedWalletAddress = useTonAddress();
 
   const { sandboxBlockchain } = globalWorkspace;
-  const tactVersion = packageJson.dependencies['@tact-lang/compiler'].replace(
+  const tactVersion = stripPrefix(
+    packageJson.dependencies['@tact-lang/compiler'],
     '^',
-    '',
   );
 
   const [deployForm] = useForm();
 
   const { deployContract } = useContractAction();
 
+  const updateCompilerInfo = async () => {
+    let versionInfo;
+    if (activeProject?.language === 'tact') {
+      versionInfo = `- Tact version: ${tactVersion}`;
+    } else {
+      const funcCompilerVersion = await compilerVersion();
+      versionInfo = `- FunC version: ${funcCompilerVersion.funcVersion}`;
+    }
+
+    setCompilerInfo(versionInfo);
+  };
+
   const contractsToDeploy = () => {
-    return projectFiles
-      .filter((f) => {
-        const _fileExtension = getFileExtension(f.name || '');
-        return (
-          f.path.startsWith(`${activeProject?.path}/dist`) &&
-          ['abi'].includes(_fileExtension as string)
-        );
-      })
-      .map((f) => {
-        return {
-          id: f.id,
-          name: f.name
-            .replace('.abi', '')
-            .replace('tact_', '')
-            .replace('func_', ''),
-          path: f.path,
-        };
-      });
+    if (!activeProject?.path) {
+      return [];
+    }
+    return filterABIFiles(projectFiles, activeProject);
   };
 
   const cellBuilder = (info: string) => {
@@ -276,8 +282,17 @@ const BuildProject: FC<Props> = ({ projectId, contract, updateContract }) => {
 
   const deploy = async () => {
     createLog(`Deploying contract ...`, 'info');
-    const contractBOCPath = selectedContract?.replace('.abi', '.code.boc');
-    const contractBOC = (await getFile(contractBOCPath!)) as string;
+    if (!selectedContract) {
+      createLog('Select a contract', 'error');
+      return;
+    }
+
+    const contractBOCPath = replaceFileExtension(
+      selectedContract,
+      '.abi',
+      '.code.boc',
+    );
+    const contractBOC = (await getFile(contractBOCPath)) as string;
     if (!contractBOC) {
       throw new Error('Contract BOC is missing. Rebuild the contract.');
     }
@@ -346,10 +361,14 @@ const BuildProject: FC<Props> = ({ projectId, contract, updateContract }) => {
   };
 
   const createStateInitCell = async (initParams = '') => {
-    if (!selectedContract) {
+    if (!selectedContract || !activeProject?.path) {
       throw new Error('Please select contract');
     }
-    const contractScriptPath = selectedContract.replace('.abi', '.ts');
+    const contractScriptPath = replaceFileExtension(
+      selectedContract,
+      '.abi',
+      '.ts',
+    );
     if (!cellBuilderRef.current?.contentWindow) return;
     let contractScript = '';
     try {
@@ -357,14 +376,14 @@ const BuildProject: FC<Props> = ({ projectId, contract, updateContract }) => {
     } catch (error) {
       /* empty */
     }
-    if (activeProject?.language === 'tact' && !contractScript) {
+    if (activeProject.language === 'tact' && !contractScript) {
       throw new Error('Contract script is missing. Rebuild the contract.');
     }
 
     try {
       let jsOutout = [];
 
-      if (activeProject?.language == 'tact') {
+      if (activeProject.language == 'tact') {
         jsOutout = await buildTs(
           {
             'tact.ts': contractScript,
@@ -376,7 +395,7 @@ const BuildProject: FC<Props> = ({ projectId, contract, updateContract }) => {
         let cellCode = '';
         try {
           stateInitContent = (await getFile(
-            `${activeProject?.path}/stateInit.cell.ts`,
+            `${activeProject.path}/stateInit.cell.ts`,
           )) as string;
         } catch (error) {
           console.log('stateInit.cell.ts is missing');
@@ -406,9 +425,12 @@ const BuildProject: FC<Props> = ({ projectId, contract, updateContract }) => {
 
       const finalJsoutput = fromJSModule((jsOutout as OutputChunk[])[0].code);
 
-      const contractName = extractContractName(selectedContract);
+      const contractName = extractContractName(
+        selectedContract,
+        activeProject.path,
+      );
 
-      if (activeProject?.language == 'tact') {
+      if (activeProject.language == 'tact') {
         const _code = `async function main(initParams) {
           ${finalJsoutput}
           const contractInit = await ${contractName}.fromInit(...Object.values(initParams));
@@ -429,8 +451,8 @@ const BuildProject: FC<Props> = ({ projectId, contract, updateContract }) => {
           name: 'ton-web-ide',
           type: 'state-init-data',
           code: finalJsoutput,
-          language: activeProject?.language,
-          contractName: activeProject?.contractName,
+          language: activeProject.language,
+          contractName: activeProject.contractName,
           initParams,
         },
         '*',
@@ -519,20 +541,12 @@ const BuildProject: FC<Props> = ({ projectId, contract, updateContract }) => {
     setEnvironment(network);
   };
 
-  const updateSelectedContract = (contract: string) => {
+  const updateSelectedContract = async (contract: string | undefined) => {
     setSelectedContract(contract);
+    await delay(500);
     updateProjectSetting({
-      selectedContract: contract,
-    } as ProjectSetting);
-  };
-
-  const extractContractName = (currentContractName: string) => {
-    return currentContractName
-      .replace(activeProject?.path + '/', '')
-      .replace('dist/', '')
-      .replace('.abi', '')
-      .replace('tact_', '')
-      .replace('func_', '');
+      selectedContractABI: contract,
+    });
   };
 
   const fromJSModule = (jsModuleCode: string) => {
@@ -547,7 +561,11 @@ const BuildProject: FC<Props> = ({ projectId, contract, updateContract }) => {
     language: 'tact' | 'func',
     supressErrors = false,
   ) => {
-    const contractScriptPath = currentContractName.replace('.abi', '.ts');
+    const contractScriptPath = replaceFileExtension(
+      currentContractName,
+      '.abi',
+      '.ts',
+    );
     const contractScript = (await getFile(contractScriptPath)) as string;
     if (language === 'tact' && !contractScript) {
       if (supressErrors) {
@@ -589,7 +607,10 @@ const BuildProject: FC<Props> = ({ projectId, contract, updateContract }) => {
     );
     if (!output) return;
 
-    const contractName = extractContractName(selectedContract);
+    const contractName = extractContractName(
+      selectedContract,
+      activeProject.path!,
+    );
 
     const _code = `async function main() {
       ${output.finalJSoutput}
@@ -611,19 +632,55 @@ const BuildProject: FC<Props> = ({ projectId, contract, updateContract }) => {
   };
 
   const autoSelectFirstContract = () => {
-    const _contractsToDeploy = contractsToDeploy();
-    if (_contractsToDeploy.length > 0 && !selectedContract) {
+    const deployableContracts = contractsToDeploy();
+    const isSelectedContractExists = deployableContracts.some(
+      (file) => file.path === selectedContract,
+    );
+
+    if (deployableContracts.length > 0 && !isSelectedContractExists) {
       deployForm.setFieldsValue({
-        contract: _contractsToDeploy[0]?.path, // Set the first contract as default
+        contract: deployableContracts[0]?.path, // Set the first contract as default
       });
-      updateSelectedContract(_contractsToDeploy[0]?.path);
+      updateSelectedContract(deployableContracts[0]?.path);
     }
+  };
+
+  const getSelectedContractABIPath = () => {
+    const previousSelectedABIPath = activeProject?.selectedContractABI;
+    if (!previousSelectedABIPath) return;
+
+    const correspondingScriptPath = replaceFileExtension(
+      previousSelectedABIPath,
+      '.abi',
+      '.ts',
+    );
+
+    let contractABIPath: string | undefined = previousSelectedABIPath;
+
+    // in case of Tact, verify the presence of the corresponding contract wrapper script
+    if (activeProject.language === 'tact') {
+      const scriptFile = projectFiles.find(
+        (file) => file.path === correspondingScriptPath,
+      );
+      const hasValidScriptFile =
+        scriptFile &&
+        projectFiles.find((file) => file.path === previousSelectedABIPath);
+
+      contractABIPath = hasValidScriptFile
+        ? previousSelectedABIPath
+        : undefined;
+    }
+    return contractABIPath;
   };
 
   useEffect(() => {
     updateABI().catch(() => {});
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedContract, contract]);
+
+  useEffect(() => {
+    updateCompilerInfo();
+  }, [activeProject]);
 
   useEffect(() => {
     try {
@@ -638,10 +695,22 @@ const BuildProject: FC<Props> = ({ projectId, contract, updateContract }) => {
     if (activeProject?.network) {
       setEnvironment(activeProject.network);
     }
-    if (activeProject?.selectedContract) {
-      setSelectedContract(activeProject.selectedContract);
-      deployForm.setFieldsValue({ contract: activeProject.selectedContract });
+
+    const contractABIPath = getSelectedContractABIPath();
+    const deployableContracts = contractsToDeploy();
+
+    const isSelectedContractExists = deployableContracts.some(
+      (file) => file.path === contractABIPath,
+    );
+
+    if (isSelectedContractExists) {
+      deployForm.setFieldsValue({
+        contract: contractABIPath,
+      });
+
+      updateSelectedContract(contractABIPath);
     }
+
     const handler = (
       event: MessageEvent<{
         name: string;
@@ -697,9 +766,25 @@ const BuildProject: FC<Props> = ({ projectId, contract, updateContract }) => {
     autoSelectFirstContract();
   }, [buildCount]);
 
+  useEffect(() => {
+    if (
+      previouslySelectedContract.current &&
+      activeProject?.selectedContract !== previouslySelectedContract.current
+    ) {
+      updateSelectedContract(undefined);
+      deployForm.setFieldsValue({
+        contract: undefined,
+      });
+
+      previouslySelectedContract.current = activeProject?.selectedContract;
+    }
+  }, [activeProject?.selectedContract]);
+
   return (
     <div className={`${s.root} onboarding-build-deploy`}>
-      <h3 className={`${s.heading} sidebar-section-title`}>Build & Deploy</h3>
+      <h3 className={`section-heading`}>
+        <AppLogo /> Build & Deploy
+      </h3>
       <iframe
         className={`${s.cellBuilderRef} cell-builder-ref`}
         ref={cellBuilderRef}
@@ -740,13 +825,10 @@ const BuildProject: FC<Props> = ({ projectId, contract, updateContract }) => {
               isAutoBuildAndDeployEnabled()
                 ? '- Auto-build and deploy is enabled for Sandbox and can be changed in settings. <br />'
                 : ''
-            }
-            ${
-              activeProject?.language === 'tact' &&
-              '<br />- Tact version: ' + tactVersion
-            }
+            } 
+            ${compilerInfo}
             `}
-          allowedFile={['fc', 'tact']}
+          allowedFile={activeProject?.language === 'tact' ? ['tact'] : ['fc']}
           onCompile={() => {
             (async () => {
               if (
@@ -765,7 +847,7 @@ const BuildProject: FC<Props> = ({ projectId, contract, updateContract }) => {
             })().catch(() => {});
           }}
         />
-        {deployView()}
+        {activeProject?.selectedContract && deployView()}
       </div>
 
       {activeProject?.contractAddress && environment !== 'SANDBOX' && (

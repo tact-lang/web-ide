@@ -1,4 +1,5 @@
 import AppIcon from '@/components/ui/icon';
+import { ANSI_CODES } from '@/constant/ansiCodes';
 import { useLogActivity } from '@/hooks/logActivity.hooks';
 import { useProject } from '@/hooks/projectV2.hooks';
 import GitManager from '@/lib/git';
@@ -22,7 +23,7 @@ const GitSync: FC = () => {
   const onMessage = async (message: string) => {
     // add a delay to show the progress counter
     await delay(5);
-    createLog(`\x1b[2K\r${message}`, 'info', true, true);
+    createLog(`${ANSI_CODES.clearLine}${message}`, 'info', true, true);
   };
 
   const preCheck = async () => {
