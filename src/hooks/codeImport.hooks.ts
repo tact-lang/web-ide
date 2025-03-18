@@ -21,7 +21,7 @@ export const useCodeImport = () => {
     });
 
     navigate(`?${finalQueryParam.toString()}`, { replace: true });
-  }, [navigate]);
+  }, [navigate, searchParams]);
 
   const importEncodedCode = useCallback(
     async (code: string, language: ContractLanguage) => {
