@@ -34,7 +34,7 @@ export default function App() {
                   "type": "module",
                   "dependencies": {
                     "jest": "29.6.2",
-                    "@ton/core": "^0.56.3",
+                    "@ton/core": "^0.60.1",
                     "@ton/test-utils": "0.4.2",
                     "@ton/sandbox": "^0.20.0"
                   }
