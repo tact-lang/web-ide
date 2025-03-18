@@ -1,6 +1,5 @@
 /* eslint-disable react/no-children-prop */
 import { NewProject } from '@/components/project';
-import { useTheme } from '@/components/shared/ThemeProvider';
 import AppIcon from '@/components/ui/icon';
 import { AppConfig } from '@/config/AppConfig';
 import { projectExamples } from '@/constant/projectExamples';
@@ -9,12 +8,54 @@ import axios from 'axios';
 import Link from 'next/link';
 import { FC, useEffect, useState } from 'react';
 import Markdown from 'react-markdown';
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import {
-  oneDark as darkTheme,
-  oneLight as lightTheme,
-} from 'react-syntax-highlighter/dist/cjs/styles/prism';
+import { createHighlighter } from 'shiki';
+import tactTMLanguage from '../../../assets/ton/tact/tmLanguage.json';
 import s from './ProjectTemplate.module.scss';
+
+async function highlightCode(code: string) {
+  const highlighter = await createHighlighter({
+    themes: ['min-dark', 'min-light'],
+    langs: [tactTMLanguage, 'typescript'],
+  });
+
+  return highlighter.codeToHtml(code, {
+    lang: 'tact',
+    themes: {
+      light: 'min-light',
+      dark: 'min-dark',
+    },
+  });
+}
+
+interface CodeBlockProps {
+  children?: React.ReactNode;
+  className?: string;
+}
+
+const AsyncCodeBlock: React.FC<CodeBlockProps> = ({
+  children,
+  className,
+  ...rest
+}) => {
+  const [highlightedCode, setHighlightedCode] = useState<string | null>(null);
+  const languageMatch = /language-(\w+)/.exec(className ?? '');
+
+  useEffect(() => {
+    async function highlight() {
+      const html = await highlightCode((children as string).trim());
+      setHighlightedCode(html);
+    }
+    highlight();
+  }, [children]);
+
+  return highlightedCode && languageMatch ? (
+    <div dangerouslySetInnerHTML={{ __html: highlightedCode }} />
+  ) : (
+    <code {...rest} className={className}>
+      {children}
+    </code>
+  );
+};
 
 function LinkRenderer({
   href,
@@ -39,7 +80,6 @@ const ProjectTemplate: FC = () => {
     contract: string;
     content: string;
   }>({ contract: '', content: '' });
-  const { theme } = useTheme();
   const { message } = App.useApp();
 
   const getContent = async () => {
@@ -62,7 +102,7 @@ const ProjectTemplate: FC = () => {
       const contentResponse = await axios.get(contentURL, axiosParams);
 
       const content =
-        '```ts\n' + contractResponse.data + '\n```\n' + contentResponse.data;
+        '```tact\n' + contractResponse.data + '\n```\n' + contentResponse.data;
 
       setContractDetails({
         contract: contractResponse.data,
@@ -163,22 +203,8 @@ const ProjectTemplate: FC = () => {
         <Markdown
           children={contractDetails.content}
           components={{
-            code(props) {
-              const { children, className, ...rest } = props;
-              const match = /language-(\w+)/.exec(className ?? '');
-              return match ? (
-                <SyntaxHighlighter
-                  {...(rest as SyntaxHighlighter)}
-                  PreTag="div"
-                  children={String(children).replace(/\n$/, '')}
-                  language={match[1]}
-                  style={theme === 'dark' ? darkTheme : lightTheme}
-                />
-              ) : (
-                <code {...rest} className={className}>
-                  {children}
-                </code>
-              );
+            code: (props) => {
+              return <AsyncCodeBlock {...props} />;
             },
             a: LinkRenderer,
           }}
