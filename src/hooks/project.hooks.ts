@@ -112,7 +112,13 @@ export function useProjectActions() {
       },
     ];
     await writeFiles(projectId, buildFiles, { overwrite: true });
-    return { contractBOC: (buildResult as SuccessResult).codeBoc };
+    return new Map<string, Buffer>([
+      ...buildFiles.map<[string, Buffer]>((file) => [
+        relativePath(file.path, projectId),
+        Buffer.from(file.content),
+      ]),
+      ['contractBOC', Buffer.from((buildResult as SuccessResult).codeBoc)],
+    ]);
   }
 
   async function compileTactProgram(

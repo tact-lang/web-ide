@@ -80,6 +80,7 @@ export interface ProjectSetting {
   contractName?: string;
   network?: NetworkEnvironment;
   selectedContract?: string;
+  selectedContractABI?: string;
   contractAddress?: string;
   tab?: IFileTab;
   cellABI?: CellABI;
@@ -89,6 +90,7 @@ export interface ProjectSetting {
     minSeverity: Severity;
     detectors: string[];
   };
+  buildContractList?: Record<string, string[]>;
 }
 
 export interface ABIParameter {
