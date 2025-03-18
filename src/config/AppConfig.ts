@@ -10,8 +10,8 @@ export const AppConfig = {
     IS_ENABLED: !!process.env.NEXT_PUBLIC_ANALYTICS_ENABLED || false,
   },
   proxy: {
-    key: process.env.NEXT_PUBLIC_PROXY_KEY ?? '',
-    url: process.env.NEXT_PUBLIC_PROXY_URL ?? 'https://proxy.cors.sh/',
+    GIT_RAW_CONTENT: 'https://cdn-ide-raw.tonstudio.io',
+    GIT_IMPORT: 'https://cdn-ide-github.tonstudio.io',
   },
   cors: {
     proxy:

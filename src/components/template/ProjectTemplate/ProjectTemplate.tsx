@@ -2,7 +2,6 @@
 import { NewProject } from '@/components/project';
 import { useTheme } from '@/components/shared/ThemeProvider';
 import AppIcon from '@/components/ui/icon';
-import { AppConfig } from '@/config/AppConfig';
 import { projectExamples } from '@/constant/projectExamples';
 import { App, Drawer, Skeleton } from 'antd';
 import axios from 'axios';
@@ -44,22 +43,13 @@ const ProjectTemplate: FC = () => {
 
   const getContent = async () => {
     const link = examples[currentExample].link;
-    const contractURL = `${AppConfig.proxy.url}${
-      projectExamples.baseURL + link + '/contract.tact'
-    }`;
-    const contentURL = `${AppConfig.proxy.url}${
-      projectExamples.baseURL + link + '/content.md'
-    }`;
+    const contractURL = projectExamples.baseURL + link + '/contract.tact';
+    const contentURL = projectExamples.baseURL + link + '/content.md';
     setContractDetails(contractBlank);
     try {
       setLoading('content');
-      const axiosParams = {
-        headers: {
-          'x-cors-api-key': AppConfig.proxy.key,
-        },
-      };
-      const contractResponse = await axios.get(contractURL, axiosParams);
-      const contentResponse = await axios.get(contentURL, axiosParams);
+      const contractResponse = await axios.get(contractURL);
+      const contentResponse = await axios.get(contentURL);
 
       const content =
         '```ts\n' + contractResponse.data + '\n```\n' + contentResponse.data;

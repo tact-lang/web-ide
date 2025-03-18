@@ -36,7 +36,7 @@ async function convertToZipUrl(
         branchName = repoData.default_branch;
       }
 
-      const zipUrl = `https://github.com/${owner}/${repo}/archive/refs/heads/${branchName}.zip`;
+      const zipUrl = `${owner}/${repo}/archive/refs/heads/${branchName}.zip`;
       return { url: zipUrl, path: pathName };
     }
 
@@ -55,8 +55,7 @@ export async function downloadRepo(repoURL: string): Promise<Tree[]> {
     throw new Error('Invalid GitHub URL');
   }
 
-  const zipResponse = await axios.get(`${AppConfig.proxy.url}${url}`, {
-    headers: { 'x-cors-api-key': AppConfig.proxy.key },
+  const zipResponse = await axios.get(`${AppConfig.proxy.GIT_IMPORT}/${url}`, {
     responseType: 'arraybuffer',
   });
 
