@@ -80,12 +80,10 @@ const MistiStaticAnalyzer: FC = () => {
           continue;
         }
         const content = await fileSystem.readFile(file.path);
-        if (content) {
-          vfs.writeFile(
-            normalizeRelativePath(file.path, activeProject.path),
-            content as string,
-          );
-        }
+        vfs.writeFile(
+          normalizeRelativePath(file.path, activeProject.path),
+          content as string,
+        );
       }
 
       // add all stdlib files to vfs
