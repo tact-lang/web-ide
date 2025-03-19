@@ -72,10 +72,10 @@ jobs:
           build-args: |
             sha=${{ github.sha }}
             sha_short=${{ env.GITHUB_SHA_SHORT }}
-            app_env=${{ env.APP_ENV }}
-            NEXT_PUBLIC_PROXY_KEY=${{ secrets.NEXT_PUBLIC_PROXY_KEY }}
-            NEXT_PUBLIC_MIXPANEL_TOKEN=${{ secrets.NEXT_PUBLIC_MIXPANEL_TOKEN }}
-            NEXT_PUBLIC_ANALYTICS_ENABLED=${{ secrets.NEXT_PUBLIC_ANALYTICS_ENABLED }}
+            app_env=${{ vars.APP_ENV }}
+            REACT_APP_PROXY_KEY=${{ secrets.REACT_APP_PROXY_KEY }}
+            REACT_APP_MIXPANEL_TOKEN=${{ secrets.REACT_APP_MIXPANEL_TOKEN }}
+            REACT_APP_ANALYTICS_ENABLED=${{ secrets.REACT_APP_ANALYTICS_ENABLED }}
 
       - name: Apply AWS k8s config
         run: aws eks update-kubeconfig --name ${{ vars.AWS_CLUSTER }} --region ${{ vars.AWS_REGION }}

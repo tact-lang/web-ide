@@ -1,11 +1,11 @@
 /* eslint-disable react/no-children-prop */
 import { NewProject } from '@/components/project';
+import { Link } from '@/components/shared';
 import AppIcon from '@/components/ui/icon';
 import { AppConfig } from '@/config/AppConfig';
 import { projectExamples } from '@/constant/projectExamples';
 import { App, Drawer, Skeleton } from 'antd';
 import axios from 'axios';
-import Link from 'next/link';
 import { FC, useEffect, useState } from 'react';
 import Markdown from 'react-markdown';
 import { createHighlighter } from 'shiki';
@@ -158,11 +158,11 @@ const ProjectTemplate: FC = () => {
       </div>
       <div className={s.credit}>
         Credits for the examples go to the{' '}
-        <Link href="https://github.com/talkol" target="_blank">
+        <Link to="https://github.com/talkol" target="_blank">
           Tal Kol
         </Link>
         {' for '}
-        <Link href="https://tact-by-example.org/all" target="_blank">
+        <Link to="https://tact-by-example.org/all" target="_blank">
           Tact by example
         </Link>
       </div>

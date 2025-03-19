@@ -184,9 +184,11 @@ const MistiStaticAnalyzer: FC = () => {
             className={`w-100`}
             defaultActiveFirstOption
             filterOption={(inputValue, option) => {
-              return option?.title
-                .toLowerCase()
-                .includes(inputValue.toLowerCase());
+              return (
+                option?.title
+                  ?.toLowerCase()
+                  .includes(inputValue.toLowerCase()) ?? false
+              );
             }}
           >
             {fileList.map((f) => (

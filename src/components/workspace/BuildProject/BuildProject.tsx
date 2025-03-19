@@ -24,12 +24,12 @@ import { ABIArgument, Cell } from '@ton/core';
 import { Blockchain, SandboxContract } from '@ton/sandbox';
 import { CHAIN, useTonAddress, useTonConnectUI } from '@tonconnect/ui-react';
 import { Button, Form, Select } from 'antd';
-import Link from 'next/link';
 import { FC, Fragment, useEffect, useRef, useState } from 'react';
 import ContractInteraction from '../ContractInteraction';
 import ExecuteFile from '../ExecuteFile/ExecuteFile';
 import s from './BuildProject.module.scss';
 
+import { Link } from '@/components/shared';
 import { AppLogo } from '@/components/ui';
 import AppIcon from '@/components/ui/icon';
 import { useFile } from '@/hooks';
@@ -39,11 +39,12 @@ import { ABIParser, parseInputs } from '@/utility/abi';
 import { extractContractName } from '@/utility/contract';
 import { filterABIFiles } from '@/utility/file';
 import { replaceFileExtension } from '@/utility/filePath';
+import { compilerVersion } from '@ton-community/func-js';
 import { Maybe } from '@ton/core/dist/utils/maybe';
 import { TonClient } from '@ton/ton';
 import { useForm } from 'antd/lib/form/Form';
-import packageJson from 'package.json';
 import { OutputChunk } from 'rollup';
+import packageJson from '../../../../package.json';
 import { renderField } from '../ABIUi/TactABIUi';
 import { globalWorkspace } from '../globalWorkspace';
 import CellBuilder, { CellValues, generateCellCode } from './CellBuilder';
@@ -63,6 +64,7 @@ interface Props {
 const BuildProject: FC<Props> = ({ projectId, contract, updateContract }) => {
   const [isLoading, setIsLoading] = useState('');
   const [buildCount, setBuildCount] = useState(0);
+  const [compilerInfo, setCompilerInfo] = useState('');
   const { createLog } = useLogActivity();
   const [environment, setEnvironment] = useState<NetworkEnvironment>('SANDBOX');
   const [buildOutput, setBuildoutput] = useState<{
@@ -78,6 +80,8 @@ const BuildProject: FC<Props> = ({ projectId, contract, updateContract }) => {
   const [selectedContract, setSelectedContract] = useState<string | undefined>(
     undefined,
   );
+
+  const previouslySelectedContract = useRef<string | null>();
 
   const { isAutoBuildAndDeployEnabled } = useSettingAction();
   const {
@@ -104,15 +108,23 @@ const BuildProject: FC<Props> = ({ projectId, contract, updateContract }) => {
 
   const { deployContract } = useContractAction();
 
+  const updateCompilerInfo = async () => {
+    let versionInfo;
+    if (activeProject?.language === 'tact') {
+      versionInfo = `- Tact version: ${tactVersion}`;
+    } else {
+      const funcCompilerVersion = await compilerVersion();
+      versionInfo = `- FunC version: ${funcCompilerVersion.funcVersion}`;
+    }
+
+    setCompilerInfo(versionInfo);
+  };
+
   const contractsToDeploy = () => {
-    if (!activeProject?.path || !activeProject.language) {
+    if (!activeProject?.path) {
       return [];
     }
-    return filterABIFiles(
-      projectFiles,
-      activeProject.path,
-      activeProject.language,
-    );
+    return filterABIFiles(projectFiles, activeProject);
   };
 
   const cellBuilder = (info: string) => {
@@ -529,11 +541,12 @@ const BuildProject: FC<Props> = ({ projectId, contract, updateContract }) => {
     setEnvironment(network);
   };
 
-  const updateSelectedContract = (contract: string | undefined) => {
+  const updateSelectedContract = async (contract: string | undefined) => {
     setSelectedContract(contract);
+    await delay(500);
     updateProjectSetting({
-      selectedContract: contract,
-    } as ProjectSetting);
+      selectedContractABI: contract,
+    });
   };
 
   const fromJSModule = (jsModuleCode: string) => {
@@ -619,17 +632,21 @@ const BuildProject: FC<Props> = ({ projectId, contract, updateContract }) => {
   };
 
   const autoSelectFirstContract = () => {
-    const _contractsToDeploy = contractsToDeploy();
-    if (_contractsToDeploy.length > 0 && !selectedContract) {
+    const deployableContracts = contractsToDeploy();
+    const isSelectedContractExists = deployableContracts.some(
+      (file) => file.path === selectedContract,
+    );
+
+    if (deployableContracts.length > 0 && !isSelectedContractExists) {
       deployForm.setFieldsValue({
-        contract: _contractsToDeploy[0]?.path, // Set the first contract as default
+        contract: deployableContracts[0]?.path, // Set the first contract as default
       });
-      updateSelectedContract(_contractsToDeploy[0]?.path);
+      updateSelectedContract(deployableContracts[0]?.path);
     }
   };
 
   const getSelectedContractABIPath = () => {
-    const previousSelectedABIPath = activeProject?.selectedContract;
+    const previousSelectedABIPath = activeProject?.selectedContractABI;
     if (!previousSelectedABIPath) return;
 
     const correspondingScriptPath = replaceFileExtension(
@@ -658,8 +675,11 @@ const BuildProject: FC<Props> = ({ projectId, contract, updateContract }) => {
 
   useEffect(() => {
     updateABI().catch(() => {});
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedContract, contract]);
+
+  useEffect(() => {
+    updateCompilerInfo();
+  }, [activeProject]);
 
   useEffect(() => {
     try {
@@ -667,7 +687,6 @@ const BuildProject: FC<Props> = ({ projectId, contract, updateContract }) => {
     } catch (e) {
       /* empty */
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedContract]);
 
   useEffect(() => {
@@ -676,7 +695,13 @@ const BuildProject: FC<Props> = ({ projectId, contract, updateContract }) => {
     }
 
     const contractABIPath = getSelectedContractABIPath();
-    if (contractABIPath) {
+    const deployableContracts = contractsToDeploy();
+
+    const isSelectedContractExists = deployableContracts.some(
+      (file) => file.path === contractABIPath,
+    );
+
+    if (isSelectedContractExists) {
       deployForm.setFieldsValue({
         contract: contractABIPath,
       });
@@ -739,6 +764,20 @@ const BuildProject: FC<Props> = ({ projectId, contract, updateContract }) => {
     autoSelectFirstContract();
   }, [buildCount]);
 
+  useEffect(() => {
+    if (
+      previouslySelectedContract.current &&
+      activeProject?.selectedContract !== previouslySelectedContract.current
+    ) {
+      updateSelectedContract(undefined);
+      deployForm.setFieldsValue({
+        contract: undefined,
+      });
+
+      previouslySelectedContract.current = activeProject?.selectedContract;
+    }
+  }, [activeProject?.selectedContract]);
+
   return (
     <div className={`${s.root} onboarding-build-deploy`}>
       <h3 className={`section-heading`}>
@@ -753,6 +792,7 @@ const BuildProject: FC<Props> = ({ projectId, contract, updateContract }) => {
       <Form.Item
         label="Environment"
         className={`${s.formItem} select-search-input-dark`}
+        labelAlign="left"
       >
         <Select
           value={environment}
@@ -784,13 +824,10 @@ const BuildProject: FC<Props> = ({ projectId, contract, updateContract }) => {
               isAutoBuildAndDeployEnabled()
                 ? '- Auto-build and deploy is enabled for Sandbox and can be changed in settings. <br />'
                 : ''
-            }
-            ${
-              activeProject?.language === 'tact' &&
-              '<br />- Tact version: ' + tactVersion
-            }
+            } 
+            ${compilerInfo}
             `}
-          allowedFile={['fc', 'tact']}
+          allowedFile={activeProject?.language === 'tact' ? ['tact'] : ['fc']}
           onCompile={() => {
             (async () => {
               if (
@@ -809,13 +846,13 @@ const BuildProject: FC<Props> = ({ projectId, contract, updateContract }) => {
             })().catch(() => {});
           }}
         />
-        {deployView()}
+        {activeProject?.selectedContract && deployView()}
       </div>
 
       {activeProject?.contractAddress && environment !== 'SANDBOX' && (
         <div className={`${s.contractAddress} wrap`}>
           <Link
-            href={`https://${
+            to={`https://${
               chain === CHAIN.TESTNET ? 'testnet.' : ''
             }tonviewer.com/${activeProject.contractAddress}`}
             target="_blank"
