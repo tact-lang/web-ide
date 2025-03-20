@@ -1,3 +1,4 @@
+import { vscodeLight } from '@/assets/vscode-light';
 import { vscodeOneDark } from '@/assets/vscode-one-dark';
 import { ContractLanguage } from '@/interfaces/workspace.interface';
 import { loader } from '@monaco-editor/react';
@@ -104,6 +105,7 @@ export async function highlightCodeSnippets(
       }
 
       monaco.editor.defineTheme('vs-theme-dark', vscodeOneDark);
+      monaco.editor.defineTheme('vs-theme-light', vscodeLight);
       monaco.editor.setTheme('vs-theme-dark');
     })
     .catch(() => {});
