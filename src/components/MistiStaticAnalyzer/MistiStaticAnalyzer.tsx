@@ -1,10 +1,11 @@
 import { COLOR_MAP } from '@/constant/ansiCodes';
+import { useFileTab } from '@/hooks';
 import { useLogActivity } from '@/hooks/logActivity.hooks';
 import { useProject } from '@/hooks/projectV2.hooks';
 import { Tree } from '@/interfaces/workspace.interface';
 import fileSystem from '@/lib/fs';
 import { normalizeRelativePath } from '@/utility/path';
-import { mistiFormatResult } from '@/utility/utils';
+import { getFileExtension, mistiFormatResult } from '@/utility/utils';
 import Path from '@isomorphic-git/lightning-fs/src/path';
 import {
   BuiltInDetectors,
@@ -50,6 +51,7 @@ const MistiStaticAnalyzer: FC = () => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const { projectFiles, activeProject, updateProjectSetting } = useProject();
   const { createLog } = useLogActivity();
+  const { fileTab } = useFileTab();
 
   const [form] = useForm();
 
@@ -133,14 +135,24 @@ const MistiStaticAnalyzer: FC = () => {
     }
   };
 
+  const updateSelectedFilePath = () => {
+    if (fileTab.active && getFileExtension(fileTab.active.path) === 'tact') {
+      form.setFieldsValue({ selectedPath: fileTab.active.path });
+    }
+  };
+
   useEffect(() => {
-    if (!activeProject?.misti) return;
+    if (!activeProject) return;
 
     const { misti } = activeProject;
-
     form.setFieldsValue(misti);
-    form.setFieldValue('allDetectors', misti.detectors.length === 0);
+    form.setFieldValue('allDetectors', !misti || misti.detectors.length === 0);
+    updateSelectedFilePath();
   }, [activeProject?.path]);
+
+  useEffect(() => {
+    updateSelectedFilePath();
+  }, [fileTab.active?.path]);
 
   return (
     <div className={s.root}>
