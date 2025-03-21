@@ -52,6 +52,7 @@ const MistiStaticAnalyzer: FC = () => {
   const { projectFiles, activeProject, updateProjectSetting } = useProject();
   const { createLog } = useLogActivity();
   const { fileTab } = useFileTab();
+  const [isLoaded, setIsLoaded] = useState(false);
 
   const [form] = useForm();
 
@@ -135,10 +136,18 @@ const MistiStaticAnalyzer: FC = () => {
     }
   };
 
-  const updateSelectedFilePath = () => {
-    if (fileTab.active && getFileExtension(fileTab.active.path) === 'tact') {
-      form.setFieldsValue({ selectedPath: fileTab.active.path });
-    }
+  const updateSelectedFilePath = (filePath?: string) => {
+    const fileToSelect = filePath ?? fileTab.active?.path;
+
+    const isValidTactFile =
+      fileToSelect &&
+      getFileExtension(fileToSelect) === 'tact' &&
+      fileList.some((f) => f.path === fileToSelect);
+
+    const selectedPath = isValidTactFile ? fileToSelect : fileList[0]?.path;
+
+    form.setFieldsValue({ selectedPath });
+    form.validateFields();
   };
 
   useEffect(() => {
@@ -147,10 +156,14 @@ const MistiStaticAnalyzer: FC = () => {
     const { misti } = activeProject;
     form.setFieldsValue(misti);
     form.setFieldValue('allDetectors', !misti || misti.detectors.length === 0);
-    updateSelectedFilePath();
+    updateSelectedFilePath(misti?.selectedPath);
+    setIsLoaded(true);
   }, [activeProject?.path]);
 
   useEffect(() => {
+    if (!isLoaded) {
+      return;
+    }
     updateSelectedFilePath();
   }, [fileTab.active?.path]);
 
