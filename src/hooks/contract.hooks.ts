@@ -4,7 +4,6 @@ import {
   ContractLanguage,
   NetworkEnvironment,
   ParameterType,
-  Project,
   TactInputFields,
 } from '@/interfaces/workspace.interface';
 import EventEmitter from '@/utility/eventEmitter';
@@ -30,6 +29,7 @@ import {
   storeStateInit,
   toNano,
 } from '@ton/core';
+import { Maybe } from '@ton/core/dist/utils/maybe';
 import {
   SandboxContract,
   SendMessageResult,
@@ -56,161 +56,90 @@ export function useContractAction() {
   };
 
   async function deployContract(
-    codeBOC: string,
-    dataCell: string,
     network: Network | Partial<NetworkEnvironment>,
-    project: Project,
-  ): Promise<{
-    address: string;
-    contract?: SandboxContract<UserContract>;
-    logs?: string[];
-  }> {
+    language: ContractLanguage,
+    contract: Contract,
+  ) {
     const { sandboxBlockchain, sandboxWallet } = globalWorkspace;
-    const codeCell = Cell.fromBoc(Buffer.from(codeBOC, 'base64'))[0];
+    const isSandbox = network.toUpperCase() === 'SANDBOX';
 
-    let sender: Sender | null = null;
-
-    let stateInit: StateInit = { code: Cell.EMPTY, data: Cell.EMPTY };
-    if (project.language === 'tact') {
-      const _contractInit = window.contractInit;
-      if (_contractInit) {
-        stateInit = {
-          code: _contractInit.init?.code,
-          data: _contractInit.init?.data,
-        };
-      }
-    } else {
-      stateInit = {
-        code: codeCell,
-        data: Cell.fromBoc(Buffer.from(dataCell, 'base64'))[0],
-      };
-    }
-
-    let messageParams: Record<string, unknown> = {};
-    const _contractInit = window.contractInit;
-    let _userContract: Contract | null = null;
-
-    if (project.language === 'tact') {
-      messageParams = {
-        $$type: 'Deploy',
-        queryId: BigInt(0),
-      };
-    }
-
-    if (project.language === 'tact' && network.toUpperCase() !== 'SANDBOX') {
-      sender = new TonConnectSender(tonConnector.connector);
-      const endpoint = getHttpEndpoint({
-        network: network.toLocaleLowerCase() as Network,
-      });
-
-      const client = new TonClient({ endpoint });
-      if (_contractInit) {
-        _userContract = client.open(_contractInit);
-      }
-    } else if (
-      network.toUpperCase() === 'SANDBOX' &&
-      sandboxBlockchain &&
-      project.language === 'tact'
-    ) {
-      if (_contractInit) {
-        _userContract = sandboxBlockchain.openContract(_contractInit);
-      }
-
-      sender = sandboxWallet!.getSender();
-    }
-
-    if (project.language === 'tact' && _userContract) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const response = await (_userContract as any).send(
-        sender as Sender,
-        {
-          value: tonAmountForInteraction,
-        },
-        messageParams,
-      );
-      let logMessages: string[] = [];
-      if (response) {
-        logMessages = terminalLogMessages(
-          [response],
-          [_userContract as Contract],
-        ) ?? ['Transaction executed successfully'];
-      }
-
-      // create a code loop through array and check has error string
-      for (const element of logMessages) {
-        if (element.includes('Error')) {
-          return {
-            address: '',
-            contract: _userContract as SandboxContract<UserContract>,
-            logs: logMessages,
-          };
-        }
-      }
-
-      return {
-        address: _userContract.address.toString(),
-        contract: _userContract as SandboxContract<UserContract>,
-        logs: logMessages,
-      };
-    }
-
-    if (network.toUpperCase() === 'SANDBOX' && sandboxBlockchain) {
-      const _userContract = UserContract.createForDeploy(
-        stateInit.code as Cell,
-        stateInit.data as Cell,
-      );
-      const userContract = sandboxBlockchain.openContract(_userContract);
-      await userContract.sendData(
-        sandboxWallet!.getSender(),
-        Cell.EMPTY,
-        tonAmountForInteraction,
-      );
-
-      if (network.toUpperCase() !== 'SANDBOX') {
-        await message.success('Contract Deployed');
-      }
-      return {
-        address: _userContract.address.toString(),
-        contract: userContract,
-      };
-    }
-
-    const _contractAddress = contractAddress(0, stateInit);
-    const endpoint = await getHttpEndpoint({
-      network: network as Network,
+    const endpoint = getHttpEndpoint({
+      network: network.toLocaleLowerCase() as Network,
     });
-
     const client = new TonClient({ endpoint });
 
-    if (await client.isContractDeployed(_contractAddress)) {
+    const sender: Sender = isSandbox
+      ? (sandboxWallet?.getSender() as Sender)
+      : new TonConnectSender(tonConnector.connector);
+
+    if (isSandbox && !sandboxBlockchain) {
+      throw new Error('Sandbox not initialized');
+    }
+
+    const openedContract = (
+      isSandbox
+        ? sandboxBlockchain!.openContract(contract)
+        : client.open(contract)
+    ) as SandboxContract<UserContract>;
+
+    // Check if already deployed on non-sandbox
+    if (!isSandbox && (await client.isContractDeployed(contract.address))) {
       await message.error(
         'Contract is already deployed for same codebase and initial state. Update code or initial state.',
       );
-      return { address: _contractAddress.toString() };
+      return {
+        address: contract.address.toString(),
+        contract: openedContract,
+      };
     }
 
-    const initCell = beginCell().store(storeStateInit(stateInit)).endCell();
+    let messageParams: Cell | Record<string, unknown> | null = Cell.EMPTY;
 
-    const params: SendTransactionRequest = {
-      validUntil: Date.now() + 1000000,
-      messages: [
-        {
-          address: _contractAddress.toString(),
-          amount: tonAmountForInteraction.toString(),
-          stateInit: initCell.toBoc().toString('base64'),
-        },
-      ],
+    if (language === 'tact') {
+      const { receivers } = contract.abi ?? {};
+
+      const hasDeployableTrait = receivers?.find(
+        (r) => r.message.kind === 'typed' && r.message.type === 'Deploy',
+      );
+      const hasEmptyReceiver = receivers?.find(
+        (r) => r.message.kind === 'empty',
+      );
+      if (hasDeployableTrait) {
+        messageParams = {
+          $$type: 'Deploy',
+          queryId: BigInt(Math.floor(Math.random() * 1000)),
+        };
+      } else if (!hasEmptyReceiver) {
+        throw new Error(
+          'Must implement either an empty Receiver or the Deployable trait.',
+        );
+      } else {
+        messageParams = null;
+      }
+    }
+
+    const response = await openedContract.send(
+      sender,
+      {
+        value: tonAmountForInteraction,
+      },
+      messageParams as Cell,
+    );
+
+    const logs =
+      typeof response === 'undefined'
+        ? (terminalLogMessages([response], [contract]) ?? [
+            'Transaction executed successfully',
+          ])
+        : [];
+
+    const hasError = logs.some((log) => log.includes('Error'));
+
+    return {
+      address: hasError ? '' : contract.address.toString(),
+      contract: openedContract,
+      logs,
     };
-    try {
-      await tonConnector.sendTransaction(params);
-      await message.success('Contract Deployed');
-
-      return { address: _contractAddress.toString() };
-    } catch (error) {
-      console.log('error', error);
-      await message.error('Not client');
-    }
-    return { address: _contractAddress.toString() };
   }
 
   async function sendMessage(
@@ -226,10 +155,12 @@ export function useContractAction() {
         await message.error('The contract has not been deployed yet.');
         return;
       }
-      const response = await contract.sendData(
+      const response = await contract.send(
         wallet.getSender(),
+        {
+          value: tonAmountForInteraction,
+        },
         _dataCell,
-        tonAmountForInteraction,
       );
       return {
         message: 'Message sent successfully',
@@ -392,24 +323,24 @@ export function useContractAction() {
 export class UserContract implements Contract {
   constructor(
     readonly address: Address,
-    readonly init?: { code: Cell; data: Cell },
+    readonly init?: Maybe<StateInit>,
   ) {}
 
-  static createForDeploy(code: Cell, data: Cell) {
+  static createForDeploy({ code, data }: StateInit) {
     const workchain = 0;
     const address = contractAddress(workchain, { code, data });
     return new UserContract(address, { code, data });
   }
 
-  async sendData(
+  async send(
     provider: ContractProvider,
     via: Sender,
+    args: { value: bigint; bounce?: boolean | null | undefined },
     body: Cell = Cell.EMPTY,
-    amount: bigint,
   ) {
     await provider.internal(via, {
-      value: amount,
-      bounce: false,
+      value: args.value,
+      bounce: args.bounce ?? false,
       body,
     });
   }
