@@ -1,19 +1,24 @@
 import { Project, Tree } from '@/interfaces/workspace.interface';
+import fileSystem from '@/lib/fs';
 import { OverwritableVirtualFileSystem } from '@/utility/OverwritableVirtualFileSystem';
+import { getContractInitParams } from '@/utility/abi';
+import { relativePath } from '@/utility/filePath';
 import { extractCompilerDiretive, parseGetters } from '@/utility/getterParser';
+import TactLogger from '@/utility/tactLogger';
 import {
   LogLevel,
   build as buildTact,
   createVirtualFileSystem,
+  precompile,
 } from '@tact-lang/compiler';
+import {
+  FactoryAst,
+  getAstFactory,
+} from '@tact-lang/compiler/dist/ast/ast-helpers';
 import { featureEnable } from '@tact-lang/compiler/dist/config/features';
-import stdLibFiles from '@tact-lang/compiler/dist/imports/stdlib';
-import { precompile } from '@tact-lang/compiler/dist/pipeline/precompile';
-
-import fileSystem from '@/lib/fs';
-import { getContractInitParams } from '@/utility/abi';
-import TactLogger from '@/utility/tactLogger';
-import { CompilerContext } from '@tact-lang/compiler/dist/context';
+import { CompilerContext } from '@tact-lang/compiler/dist/context/context';
+import { Parser, getParser } from '@tact-lang/compiler/dist/grammar';
+import stdLibFiles from '@tact-lang/compiler/dist/stdlib/stdlib';
 import {
   CompileResult,
   SuccessResult,
@@ -25,10 +30,9 @@ import { useSettingAction } from './setting.hooks';
 
 export function useProjectActions() {
   const { isContractDebugEnabled, getSettingStateByKey } = useSettingAction();
-  const { writeFiles, projectFiles } = useProject();
+  const { writeFiles, projectFiles, activeProject } = useProject();
   const { getFile } = useFile();
   const isExternalMessage = getSettingStateByKey('isExternalMessage');
-  const isMasterChainEnabled = getSettingStateByKey('masterchain');
 
   return {
     compileFuncProgram,
@@ -108,7 +112,13 @@ export function useProjectActions() {
       },
     ];
     await writeFiles(projectId, buildFiles, { overwrite: true });
-    return { contractBOC: (buildResult as SuccessResult).codeBoc };
+    return new Map<string, Buffer>([
+      ...buildFiles.map<[string, Buffer]>((file) => [
+        relativePath(file.path, projectId),
+        Buffer.from(file.content),
+      ]),
+      ['contractBOC', Buffer.from((buildResult as SuccessResult).codeBoc)],
+    ]);
   }
 
   async function compileTactProgram(
@@ -127,33 +137,40 @@ export function useProjectActions() {
       }
     });
 
-    const fs = new OverwritableVirtualFileSystem(`/`);
+    const fs = new OverwritableVirtualFileSystem();
 
     while (filesToProcess.length !== 0) {
       const fileToProcess = filesToProcess.pop();
       const fileContent = await fileSystem.readFile(fileToProcess!);
       if (fileContent) {
-        fs.writeContractFile(fileToProcess!, fileContent as string);
+        fs.writeContractFile(
+          relativePath(fileToProcess!, activeProject?.path as string),
+          fileContent as string,
+        );
       }
     }
 
     let ctx = new CompilerContext();
     const stdlib = createVirtualFileSystem('@stdlib', stdLibFiles);
-    const entryFile = file.path;
     if (isExternalMessage) {
       ctx = featureEnable(ctx, 'external');
     }
-    ctx = precompile(ctx, fs, stdlib, entryFile);
+
+    const entryFile = relativePath(file.path, activeProject?.path as string);
+
+    const ast: FactoryAst = getAstFactory();
+    const parser: Parser = getParser(ast);
+
+    ctx = precompile(ctx, fs, stdlib, entryFile, parser, ast);
 
     const response = await buildTact({
       config: {
-        path: entryFile,
+        path: `/${entryFile}`,
         output: 'dist',
         name: 'tact',
         options: {
           debug: isContractDebugEnabled(),
           external: !!isExternalMessage,
-          masterchain: !!isMasterChainEnabled,
         },
       },
       project: fs,
@@ -177,7 +194,7 @@ export function useProjectActions() {
       if (key.includes('.abi')) {
         output.abi = JSON.parse(value.toString());
       } else if (key.includes('.boc')) {
-        output.boc = Buffer.from(value).toString('base64');
+        output.boc = value.toString('base64');
       } else if (key.includes('.ts')) {
         output.contractScript = {
           name: key,
@@ -204,7 +221,7 @@ export function useProjectActions() {
         fileContent = JSON.stringify(parsedFileContent);
       }
       if (key.includes('.boc')) {
-        fileContent = Buffer.from(value).toString('base64');
+        fileContent = value.toString('base64');
       }
       buildFiles.push({
         path: filePath,

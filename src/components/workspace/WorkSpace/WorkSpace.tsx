@@ -4,21 +4,21 @@ import MistiStaticAnalyzer from '@/components/MistiStaticAnalyzer';
 import { ManageGit } from '@/components/git';
 import { DownloadProject } from '@/components/project';
 import { ProjectTemplate } from '@/components/template';
-import { NonProductionNotice } from '@/components/ui';
+import { AppLogo, HmrStatus, NonProductionNotice } from '@/components/ui';
 import { AppConfig } from '@/config/AppConfig';
 import { useFileTab } from '@/hooks';
 import { useLogActivity } from '@/hooks/logActivity.hooks';
 import { useProject } from '@/hooks/projectV2.hooks';
 import { useSettingAction } from '@/hooks/setting.hooks';
-import { Project, Tree } from '@/interfaces/workspace.interface';
+import { Project } from '@/interfaces/workspace.interface';
 import { Analytics } from '@/utility/analytics';
 import EventEmitter from '@/utility/eventEmitter';
 import * as TonCore from '@ton/core';
 import * as TonCrypto from '@ton/crypto';
 import { Blockchain } from '@ton/sandbox';
 import { Buffer } from 'buffer';
-import { useRouter } from 'next/router';
 import { FC, useEffect, useMemo, useRef, useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import Split from 'react-split';
 import { useEffectOnce } from 'react-use';
 import BottomPanel from '../BottomPanel/BottomPanel';
@@ -40,29 +40,22 @@ type SplitInstance = Split & { split: Split.Instance };
 const WorkSpace: FC = () => {
   const { clearLog, createLog } = useLogActivity();
 
-  const router = useRouter();
   const [activeMenu, setActiveMenu] = useState<WorkSpaceMenu>('code');
   const [isLoaded, setIsLoaded] = useState(false);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [contract, setContract] = useState<any>('');
   const splitVerticalRef = useRef<SplitInstance | null>(null);
 
-  const { tab } = router.query;
-  const { activeProject, setActiveProject, loadProjectFiles, newFileFolder } =
-    useProject();
+  const [searchParams] = useSearchParams();
+  const tab = searchParams.get('tab');
+
+  const navigate = useNavigate();
+
+  const { activeProject, setActiveProject, loadProjectFiles } = useProject();
 
   const { fileTab } = useFileTab();
 
   const { init: initGlobalSetting } = useSettingAction();
-
-  const commitItemCreation = async (type: Tree['type'], name: string) => {
-    if (!name) return;
-    try {
-      await newFileFolder(name, type);
-    } catch (error) {
-      createLog((error as Error).message, 'error');
-    }
-  };
 
   const createSandbox = async (force: boolean = false) => {
     if (globalWorkspace.sandboxBlockchain && !force) {
@@ -84,7 +77,7 @@ const WorkSpace: FC = () => {
 
   const cachedProjectPath = useMemo(() => {
     return activeProject?.path as string;
-  }, [activeProject]);
+  }, [activeProject?.path]);
 
   const onKeydown = (e: KeyboardEvent) => {
     if ((e.ctrlKey || e.metaKey) && e.key === 's') {
@@ -99,7 +92,7 @@ const WorkSpace: FC = () => {
   };
 
   useEffect(() => {
-    if (!cachedProjectPath) return;
+    if (!cachedProjectPath || searchParams.get('code')) return;
     openProject(cachedProjectPath).catch(() => {});
   }, [cachedProjectPath]);
 
@@ -168,11 +161,13 @@ const WorkSpace: FC = () => {
           projectName={activeProject?.path ?? ''}
           onMenuClicked={(name) => {
             setActiveMenu(name);
-            router
-              .replace({
-                query: { ...router.query, tab: name },
-              })
-              .catch(() => {});
+            const newSearchParams = new URLSearchParams({
+              ...Object.fromEntries(searchParams.entries()),
+              tab: name,
+            } as Record<string, string>).toString();
+            navigate(`${location.pathname}?${newSearchParams}`, {
+              replace: true,
+            });
           }}
         />
       </div>
@@ -189,8 +184,11 @@ const WorkSpace: FC = () => {
       >
         <div className={s.tree}>
           {isLoaded && activeMenu === 'code' && (
-            <div className="onboarding-file-explorer">
-              <span className={s.heading}>Explorer</span>
+            <div className={s.commonContainer}>
+              <h3 className={`section-heading`}>
+                <AppLogo />
+                Explorer
+              </h3>
               <ManageProject />
               {activeProject?.path && (
                 <div className={s.globalAction}>
@@ -200,10 +198,13 @@ const WorkSpace: FC = () => {
                       className={s.visible}
                       allowedActions={['NewFile', 'NewFolder']}
                       onNewFile={() => {
-                        commitItemCreation('file', 'new file');
+                        EventEmitter.emit('CREATE_ROOT_FILE_OR_FOLDER', 'file');
                       }}
                       onNewDirectory={() => {
-                        commitItemCreation('directory', 'new folder');
+                        EventEmitter.emit(
+                          'CREATE_ROOT_FILE_OR_FOLDER',
+                          'directory',
+                        );
                       }}
                     />
                     <DownloadProject
@@ -218,14 +219,16 @@ const WorkSpace: FC = () => {
             </div>
           )}
           {activeMenu === 'build' && globalWorkspace.sandboxBlockchain && (
-            <BuildProject
-              projectId={activeProject?.path as string}
-              onCodeCompile={(_codeBOC) => {}}
-              contract={contract}
-              updateContract={(contractInstance) => {
-                setContract(contractInstance);
-              }}
-            />
+            <div className={s.commonContainer}>
+              <BuildProject
+                projectId={activeProject?.path as string}
+                onCodeCompile={(_codeBOC) => {}}
+                contract={contract}
+                updateContract={(contractInstance) => {
+                  setContract(contractInstance);
+                }}
+              />
+            </div>
           )}
           {activeMenu === 'test-cases' && (
             <div className={s.commonContainer}>
@@ -281,6 +284,7 @@ const WorkSpace: FC = () => {
           )}
         </div>
       </Split>
+      <HmrStatus />
     </div>
   );
 };
