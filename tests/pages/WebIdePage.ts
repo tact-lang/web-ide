@@ -18,7 +18,7 @@ export class WebIdePage {
 
   constructor(page: Page) {
     this.page = page;
-    this.baseUrl = process.env.IDE_URL || 'https://ide.ton.org/';
+    this.baseUrl = process.env.APP_DOMAIN || 'https://ide.ton.org/';
     this.utils = new Utils(this.page);
   }
 

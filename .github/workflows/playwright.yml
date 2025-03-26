@@ -6,8 +6,10 @@ on:
     branches: ['**']
 jobs:
   test:
+    env:
+      APP_DOMAIN: "${{ startsWith(github.ref, 'refs/heads/td-') && format('{0}{1}', github.ref_name, vars.APP_DOMAIN_TESTING) || github.ref == 'refs/heads/staging' && vars.APP_DOMAIN_STAGING || vars.APP_DOMAIN }}"
     timeout-minutes: 60
-    runs-on: ubuntu-latest
+    runs-on: tact-runner-linux
     steps:
     - uses: actions/checkout@v4
     - uses: actions/setup-node@v4
