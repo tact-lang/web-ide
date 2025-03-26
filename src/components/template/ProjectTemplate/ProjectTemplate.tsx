@@ -24,6 +24,10 @@ async function highlightCode(code: string) {
       light: 'min-light',
       dark: 'min-dark',
     },
+    colorReplacements: {
+      '#1f1f1f': '#0e0e10',
+      '#ffffff': '#e8e8e8',
+    },
   });
 }
 
