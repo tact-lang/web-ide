@@ -1,10 +1,9 @@
-import AppIcon from '@/components/ui/icon';
 import { Popover } from 'antd';
 import { FC, useCallback, useEffect } from 'react';
-import AppSetting from './AppSetting';
-import SidebarMenu from './SidebarMenu';
-import Socials from './Socials';
-import ThemeSwitcher from './ThemeSwitcher';
+
+import AppIcon from '@/components/ui/icon';
+
+import { AppSetting, SidebarMenu, Socials, ThemeSwitcher } from './index';
 import s from './WorkspaceSidebar.module.scss';
 
 export type WorkSpaceMenu =

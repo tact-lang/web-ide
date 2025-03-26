@@ -34,6 +34,11 @@ import { FC, useEffect, useState } from 'react';
 import { AddressInput } from '../abiInputs';
 import s from './ContractVerifier.module.scss';
 
+interface ISourceFiles {
+  path: string;
+  content: string;
+}
+
 const getContractCode = async (
   address: string,
   network: Exclude<NetworkEnvironment, 'SANDBOX'>,
@@ -123,6 +128,15 @@ const TonContractVerifier: FC = () => {
           continue;
         }
 
+        const cleanedSources: Record<string, string> = {};
+
+        for (const path in pkgContent.sources) {
+          const newPath = path.startsWith('/') ? path.slice(1) : path;
+          cleanedSources[newPath] = pkgContent.sources[path];
+        }
+
+        pkgContent.sources = cleanedSources;
+
         pkgFiles.set(key, pkgContent);
       }
     }
@@ -185,11 +199,15 @@ const TonContractVerifier: FC = () => {
       createLog,
     );
 
-    if (codeFromAddress !== compiledResult.codeBoc) {
+    const contractBOC = compiledResult.get('contractBOC')?.toString('utf-8');
+
+    if (codeFromAddress !== contractBOC) {
       throw new Error(CONTRACT_MISMATCH_ERROR);
     }
 
-    const sourceFiles = compiledResult.snapshot.map((file) => {
+    const sourceFiles: ISourceFiles[] = JSON.parse(
+      compiledResult.get('snapshot')?.toString('utf-8') ?? '[{}]',
+    ).map((file: { filename: string; content: string }) => {
       return {
         path: file.filename.replace(`${activeProject.path}/`, ''), // remove project path
         content: file.content,
@@ -202,9 +220,7 @@ const TonContractVerifier: FC = () => {
         funcVersion: (await compilerVersion()).funcVersion,
         commandLine: `-SPA ${entryFile}`,
       },
-      knownContractHash: Cell.fromBase64(compiledResult.codeBoc)
-        .hash()
-        .toString('base64'),
+      knownContractHash: Cell.fromBase64(contractBOC).hash().toString('base64'),
       knownContractAddress: contractAddress,
       sources: sourceFiles.map((s) => ({
         includeInCommand: entryFile === s.path,
@@ -429,8 +445,8 @@ const TonContractVerifier: FC = () => {
             className={`w-100`}
             defaultActiveFirstOption
             filterOption={(inputValue, option) => {
-              return option?.title
-                .toLowerCase()
+              return !!option?.title
+                ?.toLowerCase()
                 .includes(inputValue.toLowerCase());
             }}
           >
