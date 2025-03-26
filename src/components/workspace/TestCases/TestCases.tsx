@@ -202,7 +202,7 @@ const TestCases: FC<Props> = ({ projectId }) => {
 
   return (
     <div className={s.root}>
-      <h3 className={`sidebar-section-title`}>Unit Test</h3>
+      <h3 className={`section-heading`}>Unit Test</h3>
 
       <ExecuteFile
         projectId={projectId}
