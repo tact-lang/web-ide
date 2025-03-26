@@ -15,7 +15,9 @@ import s from './ExecuteFile.module.scss';
 
 type ButtonClick =
   | React.MouseEvent<HTMLButtonElement, MouseEvent>
-  | React.MouseEvent<HTMLAnchorElement, MouseEvent>;
+  | React.MouseEvent<HTMLAnchorElement, MouseEvent>
+  | React.MouseEvent<HTMLElement, MouseEvent>;
+
 interface Props {
   projectId: Project['id'];
   onCompile?: () => void;
@@ -220,7 +222,9 @@ const ExecuteFile: FC<Props> = ({
         value={fileList.length > 0 ? selectedFile : undefined}
         onChange={selectFile}
         filterOption={(inputValue, option) => {
-          return option?.title.toLowerCase().includes(inputValue.toLowerCase());
+          return !!option?.title
+            ?.toLowerCase()
+            .includes(inputValue.toLowerCase());
         }}
       >
         {fileList.map((f) => (

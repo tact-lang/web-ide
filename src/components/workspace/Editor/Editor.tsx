@@ -207,8 +207,6 @@ const Editor: FC<Props> = ({ className = '' }) => {
     if (!monacoRef.current) {
       return;
     }
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [monacoRef.current]);
 
   useEffect(() => {
@@ -243,7 +241,7 @@ const Editor: FC<Props> = ({ className = '' }) => {
       <EditorDefault
         className={s.editor}
         path={fileTab.active?.path ?? ''}
-        theme={theme === 'dark' ? 'vs-theme-dark' : 'light'}
+        theme={theme === 'dark' ? 'vs-theme-dark' : 'vs-theme-light'}
         // height="90vh"
         defaultLanguage={fileTypeFromFileName(fileTab.active?.path ?? '')}
         defaultValue={undefined}
