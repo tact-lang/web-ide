@@ -14,7 +14,8 @@
     "format:fix": "prettier --write --ignore-path .prettierignore --ignore-path .gitignore .",
     "postinstall": "husky",
     "commit": "git-cz",
-    "test": "npx playwright test"
+    "test": "npx playwright test",
+    "gen": "echo 'GEN SKIP'"
   },
   "config": {
     "commitizen": {
