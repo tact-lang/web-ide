@@ -21,6 +21,7 @@
       "path": "cz-conventional-changelog"
     }
   },
+  "packageManager": "npm@10.9.2",
   "dependencies": {
     "@ant-design/icons": "^5.6.1",
     "@codingame/monaco-jsonrpc": "^0.3.1",
