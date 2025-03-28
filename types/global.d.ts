@@ -14,5 +14,6 @@ declare global {
     webcontainerInstance: WebContainer | null | undefined;
     TonCore: TonCore;
     TonCrypto: TonCrypto;
+    chrome: unknown;
   }
 }

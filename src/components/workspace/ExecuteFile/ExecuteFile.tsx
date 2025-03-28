@@ -26,6 +26,7 @@ interface Props {
   icon?: AppIconType;
   description?: string;
   allowedFile: string[];
+  disabled?: boolean;
 }
 
 const ExecuteFile: FC<Props> = ({
@@ -36,6 +37,7 @@ const ExecuteFile: FC<Props> = ({
   icon = '',
   description = '',
   allowedFile = [],
+  disabled = false,
 }) => {
   const { compileTsFile } = useWorkspaceActions();
   const {
@@ -236,7 +238,7 @@ const ExecuteFile: FC<Props> = ({
       <Button
         type="primary"
         className={`${s.action} ant-btn-primary-gradient w-100`}
-        disabled={!selectedFile}
+        disabled={!selectedFile || disabled}
         onClick={(e) => {
           buildFile(e).catch(() => {});
         }}
