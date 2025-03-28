@@ -6,7 +6,7 @@ import { AppConfig } from '@/config/AppConfig';
 import { projectExamples } from '@/constant/projectExamples';
 import { App, Drawer, Skeleton } from 'antd';
 import axios from 'axios';
-import { FC, useEffect, useState } from 'react';
+import { FC, memo, useEffect, useState } from 'react';
 import Markdown from 'react-markdown';
 import { createHighlighter } from 'shiki';
 import tactTMLanguage from '../../../assets/ton/tact/tmLanguage.json';
@@ -33,16 +33,10 @@ async function highlightCode(code: string) {
 
 interface CodeBlockProps {
   children?: React.ReactNode;
-  className?: string;
 }
 
-const AsyncCodeBlock: React.FC<CodeBlockProps> = ({
-  children,
-  className,
-  ...rest
-}) => {
+const CodeBlock: React.FC<CodeBlockProps> = ({ children }) => {
   const [highlightedCode, setHighlightedCode] = useState<string | null>(null);
-  const languageMatch = /language-(\w+)/.exec(className ?? '');
 
   useEffect(() => {
     async function highlight() {
@@ -52,13 +46,11 @@ const AsyncCodeBlock: React.FC<CodeBlockProps> = ({
     highlight();
   }, [children]);
 
-  return highlightedCode && languageMatch ? (
-    <div dangerouslySetInnerHTML={{ __html: highlightedCode }} />
-  ) : (
-    <code {...rest} className={className}>
-      {children}
-    </code>
-  );
+  if (!highlightedCode) {
+    return <pre className={s.codeLoading}>Loading code...</pre>;
+  }
+
+  return <div dangerouslySetInnerHTML={{ __html: highlightedCode }} />;
 };
 
 function LinkRenderer({
@@ -208,7 +200,14 @@ const ProjectTemplate: FC = () => {
           children={contractDetails.content}
           components={{
             code: (props) => {
-              return <AsyncCodeBlock {...props} />;
+              const { children, className } = props;
+              const match = /language-(\w+)/.exec(className ?? '');
+
+              return match ? (
+                <CodeBlock {...props} />
+              ) : (
+                <span className={className}>{children}</span>
+              );
             },
             a: LinkRenderer,
           }}
@@ -218,4 +217,4 @@ const ProjectTemplate: FC = () => {
   );
 };
 
-export default ProjectTemplate;
+export default memo(ProjectTemplate);
