@@ -4,8 +4,8 @@ import { useLogActivity } from '@/hooks/logActivity.hooks';
 import {
   ABIField,
   CellABI,
+  ContractLanguage,
   NetworkEnvironment,
-  Project,
   ProjectSetting,
   TactABIField,
   TactInputFields,
@@ -20,7 +20,7 @@ import {
   tonHttpEndpoint,
 } from '@/utility/utils';
 import { Network } from '@orbs-network/ton-access';
-import { ABIArgument, Cell } from '@ton/core';
+import { ABIArgument, Cell, Contract, StateInit } from '@ton/core';
 import { Blockchain, SandboxContract } from '@ton/sandbox';
 import { CHAIN, useTonAddress, useTonConnectUI } from '@tonconnect/ui-react';
 import { Button, Form, Select } from 'antd';
@@ -311,15 +311,28 @@ const BuildProject: FC<Props> = ({ projectId, contract, updateContract }) => {
           false,
         );
       }
+      const init: StateInit = {
+        code: contractBOC
+          ? Cell.fromBoc(Buffer.from(contractBOC, 'base64'))[0]
+          : undefined,
+        data: buildOutput?.dataCell
+          ? Cell.fromBoc(
+              Buffer.from(buildOutput.dataCell as unknown as string, 'base64'),
+            )[0]
+          : undefined,
+      };
+      const contract =
+        activeProject?.language === 'tact'
+          ? window.contractInit
+          : UserContract.createForDeploy(init);
       const {
         address: contractAddress,
-        contract,
+        contract: openedContract,
         logs,
       } = await deployContract(
-        contractBOC,
-        buildOutput?.dataCell as unknown as string,
         environment.toLowerCase() as Network,
-        activeProject as Project,
+        activeProject?.language as ContractLanguage,
+        contract as Contract,
       );
 
       Analytics.track('Deploy project', {
@@ -334,17 +347,17 @@ const BuildProject: FC<Props> = ({ projectId, contract, updateContract }) => {
         'success',
       );
 
-      for (let i = 0; i < (logs ?? []).length; i++) {
-        if (!logs?.[i]) continue;
-        createLog(logs[i], 'info', false);
+      const outputLog = Array.isArray(logs) ? logs : [];
+
+      for (const log of outputLog) {
+        if (!log) continue;
+        createLog(log, 'info', true);
       }
 
       if (!contractAddress) {
         return;
       }
-      if (contract) {
-        updateContract(contract);
-      }
+      updateContract(openedContract);
 
       updateProjectSetting({
         contractAddress: contractAddress,
