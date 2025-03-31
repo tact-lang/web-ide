@@ -268,6 +268,7 @@ export const useProject = () => {
 
     await fileSystem.rename(oldPath, newPath);
     await loadProjectFiles(activeProject.path);
+    return newPath;
   };
 
   const renameProjectFile = async (oldPath: string, newName: string) => {
