@@ -19,6 +19,6 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["types/*", "**/*.ts", "**/*.tsx", "commitlint.config.ts", "src"],
+  "include": ["types/*", "**/*.ts", "**/*.tsx", "src"],
   "exclude": ["node_modules"]
 }

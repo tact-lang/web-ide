@@ -11,14 +11,7 @@
     "serve": "serve -c ../serve.json -s dist -p ${PORT:-3000}",
     "lint": "eslint 'src/**/*.{ts,tsx}' ",
     "format:check": "prettier --check --ignore-path .prettierignore --ignore-path .gitignore .",
-    "format:fix": "prettier --write --ignore-path .prettierignore --ignore-path .gitignore .",
-    "postinstall": "husky",
-    "commit": "git-cz"
-  },
-  "config": {
-    "commitizen": {
-      "path": "cz-conventional-changelog"
-    }
+    "format:fix": "prettier --write --ignore-path .prettierignore --ignore-path .gitignore ."
   },
   "dependencies": {
     "@codingame/monaco-jsonrpc": "^0.3.1",
@@ -84,9 +77,6 @@
     "@babel/preset-env": "^7.26.8",
     "@babel/preset-react": "^7.26.3",
     "@babel/preset-typescript": "^7.26.0",
-    "@commitlint/cli": "^19.5.0",
-    "@commitlint/config-conventional": "^19.5.0",
-    "@commitlint/types": "^19.5.0",
     "@pmmmwh/react-refresh-webpack-plugin": "^0.5.15",
     "@types/bn.js": "^5.1.1",
     "@types/jsonwebtoken": "^9.0.1",
@@ -98,12 +88,9 @@
     "babel-loader": "^9.2.1",
     "buffer": "^6.0.3",
     "clean-webpack-plugin": "^4.0.0",
-    "commitizen": "^4.3.1",
-    "conventional-changelog-atom": "^5.0.0",
     "copy-webpack-plugin": "^12.0.2",
     "css-loader": "^7.1.2",
     "css-minimizer-webpack-plugin": "^7.0.0",
-    "cz-conventional-changelog": "^3.3.0",
     "detect-port": "^2.1.0",
     "dotenv-webpack": "^8.1.0",
     "eslint-config-prettier": "^9.1.0",
@@ -112,7 +99,6 @@
     "eslint-webpack-plugin": "^4.2.0",
     "file-loader": "^6.2.0",
     "html-webpack-plugin": "^5.6.3",
-    "husky": "^9.1.6",
     "lint-staged": "^15.2.10",
     "mini-css-extract-plugin": "^2.9.2",
     "monaco-editor-webpack-plugin": "^7.1.0",
