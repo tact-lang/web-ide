@@ -242,7 +242,7 @@ export function useContractAction() {
     language: ContractLanguage,
     kind?: string,
     stack?: TupleItem[],
-    network?: Network | Partial<NetworkEnvironment>,
+    _network?: Network | Partial<NetworkEnvironment>,
   ): Promise<
     { message?: string; logs?: string[]; status?: string } | RESPONSE_VALUES[]
   > {
@@ -252,68 +252,45 @@ export function useContractAction() {
     if (language === 'func') {
       parsedStack = parseStackForFunc(stack);
     }
-    if (network === 'SANDBOX' && !contract) {
+    if (!contract) {
       return {
         logs: ['The contract has not been deployed yet.'],
         status: 'error',
       };
     }
-    if (network === 'SANDBOX' && contract) {
-      const responseValues = [];
-
-      if (language === 'tact') {
-        // convert getter function name as per script function name. Ex. counter will become getCounter
-        const _method = ('get' + pascalCase(methodName)) as keyof Contract;
-
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        if (!(contract as any)[_method]) {
-          return {
-            logs: [
-              'The contract has not been deployed yet or method not found.',
-            ],
-            status: 'error',
-          };
-        }
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const response = await (contract as any)[_method](
-          ...(parsedStack as TactInputFields[]),
-        );
-        printDebugLog();
-        responseValues.push({
-          method: methodName,
-          value: serializeToJSONFormat(response),
-        });
-      } else {
-        const call = await contract.getData(
-          methodName,
-          parsedStack as TupleItem[],
-        );
-        printDebugLog();
-        while (call.stack.remaining) {
-          const parsedData = parseReponse(call.stack.pop());
-          if (parsedData) {
-            responseValues.push(parsedData);
-          }
-        }
-      }
-      return responseValues;
-    }
-
-    const endpoint = getHttpEndpoint({
-      network: network?.toLocaleLowerCase() as Network,
-    });
-    const client = new TonClient({ endpoint });
-    const call = await client.runMethod(
-      Address.parse(contractAddress),
-      methodName,
-      stack,
-    );
-
     const responseValues = [];
-    while (call.stack.remaining) {
-      const parsedData = parseReponse(call.stack.pop());
-      if (parsedData) {
-        responseValues.push(parsedData);
+
+    if (language === 'tact') {
+      // convert getter function name as per script function name. Ex. counter will become getCounter
+      const _method = ('get' + pascalCase(methodName)) as keyof Contract;
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      if (!(contract as any)[_method]) {
+        return {
+          logs: ['The contract has not been deployed yet or method not found.'],
+          status: 'error',
+        };
+      }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const response = await (contract as any)[_method](
+        ...(parsedStack as TactInputFields[]),
+      );
+      printDebugLog();
+      responseValues.push({
+        method: methodName,
+        value: serializeToJSONFormat(response),
+      });
+    } else {
+      const call = await contract.getData(
+        methodName,
+        parsedStack as TupleItem[],
+      );
+      printDebugLog();
+      while (call.stack.remaining) {
+        const parsedData = parseReponse(call.stack.pop());
+        if (parsedData) {
+          responseValues.push(parsedData);
+        }
       }
     }
     return responseValues;
