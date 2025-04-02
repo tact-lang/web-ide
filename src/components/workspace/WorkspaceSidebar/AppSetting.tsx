@@ -1,6 +1,5 @@
-import AppIcon from '@/components/ui/icon';
-import { Form, Input, Select, Switch } from 'antd';
-import React, { FC, useCallback } from 'react';
+import { Form, Select, Switch } from 'antd';
+import { FC } from 'react';
 
 import { useSettingAction } from '@/hooks/setting.hooks';
 import s from './WorkspaceSidebar.module.scss';
@@ -11,35 +10,17 @@ const AppSetting: FC = () => {
     toggleContractDebug,
     isFormatOnSave,
     toggleFormatOnSave,
-    updateTonAmountForInteraction,
-    getTonAmountForInteraction,
     isAutoBuildAndDeployEnabled,
     toggleAutoBuildAndDeploy,
     getSettingStateByKey,
     updateEditorMode,
     toggleExternalMessage,
-    toggleMasterChain,
   } = useSettingAction();
 
   const editorMode = getSettingStateByKey('editorMode');
   const isExternalMessage = getSettingStateByKey(
     'isExternalMessage',
   ) as boolean;
-  const isMasterChainEnabled = getSettingStateByKey('masterchain');
-
-  const handleTonAmountChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const value = e.target.value;
-      if (!isNaN(Number(value))) {
-        updateTonAmountForInteraction(value);
-      }
-    },
-    [updateTonAmountForInteraction],
-  );
-
-  const resetTonAmount = useCallback(() => {
-    updateTonAmountForInteraction('', true);
-  }, [updateTonAmountForInteraction]);
 
   return (
     <>
@@ -64,17 +45,6 @@ const AppSetting: FC = () => {
           <Switch
             checked={isExternalMessage}
             onChange={toggleExternalMessage}
-          />
-        </Form.Item>
-      </div>
-
-      <div className={s.settingItem}>
-        <Form.Item label="Masterchain" valuePropName="checked">
-          <Switch
-            checked={!!isMasterChainEnabled}
-            onChange={(toggleState) => {
-              toggleMasterChain(toggleState);
-            }}
           />
         </Form.Item>
       </div>
@@ -114,33 +84,6 @@ const AppSetting: FC = () => {
             <Select.Option value="vim">Vim</Select.Option>
           </Select>
         </Form.Item>
-      </div>
-
-      <div className={s.settingItem}>
-        <Form.Item
-          style={{ marginBottom: 0 }}
-          label="TON Amount for Interaction"
-        >
-          <Input
-            style={{ marginBottom: 0, width: '6rem' }}
-            value={getTonAmountForInteraction()}
-            onChange={handleTonAmountChange}
-            placeholder="in TON"
-            suffix={
-              <div
-                title="Reset"
-                className={s.resetAmount}
-                onClick={resetTonAmount}
-              >
-                <AppIcon name="Reload" />
-              </div>
-            }
-          />
-        </Form.Item>
-        <p className={s.description}>
-          This amount will be used for all the <br /> contract interaction like
-          deployment and sending internal messages.
-        </p>
       </div>
     </>
   );
