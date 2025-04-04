@@ -10,6 +10,7 @@ import {
 } from '@/interfaces/workspace.interface';
 import { Analytics } from '@/utility/analytics';
 import { downloadRepo } from '@/utility/gitRepoDownloader';
+import { getUrlParams } from '@/utility/url';
 import { App, Button, Form, Input, Modal, Radio, Upload } from 'antd';
 import { useForm } from 'antd/lib/form/Form';
 import type { RcFile } from 'antd/lib/upload';
@@ -120,7 +121,7 @@ const NewProject: FC<Props> = ({
   };
 
   const onRouterReady = useCallback(async () => {
-    const searchParams = new URLSearchParams(window.location.search);
+    const searchParams = getUrlParams();
 
     const {
       importURL,
