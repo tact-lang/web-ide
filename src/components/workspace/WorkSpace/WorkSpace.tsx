@@ -18,7 +18,7 @@ import * as TonCrypto from '@ton/crypto';
 import { Blockchain } from '@ton/sandbox';
 import { Buffer } from 'buffer';
 import { FC, useEffect, useMemo, useRef, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import Split from 'react-split';
 import { useEffectOnce } from 'react-use';
 import BottomPanel from '../BottomPanel/BottomPanel';
@@ -49,8 +49,6 @@ const WorkSpace: FC = () => {
 
   const [searchParams] = useSearchParams();
   const tab = searchParams.get('tab');
-
-  const navigate = useNavigate();
 
   const { activeProject, setActiveProject, loadProjectFiles } = useProject();
 
@@ -162,13 +160,6 @@ const WorkSpace: FC = () => {
           projectName={activeProject?.path ?? ''}
           onMenuClicked={(name) => {
             setActiveMenu(name);
-            const newSearchParams = new URLSearchParams({
-              ...Object.fromEntries(searchParams.entries()),
-              tab: name,
-            } as Record<string, string>).toString();
-            navigate(`${location.pathname}?${newSearchParams}`, {
-              replace: true,
-            });
           }}
         />
       </div>

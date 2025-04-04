@@ -1,4 +1,5 @@
 import { ContractLanguage } from '@/interfaces/workspace.interface';
+import { getUrlParams } from '@/utility/url';
 import { decodeBase64 } from '@/utility/utils';
 import { useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
@@ -14,7 +15,8 @@ export const useCodeImport = () => {
   const removeImportParams = useCallback(() => {
     // Remove all query params related to importing code
     const keysToRemove = ['code', 'lang', 'importURL', 'name'];
-    const finalQueryParam = new URLSearchParams(searchParams);
+
+    const finalQueryParam = getUrlParams();
 
     keysToRemove.forEach((key) => {
       finalQueryParam.delete(key);
@@ -42,7 +44,7 @@ export const useCodeImport = () => {
             path: defaultFileName,
             type: 'file' as const,
             name: defaultFileName,
-            content: decodeBase64(code),
+            content: decodeBase64(decodeURIComponent(code)),
           },
         ],
         isTemporary: true,
