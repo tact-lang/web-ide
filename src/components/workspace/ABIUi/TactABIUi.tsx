@@ -467,7 +467,9 @@ const TactABIUi: FC<TactABI> = ({
           if (contractError && !ExitCodes[code]) {
             const modifiedLog = error.message.replace(
               EXIT_CODE_PATTERN,
-              `exit_code: ${code} (${contractError.message})`,
+              (_, label, code) => {
+                return `${label}: ${code} (${contractError.message})`;
+              },
             );
             createLog(modifiedLog, 'error');
             return;

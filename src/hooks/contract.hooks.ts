@@ -423,6 +423,8 @@ function terminalLogMessages(
           if (transaction.description.type === 'generic') {
             if (transaction.description.computePhase.type === 'vm') {
               const compute = transaction.description.computePhase;
+              const actionResultCode =
+                transaction.description.actionPhase?.resultCode ?? 0;
               let exitCode = compute.exitCode;
               // 4294967282 as an unsigned 32-bit integer is equivalent to -14 when interpreted as a signed 32-bit integer.
               if (exitCode === 4294967282) exitCode = -14;
@@ -461,9 +463,12 @@ function terminalLogMessages(
                 ...generalErrorMessage,
               ];
 
+              const actionPhaseResultMessage = `action_result_code: ${actionResultCode}`;
+
               const transactionMessage = (
-                `${transactionStatus === 'success' ? '🟢' : '🔴'} Transaction executed: ${transactionStatus}, ` +
+                `${transactionStatus === 'success' && !actionResultCode ? '🟢' : '🔴'} Transaction executed: ${transactionStatus}, ` +
                 `exit_code: ${exitCode} ${allErrorMessages.join('\n')}, ` +
+                `${actionPhaseResultMessage}, ` +
                 `gas: ${shorten(compute.gasFees, 'coins')}`
               ).trim();
 
