@@ -34,7 +34,7 @@ const FileTree: FC<Props> = ({ projectId }) => {
 
   const [newItemToCreate, setNewItemToCreate] = useState<INewItem | null>(null);
 
-  const getProjectFiles = (): NodeModel[] => {
+  const getProjectFiles = (): NodeModel<TreeNodeData>[] => {
     if (!activeProject?.path) return [];
     return projectFiles.map((item) => {
       return {
@@ -50,10 +50,25 @@ const FileTree: FC<Props> = ({ projectId }) => {
   };
 
   const handleDrop = async (_: unknown, options: DropOptions) => {
-    await moveItem(
-      options.dragSourceId as string,
-      options.dropTargetId as string,
+    const { dragSourceId, dropTargetId, dropTarget, dragSource } = options;
+
+    const isSelfDrop = dragSourceId === dropTargetId;
+    const isInvalidDrop = dropTarget?.droppable === false;
+    const isSameParentDrop = dragSource?.parent === dropTargetId;
+
+    if (isSelfDrop || isInvalidDrop || isSameParentDrop) return;
+
+    const newPath = await moveItem(
+      dragSourceId as string,
+      dropTargetId as string,
     );
+
+    if (!newPath) return;
+
+    EventEmitter.emit('FILE_RENAMED', {
+      oldPath: dragSourceId as string,
+      newPath,
+    });
   };
 
   const commitItemCreation = async (name?: string) => {
@@ -100,14 +115,31 @@ const FileTree: FC<Props> = ({ projectId }) => {
 
   return (
     <div className={s.root}>
+      {newItemToCreate?.parentPath === activeProject.path && (
+        <TreePlaceholderInput
+          style={{ paddingInlineStart: 3 }}
+          onSubmit={commitItemCreation}
+          onCancel={reset}
+          type={newItemToCreate.type}
+        />
+      )}
       <DndProvider backend={MultiBackend} options={getBackendOptions()}>
         <Tree
           tree={getProjectFiles()}
           rootId={activeProject.path}
           onDrop={handleDrop}
-          render={(node, { depth, isOpen, onToggle }) => {
+          classes={{
+            root: s.treeRoot,
+            draggingSource: s.draggingSource,
+            dropTarget: s.dropTarget,
+          }}
+          dragPreviewRender={(monitorProps) => (
+            <div>{monitorProps.item.text}</div>
+          )}
+          render={(node, { depth, isOpen, onToggle, ...rest }) => {
             return (
               <TreeNode
+                {...rest}
                 projectId={projectId as string}
                 node={node as NodeModel<TreeNodeData>}
                 depth={depth}
@@ -132,14 +164,6 @@ const FileTree: FC<Props> = ({ projectId }) => {
           }}
         />
       </DndProvider>
-      {newItemToCreate?.parentPath === activeProject.path && (
-        <TreePlaceholderInput
-          style={{ paddingInlineStart: 15 }}
-          onSubmit={commitItemCreation}
-          onCancel={reset}
-          type={newItemToCreate.type}
-        />
-      )}
     </div>
   );
 };

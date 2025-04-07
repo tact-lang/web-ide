@@ -165,6 +165,18 @@ hr {
   text-align: center;
 }
 
+[data-theme='dark'] {
+  .shiki,
+  .shiki span {
+    color: var(--shiki-dark) !important;
+    background-color: var(--shiki-dark-bg) !important;
+  }
+}
+
+.shiki {
+  padding: 0.5rem;
+}
+
 @keyframes rotate {
   from {
     transform: rotate(0deg);

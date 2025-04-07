@@ -61,6 +61,7 @@ const ManageProject: FC = () => {
           icon="GitHub"
           className={s.git}
           active={importURL !== null}
+          key={importURL ?? 'import-from-git'}
         />
         <NewProject
           label="Import"
@@ -81,7 +82,9 @@ const ManageProject: FC = () => {
             <AppIcon name="Delete" />
           </div>
         </Tooltip>
-        <DownloadProject path="/" title="Download all projects" />
+        {projects.length > 0 && (
+          <DownloadProject path="/" title="Download all projects" />
+        )}
       </div>
     </>
   );
@@ -114,10 +117,14 @@ const ManageProject: FC = () => {
   );
 
   const noProjectExistsUI = () => (
-    <div className={s.startNew}>
-      <span className={s.title}>Begin by initiating a new project</span>
-      <NewProject ui="button" className={s.newProject} icon="Plus" />
-      <MigrateToUnifiedFS hasDescription />
+    <div className={s.header}>
+      <div className={s.startNew}>
+        <span className={s.title}>
+          Get started by creating your first project.
+        </span>
+        <NewProject ui="button" className={s.newProject} icon="Plus" />
+        <MigrateToUnifiedFS hasDescription />
+      </div>
     </div>
   );
 
@@ -129,10 +136,9 @@ const ManageProject: FC = () => {
 
   return (
     <div className={s.root}>
-      <div className={s.header}>
-        {projects.length > 0 ? projectHeader() : noProjectExistsUI()}
-      </div>
-      {projects.length > 0 && projectOptions()}
+      <div className={s.header}>{projectHeader()}</div>
+
+      {projects.length > 0 ? projectOptions() : noProjectExistsUI()}
 
       <Modal
         className="modal-delete-project"

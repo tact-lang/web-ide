@@ -67,6 +67,7 @@ const Tabs: FC = () => {
 
   const onFileRename = useCallback(
     ({ oldPath, newPath }: IRenameFile) => {
+      if (fileTab.items.length === 0) return;
       rename(oldPath, newPath);
     },
     [rename],

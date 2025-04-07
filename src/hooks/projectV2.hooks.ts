@@ -268,6 +268,7 @@ export const useProject = () => {
 
     await fileSystem.rename(oldPath, newPath);
     await loadProjectFiles(activeProject.path);
+    return newPath;
   };
 
   const renameProjectFile = async (oldPath: string, newName: string) => {
@@ -358,6 +359,13 @@ export const useProject = () => {
     });
   }
 
+  function getContractVerifierInputs() {
+    if (!activeProject) {
+      return undefined;
+    }
+    return activeProject.contractVerificationInputs;
+  }
+
   return {
     projects,
     projectFiles,
@@ -378,6 +386,7 @@ export const useProject = () => {
     getABIInputValues,
     updateABIInputValues,
     updateContractBuild,
+    getContractVerifierInputs,
   };
 };
 

@@ -43,6 +43,7 @@ import {
   Setting,
   Telegram,
   Test,
+  TonVerifier,
 } from './AppIconList';
 
 export type AppIconType =
@@ -85,7 +86,8 @@ export type AppIconType =
   | 'Moon'
   | 'Sun'
   | 'CodeScan'
-  | 'Refresh';
+  | 'Refresh'
+  | 'TonVerifier';
 
 export interface AppIconInterface {
   name: AppIconType;
@@ -133,6 +135,7 @@ const Components = {
   Sun: FaSun,
   CodeScan: GoCodescan,
   Refresh: RiRefreshLine,
+  TonVerifier,
 };
 
 const AppIcon: FC<AppIconInterface> = ({ name, className = '' }) => {

@@ -382,7 +382,12 @@ const TactABIUi: FC<TactABI> = ({
 
   const hasFormErrors = () => {
     if (type === 'Getter' && abiType.params.length === 0) return false;
-    if (type === 'Setter' && !abiType.params[0].fields) return false;
+    if (
+      type === 'Setter' &&
+      (!abiType.params[0].fields || abiType.params[0].fields.length === 0)
+    )
+      return false;
+
     return (
       !form.isFieldsTouched() ||
       form.getFieldsError().some(({ errors }) => errors.length > 0)
