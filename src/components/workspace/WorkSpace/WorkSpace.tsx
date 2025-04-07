@@ -81,9 +81,8 @@ const WorkSpace: FC = () => {
   }, [activeProject?.path]);
 
   const onKeydown = (e: KeyboardEvent) => {
-    if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+    if ((e.ctrlKey || e.metaKey) && e.code === 'KeyS') {
       e.preventDefault();
-      EventEmitter.emit('SAVE_FILE');
     }
   };
 

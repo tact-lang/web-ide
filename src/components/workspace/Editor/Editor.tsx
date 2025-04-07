@@ -83,7 +83,6 @@ const Editor: FC<Props> = ({ className = '' }) => {
 
   useEffect(() => {
     if (!isLoaded) return;
-    EventEmitter.on('SAVE_FILE', saveFile);
 
     // If file is changed e.g. in case of build process then force update in editor
     EventEmitter.on('FORCE_UPDATE_FILE', (file) => {
@@ -103,7 +102,6 @@ const Editor: FC<Props> = ({ className = '' }) => {
       });
     });
     return () => {
-      EventEmitter.off('SAVE_FILE', saveFile);
       EventEmitter.off('FORCE_UPDATE_FILE');
     };
   }, [isLoaded]);
