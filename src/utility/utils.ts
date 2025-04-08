@@ -1,7 +1,8 @@
 import { COLOR_MAP } from '@/constant/ansiCodes';
 import { FileExtensionToFileType, FileType } from '@/enum/file';
 import { NetworkEnvironment } from '@/interfaces/workspace.interface';
-import { MistiResult } from '@nowarp/misti/dist/cli';
+import { formatWarning } from '@nowarp/misti/dist';
+import { Result } from '@nowarp/misti/dist/cli';
 import { unreachable } from '@nowarp/misti/dist/internals/util';
 import { Config } from '@orbs-network/ton-access';
 import { Address, Cell, Dictionary, Slice } from '@ton/core';
@@ -262,7 +263,7 @@ interface MistiResultResponse {
   type: 'info' | 'success' | 'error' | 'warning';
   message: string;
 }
-export function mistiFormatResult(result: MistiResult): MistiResultResponse[] {
+export function mistiFormatResult(result: Result): MistiResultResponse[] {
   const MISTI_STYLE = '\x1b[1;38;5;135m'; // Bold and colored output for MISTI prefix
   const prefix = `${MISTI_STYLE}[MISTI]`;
   switch (result.kind) {
@@ -272,15 +273,15 @@ export function mistiFormatResult(result: MistiResult): MistiResultResponse[] {
       return [
         { type: 'error', message: `Misti execution failed:\n${result.error}` },
       ];
-    case 'warnings':
-      return result.warnings
-        .flatMap((warningOutput) => warningOutput.warnings)
-        .map((warning) => {
-          return {
-            type: 'warning',
-            message: `${prefix}${COLOR_MAP.reset} ${warning} ${COLOR_MAP.reset}`,
-          };
-        });
+    case 'warnings': {
+      return result.warnings.map((warn, index) => {
+        const isLastWarning = index === result.warnings.length - 1;
+        return {
+          type: 'warning',
+          message: `${prefix}${COLOR_MAP.reset} ${formatWarning(warn, true, !isLastWarning)} ${COLOR_MAP.reset}`,
+        };
+      });
+    }
     case 'tool':
       return result.output.length === 1
         ? [{ type: 'info', message: result.output[0].output }]

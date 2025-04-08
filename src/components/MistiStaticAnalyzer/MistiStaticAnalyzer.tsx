@@ -8,8 +8,8 @@ import { normalizeRelativePath } from '@/utility/path';
 import { getFileExtension, mistiFormatResult } from '@/utility/utils';
 import Path from '@isomorphic-git/lightning-fs/src/path';
 import {
+  BROWSER_STDLIB_PATH_ELEMENTS,
   BuiltInDetectors,
-  DEFAULT_STDLIB_PATH_ELEMENTS,
   MISTI_VERSION,
   Severity,
 } from '@nowarp/misti/dist';
@@ -91,8 +91,8 @@ const MistiStaticAnalyzer: FC = () => {
 
       // add all stdlib files to vfs
       for (const [path, content] of Object.entries(stdLibFiles)) {
-        const stdLibPath = Path.resolve(...DEFAULT_STDLIB_PATH_ELEMENTS, path);
-        vfs.writeFile(stdLibPath, content);
+        const stdLibPath = Path.resolve(...BROWSER_STDLIB_PATH_ELEMENTS, path);
+        vfs.writeFile(stdLibPath, content as string);
       }
 
       const driver = await Driver.create(
@@ -103,8 +103,8 @@ const MistiStaticAnalyzer: FC = () => {
           enabledDetectors: detectors,
           minSeverity: minSeverity,
           listDetectors: false,
-          souffleEnabled: false,
-          tactStdlibPath: Path.resolve(...DEFAULT_STDLIB_PATH_ELEMENTS),
+          souffle: false,
+          tactStdlibPath: Path.resolve(...BROWSER_STDLIB_PATH_ELEMENTS),
           newDetector: undefined,
         },
       );
