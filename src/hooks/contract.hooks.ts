@@ -127,7 +127,7 @@ export function useContractAction() {
       sender,
       {
         value: toNano(tonValue),
-        sendMode: [SendMode.PAY_GAS_SEPARATELY],
+        sendMode: SendMode.PAY_GAS_SEPARATELY,
       },
       messageParams as Cell,
     );
@@ -155,8 +155,9 @@ export function useContractAction() {
     network: Network | Partial<NetworkEnvironment>,
     wallet: SandboxContract<TreasuryContract>,
     tonValue: string,
-    sendMode: SendMode[],
+    sendMode: SendMode,
   ) {
+    console.log('sendMode', sendMode);
     const _dataCell = Cell.fromBoc(Buffer.from(dataCell, 'base64'))[0];
     if (network.toUpperCase() === 'SANDBOX') {
       if (!contract) {
@@ -346,7 +347,7 @@ export class UserContract implements Contract {
     args: {
       value: bigint;
       bounce?: boolean | null | undefined;
-      sendMode: SendMode[];
+      sendMode: SendMode;
     },
     body: Cell = Cell.EMPTY,
   ) {
@@ -354,7 +355,7 @@ export class UserContract implements Contract {
       value: args.value,
       bounce: args.bounce ?? false,
       body,
-      sendMode: combineSendModes(args.sendMode),
+      sendMode: args.sendMode,
     });
   }
 
@@ -406,17 +407,6 @@ class TonConnectSender implements Sender {
   }
 
   async send(args: SenderArguments): Promise<void> {
-    if (
-      !(
-        args.sendMode === undefined ||
-        args.sendMode === SendMode.PAY_GAS_SEPARATELY
-      )
-    ) {
-      throw new Error(
-        'Deployer sender does not support `sendMode` other than `PAY_GAS_SEPARATELY`',
-      );
-    }
-
     await this.provider.sendTransaction({
       validUntil: Date.now() + 5 * 60 * 1000,
       messages: [

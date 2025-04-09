@@ -1,5 +1,5 @@
 import { useFile } from '@/hooks';
-import { useContractAction } from '@/hooks/contract.hooks';
+import { combineSendModes, useContractAction } from '@/hooks/contract.hooks';
 import { useLogActivity } from '@/hooks/logActivity.hooks';
 import { baseProjectPath, useProject } from '@/hooks/projectV2.hooks';
 import { CellABI, ProjectSetting } from '@/interfaces/workspace.interface';
@@ -117,7 +117,7 @@ const FuncContractInteraction: FC<ProjectInteractionProps> = ({
       network,
       wallet!,
       tonValue,
-      sendMode,
+      combineSendModes(sendMode),
     );
 
     messageResponse?.logs?.map((log) => {
@@ -151,6 +151,14 @@ const FuncContractInteraction: FC<ProjectInteractionProps> = ({
         );
         createLog('Message sent successfully', 'success');
       } catch (error) {
+        if (error instanceof Error) {
+          createLog(error.message, 'error');
+          return;
+        }
+        createLog(
+          'Something went wrong. Check browser console for details.',
+          'error',
+        );
         console.log('error', error);
       } finally {
         setIsLoading('');
