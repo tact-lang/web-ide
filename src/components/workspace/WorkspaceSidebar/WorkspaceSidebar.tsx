@@ -38,7 +38,9 @@ const WorkspaceSidebar: FC<Props> = ({
 
   useEffect(() => {
     if (!projectName) {
-      onMenuClicked('code');
+      setTimeout(() => {
+        onMenuClicked('code');
+      }, 1500);
     }
   }, [projectName, onMenuClicked]);
 

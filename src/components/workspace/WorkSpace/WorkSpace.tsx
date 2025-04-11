@@ -13,12 +13,13 @@ import { useSettingAction } from '@/hooks/setting.hooks';
 import { Project } from '@/interfaces/workspace.interface';
 import { Analytics } from '@/utility/analytics';
 import EventEmitter from '@/utility/eventEmitter';
+import { delay } from '@/utility/utils';
 import * as TonCore from '@ton/core';
 import * as TonCrypto from '@ton/crypto';
 import { Blockchain } from '@ton/sandbox';
 import { Buffer } from 'buffer';
 import { FC, useEffect, useMemo, useRef, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import Split from 'react-split';
 import { useEffectOnce } from 'react-use';
 import BottomPanel from '../BottomPanel/BottomPanel';
@@ -49,6 +50,8 @@ const WorkSpace: FC = () => {
 
   const [searchParams] = useSearchParams();
   const tab = searchParams.get('tab');
+
+  const navigate = useNavigate();
 
   const { activeProject, setActiveProject, loadProjectFiles } = useProject();
 
@@ -132,6 +135,20 @@ const WorkSpace: FC = () => {
       setActiveMenu(tab as WorkSpaceMenu);
     }
   }, [tab]);
+
+  useEffect(() => {
+    if (activeMenu === 'code') return;
+    (async () => {
+      const newSearchParams = new URLSearchParams({
+        ...Object.fromEntries(searchParams.entries()),
+        tab: activeMenu,
+      } as Record<string, string>).toString();
+      await delay(100);
+      navigate(`${location.pathname}?${newSearchParams}`, {
+        replace: true,
+      });
+    })();
+  }, [activeMenu]);
 
   useEffectOnce(() => {
     setIsLoaded(true);
