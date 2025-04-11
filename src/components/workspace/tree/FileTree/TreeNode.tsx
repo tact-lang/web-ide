@@ -149,7 +149,7 @@ const TreeNode: FC<Props> = ({
         return;
       }
       const language = fileTypeFromFileName(node.text);
-      const shareableLink = `${window.location.origin}/?code=${encodeBase64(fileContent)}&lang=${language}`;
+      const shareableLink = `${window.location.origin}/#code=${encodeURIComponent(encodeBase64(fileContent))}&lang=${language}`;
 
       navigator.clipboard.writeText(shareableLink);
 

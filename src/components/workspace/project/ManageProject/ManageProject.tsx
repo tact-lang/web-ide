@@ -9,6 +9,7 @@ import AppIcon from '@/components/ui/icon';
 import { baseProjectPath, useProject } from '@/hooks/projectV2.hooks';
 import { Project } from '@/interfaces/workspace.interface';
 import EventEmitter from '@/utility/eventEmitter';
+import { getUrlParams } from '@/utility/url';
 import { App, Button, Modal, Select } from 'antd';
 import { FC, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -130,8 +131,7 @@ const ManageProject: FC = () => {
 
   useEffect(() => {
     loadProjects();
-    const searchParams = new URLSearchParams(window.location.search);
-    setImportURL(searchParams.get('importURL'));
+    setImportURL(getUrlParams().get('importURL'));
   }, []);
 
   return (
