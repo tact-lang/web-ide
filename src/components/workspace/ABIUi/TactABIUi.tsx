@@ -16,6 +16,7 @@ import { parseInputs } from '@/utility/abi';
 import { EXIT_CODE_PATTERN } from '@/utility/text';
 import { isIncludesTypeCellOrSlice } from '@/utility/utils';
 import { MinusCircleOutlined } from '@ant-design/icons';
+import Path from '@isomorphic-git/lightning-fs/src/path';
 import { Address, Contract, TupleItem } from '@ton/core';
 import { SandboxContract } from '@ton/sandbox';
 import { Button, Form, Input, Popover, Radio, Select, Switch } from 'antd';
@@ -415,7 +416,7 @@ const TactABIUi: FC<TactABI> = ({
             !file.name.endsWith('.spec.ts'),
         );
         fileCollection.forEach((file) => {
-          tsProjectFiles[file.path!] = file.content ?? '';
+          tsProjectFiles[Path.normalize(file.path!)] = file.content ?? '';
         });
       }
       const parsedInputsValues = Object.values(
