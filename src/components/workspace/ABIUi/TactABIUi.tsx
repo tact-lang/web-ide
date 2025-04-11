@@ -1,3 +1,4 @@
+import CodeBlock from '@/components/shared/CodeBlock';
 import { Tooltip } from '@/components/ui';
 import AppIcon from '@/components/ui/icon';
 import { ExitCodes } from '@/constant/exitCodes';
@@ -254,18 +255,22 @@ export const renderField = (
 
     const popoverContent = () => (
       <div>
-        <p>Note: Create a TypeScript file and use the default export.</p>
+        <p>
+          Note: Preferably, create a TypeScript file in the project root and use
+          a default export.
+        </p>
 
         <p>
-          <i>Example:</i>
+          <i>Example: cell.ts</i>
         </p>
-        <pre>
-          {`import { beginCell } from "@ton/core";
+        <CodeBlock
+          lang="typescript"
+          code={`import { beginCell } from "@ton/core";
 
 const cell = beginCell().storeInt(9, 32).endCell();
 
 export default cell;`}
-        </pre>
+        />
         <p style={{ color: `var(--color-warning)` }}>
           <b>Supported npm packages:</b> @ton/core, @ton/crypto
         </p>
