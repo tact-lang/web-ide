@@ -178,6 +178,7 @@ const WorkSpace: FC = () => {
           onMenuClicked={(name) => {
             setActiveMenu(name);
           }}
+          isLoaded={isLoaded}
         />
       </div>
       <Split
