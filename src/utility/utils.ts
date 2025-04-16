@@ -5,7 +5,7 @@ import { formatWarning } from '@nowarp/misti/dist';
 import { Result } from '@nowarp/misti/dist/cli';
 import { unreachable } from '@nowarp/misti/dist/internals/util';
 import { Config } from '@orbs-network/ton-access';
-import { Address, Cell, Dictionary, Slice } from '@ton/core';
+import { Address, Cell, Dictionary, fromNano, Slice } from '@ton/core';
 
 export function fileTypeFromFileName(name: string): FileType {
   return fileTypeForExtension(name.split('.').pop() ?? '');
@@ -294,4 +294,19 @@ export function mistiFormatResult(result: Result): MistiResultResponse[] {
     default:
       unreachable(result);
   }
+}
+
+export function shorten(
+  long: Address | bigint | string,
+  format: 'default' | 'coins' = 'default',
+) {
+  if (long instanceof Address || typeof long === 'string') {
+    const str = typeof long === 'string' ? long : long.toString();
+    return `${str.slice(0, 4)}..${str.slice(-4)}`;
+  }
+
+  if (typeof long === 'bigint') {
+    return format === 'coins' ? fromNano(long) : long.toString();
+  }
+  return '';
 }
