@@ -40,12 +40,16 @@ import { ITonConnect, SendTransactionRequest } from '@tonconnect/sdk';
 import { useTonConnectUI } from '@tonconnect/ui-react';
 import { App } from 'antd';
 import { pascalCase } from 'change-case';
-import { useSettingAction } from './setting.hooks';
+
+export type RESPONSE_VALUES =
+  | { method: string; value: string | GetterJSONReponse }
+  | { type: string; value: string | GetterJSONReponse };
+
+export const combineSendModes = (modes: SendMode[]): number =>
+  modes.reduce((a, b) => a + (b as number), 0);
 
 export function useContractAction() {
   const [tonConnector] = useTonConnectUI();
-  const { getTonAmountForInteraction } = useSettingAction();
-  const tonAmountForInteraction = toNano(getTonAmountForInteraction());
   const { message } = App.useApp();
 
   return {
@@ -59,6 +63,7 @@ export function useContractAction() {
     network: Network | Partial<NetworkEnvironment>,
     language: ContractLanguage,
     contract: Contract,
+    tonValue: string,
   ) {
     const { sandboxBlockchain, sandboxWallet } = globalWorkspace;
     const isSandbox = network.toUpperCase() === 'SANDBOX';
@@ -121,7 +126,8 @@ export function useContractAction() {
     const response = await openedContract.send(
       sender,
       {
-        value: tonAmountForInteraction,
+        value: toNano(tonValue),
+        sendMode: SendMode.PAY_GAS_SEPARATELY,
       },
       messageParams as Cell,
     );
@@ -148,7 +154,10 @@ export function useContractAction() {
     contract: SandboxContract<UserContract> | null = null,
     network: Network | Partial<NetworkEnvironment>,
     wallet: SandboxContract<TreasuryContract>,
+    tonValue: string,
+    sendMode: SendMode,
   ) {
+    console.log('sendMode', sendMode);
     const _dataCell = Cell.fromBoc(Buffer.from(dataCell, 'base64'))[0];
     if (network.toUpperCase() === 'SANDBOX') {
       if (!contract) {
@@ -158,7 +167,8 @@ export function useContractAction() {
       const response = await contract.send(
         wallet.getSender(),
         {
-          value: tonAmountForInteraction,
+          value: toNano(tonValue),
+          sendMode: sendMode,
         },
         _dataCell,
       );
@@ -173,7 +183,7 @@ export function useContractAction() {
         messages: [
           {
             address: contractAddress,
-            amount: tonAmountForInteraction.toString(),
+            amount: toNano(tonValue).toString(),
             payload: _dataCell.toBoc().toString('base64'),
           },
         ],
@@ -193,6 +203,8 @@ export function useContractAction() {
     receiverType?: 'none' | 'external' | 'internal',
     stack?: TupleItem[],
     network?: Network | Partial<NetworkEnvironment>,
+    tonValue: string = '0.5',
+    sendMode: SendMode[] = [SendMode.PAY_GAS_SEPARATELY],
   ): Promise<
     { message: string; logs?: string[]; status?: string } | undefined
   > {
@@ -216,7 +228,8 @@ export function useContractAction() {
       response = await (contract as any).send(
         sender,
         {
-          value: tonAmountForInteraction,
+          value: toNano(tonValue),
+          sendMode: combineSendModes(sendMode),
         },
         stack ? stack[0] : '',
       );
@@ -230,10 +243,6 @@ export function useContractAction() {
       logs: terminalLogMessages([response], [contract as Contract]),
     };
   }
-
-  type RESPONSE_VALUES =
-    | { method: string; value: string | GetterJSONReponse }
-    | { type: string; value: string | GetterJSONReponse };
 
   async function callGetter(
     contractAddress: string,
@@ -312,13 +321,18 @@ export class UserContract implements Contract {
   async send(
     provider: ContractProvider,
     via: Sender,
-    args: { value: bigint; bounce?: boolean | null | undefined },
+    args: {
+      value: bigint;
+      bounce?: boolean | null | undefined;
+      sendMode: SendMode;
+    },
     body: Cell = Cell.EMPTY,
   ) {
     await provider.internal(via, {
       value: args.value,
       bounce: args.bounce ?? false,
       body,
+      sendMode: args.sendMode,
     });
   }
 
@@ -370,17 +384,6 @@ class TonConnectSender implements Sender {
   }
 
   async send(args: SenderArguments): Promise<void> {
-    if (
-      !(
-        args.sendMode === undefined ||
-        args.sendMode === SendMode.PAY_GAS_SEPARATELY
-      )
-    ) {
-      throw new Error(
-        'Deployer sender does not support `sendMode` other than `PAY_GAS_SEPARATELY`',
-      );
-    }
-
     await this.provider.sendTransaction({
       validUntil: Date.now() + 5 * 60 * 1000,
       messages: [

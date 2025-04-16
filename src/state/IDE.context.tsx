@@ -37,7 +37,6 @@ interface IDEContextProps {
 const defaultSetting = {
   contractDebug: true,
   formatOnSave: false,
-  tonAmountForInteraction: '0.05',
   autoBuildAndDeploy: true,
   editorMode: 'default' as const,
   isExternalMessage: false,

@@ -47,6 +47,7 @@ import { useForm } from 'antd/lib/form/Form';
 import { OutputChunk } from 'rollup';
 import packageJson from '../../../../package.json';
 import { renderField } from '../ABIUi/TactABIUi';
+import { TonInputValue } from '../ABIUi/TonValueInput';
 import { globalWorkspace, WalletDetails } from '../globalWorkspace';
 import CellBuilder, { CellValues, generateCellCode } from './CellBuilder';
 
@@ -156,6 +157,9 @@ const BuildProject: FC<Props> = ({ projectId, contract, updateContract }) => {
           className={`${s.form} app-form`}
           form={deployForm}
           layout="vertical"
+          initialValues={{
+            tonValue: 0.5,
+          }}
           onFinish={(values) => {
             initDeploy(values as FormValues).catch(() => {});
           }}
@@ -200,6 +204,8 @@ const BuildProject: FC<Props> = ({ projectId, contract, updateContract }) => {
               </div>
             )}
 
+          <TonInputValue name="tonValue" />
+
           <Button
             type="primary"
             htmlType="submit"
@@ -223,7 +229,7 @@ const BuildProject: FC<Props> = ({ projectId, contract, updateContract }) => {
   }
 
   const initDeploy = async (formValues: FormValues) => {
-    const tempFormValues = { ...formValues };
+    const { tonValue, ...tempFormValues } = formValues;
 
     let initParams = '';
     if (tempFormValues.queryId) {
@@ -275,7 +281,7 @@ const BuildProject: FC<Props> = ({ projectId, contract, updateContract }) => {
         throw new Error(`Please connect wallet to ${environment}`);
       }
       setIsLoading('deploy');
-      await createStateInitCell(initParams);
+      await createStateInitCell(initParams, tonValue as string);
     } catch (error) {
       setIsLoading('');
       if (typeof error === 'string') {
@@ -289,7 +295,7 @@ const BuildProject: FC<Props> = ({ projectId, contract, updateContract }) => {
     }
   };
 
-  const deploy = async () => {
+  const deploy = async (tonValue: string) => {
     createLog(`Deploying contract ...`, 'info');
     if (!selectedContract) {
       createLog('Select a contract', 'error');
@@ -342,6 +348,7 @@ const BuildProject: FC<Props> = ({ projectId, contract, updateContract }) => {
         environment.toLowerCase() as Network,
         activeProject?.language as ContractLanguage,
         contract as Contract,
+        tonValue,
       );
 
       Analytics.track('Deploy project', {
@@ -390,7 +397,7 @@ const BuildProject: FC<Props> = ({ projectId, contract, updateContract }) => {
     }
   };
 
-  const createStateInitCell = async (initParams = '') => {
+  const createStateInitCell = async (initParams = '', tonValue: string) => {
     if (!selectedContract || !activeProject?.path) {
       throw new Error('Please select contract');
     }
@@ -472,7 +479,7 @@ const BuildProject: FC<Props> = ({ projectId, contract, updateContract }) => {
           ...(initParams as unknown as object),
         });
         window.contractInit = contractInit;
-        deploy().catch(() => {});
+        deploy(tonValue).catch(() => {});
         return;
       }
 
@@ -808,7 +815,7 @@ const BuildProject: FC<Props> = ({ projectId, contract, updateContract }) => {
     if (!buildOutput?.dataCell || !isLoading) {
       return;
     }
-    deploy().catch(() => {});
+    deploy(deployForm.getFieldValue('tonValue')).catch(() => {});
   }, [buildOutput?.dataCell]);
 
   useEffect(() => {

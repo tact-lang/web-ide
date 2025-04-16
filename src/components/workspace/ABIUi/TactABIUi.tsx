@@ -1,11 +1,17 @@
 import { Tooltip } from '@/components/ui';
 import AppIcon from '@/components/ui/icon';
 import { ExitCodes } from '@/constant/exitCodes';
-import { UserContract, useContractAction } from '@/hooks/contract.hooks';
+import {
+  RESPONSE_VALUES,
+  UserContract,
+  useContractAction,
+} from '@/hooks/contract.hooks';
 import { useLogActivity } from '@/hooks/logActivity.hooks';
 import { useProject } from '@/hooks/projectV2.hooks';
 import { LogType } from '@/interfaces/log.interface';
 import {
+  ContractLanguage,
+  NetworkEnvironment,
   TactABIField,
   TactInputFields,
   TactType,
@@ -15,7 +21,8 @@ import { parseInputs } from '@/utility/abi';
 import { EXIT_CODE_PATTERN } from '@/utility/text';
 import { isIncludesTypeCellOrSlice } from '@/utility/utils';
 import { MinusCircleOutlined } from '@ant-design/icons';
-import { Address, Contract, TupleItem } from '@ton/core';
+import { Network } from '@orbs-network/ton-access';
+import { Address, Contract, SendMode, TupleItem } from '@ton/core';
 import { SandboxContract } from '@ton/sandbox';
 import { Button, Form, Input, Popover, Radio, Select, Switch } from 'antd';
 import { Rule, RuleObject } from 'antd/es/form';
@@ -23,6 +30,8 @@ import { useForm } from 'antd/lib/form/Form';
 import { FC, Fragment, useEffect, useState } from 'react';
 import { ABIUiProps } from './ABIUi';
 import s from './ABIUi.module.scss';
+import { TonSendMode } from './TonSendMode';
+import { TonInputValue } from './TonValueInput';
 
 const comptimeSliceDescriptions: Record<'slice' | 'rawSlice', string> = {
   slice:
@@ -413,13 +422,14 @@ const TactABIUi: FC<TactABI> = ({
           tsProjectFiles[file.path!] = file.content ?? '';
         });
       }
+      const { tonValue, sendMode, ...remainingFormValues } = formValues;
+
       const parsedInputsValues = Object.values(
-        await parseInputs(formValues, tsProjectFiles),
+        await parseInputs(remainingFormValues, tsProjectFiles),
       );
       setLoading(fieldName);
-      const callableFunction = type === 'Getter' ? callGetter : callSetter;
 
-      const response = await callableFunction(
+      const baseArgs = [
         contractAddress,
         fieldName,
         contract as SandboxContract<UserContract>,
@@ -427,7 +437,30 @@ const TactABIUi: FC<TactABI> = ({
         abiType.receiverType,
         parsedInputsValues as TupleItem[],
         network,
-      );
+      ] as const satisfies [
+        string,
+        string,
+        SandboxContract<UserContract>,
+        ContractLanguage,
+        'none' | 'external' | 'internal',
+        TupleItem[],
+        Network | Partial<NetworkEnvironment>,
+      ];
+
+      let response:
+        | { message?: string; logs?: string[]; status?: string }
+        | RESPONSE_VALUES[]
+        | undefined = [];
+
+      if (type === 'Setter') {
+        response = await callSetter(
+          ...baseArgs,
+          tonValue as string,
+          sendMode as SendMode[],
+        );
+      } else {
+        response = await callGetter(...baseArgs);
+      }
 
       if (Array.isArray(response)) {
         createLog(JSON.stringify(response, null, 2));
@@ -500,6 +533,10 @@ const TactABIUi: FC<TactABI> = ({
         onFinish={(values) => {
           onSubmit(values, abiType.name);
         }}
+        initialValues={{
+          tonValue: 0.5,
+          sendMode: [SendMode.PAY_GAS_SEPARATELY],
+        }}
       >
         <h4 className={s.abiHeading}>{getItemHeading(abiType)}:</h4>
         {abiType.params.map((field) => (
@@ -512,6 +549,13 @@ const TactABIUi: FC<TactABI> = ({
             )}
           </Fragment>
         ))}
+        {type === 'Setter' && (
+          <>
+            <TonSendMode name="sendMode" />
+            <TonInputValue name="tonValue" />
+          </>
+        )}
+
         <Form.Item shouldUpdate noStyle>
           {() => (
             <Button
