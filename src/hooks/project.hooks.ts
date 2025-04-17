@@ -11,14 +11,9 @@ import {
   createVirtualFileSystem,
   precompile,
 } from '@tact-lang/compiler';
-import {
-  FactoryAst,
-  getAstFactory,
-} from '@tact-lang/compiler/dist/ast/ast-helpers';
 import { featureEnable } from '@tact-lang/compiler/dist/config/features';
 import { CompilerContext } from '@tact-lang/compiler/dist/context/context';
-import { Parser, getParser } from '@tact-lang/compiler/dist/grammar';
-import stdLibFiles from '@tact-lang/compiler/dist/stdlib/stdlib';
+import { files as stdLibFiles } from '@tact-lang/compiler/dist/stdlib/stdlib';
 import {
   CompileResult,
   SuccessResult,
@@ -159,10 +154,7 @@ export function useProjectActions() {
 
     const entryFile = relativePath(file.path, activeProject?.path as string);
 
-    const ast: FactoryAst = getAstFactory();
-    const parser: Parser = getParser(ast);
-
-    ctx = precompile(ctx, fs, stdlib, entryFile, parser, ast);
+    ctx = precompile(ctx, fs, stdlib, entryFile);
 
     const response = await buildTact({
       config: {

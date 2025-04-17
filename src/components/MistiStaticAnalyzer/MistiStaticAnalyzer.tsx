@@ -15,7 +15,7 @@ import {
 } from '@nowarp/misti/dist';
 import { Driver } from '@nowarp/misti/dist/cli/driver';
 import { createVirtualFileSystem } from '@nowarp/misti/dist/vfs/createVirtualFileSystem';
-import stdLibFiles from '@tact-lang/compiler/dist/stdlib/stdlib';
+import { files as stdLibFiles } from '@tact-lang/compiler/dist/stdlib/stdlib';
 import { Button, Form, Select, Switch, TreeSelect } from 'antd';
 import { useForm } from 'antd/lib/form/Form';
 import { FC, useEffect, useState } from 'react';
