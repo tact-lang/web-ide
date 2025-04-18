@@ -3,6 +3,8 @@ import { FC, useCallback, useEffect } from 'react';
 
 import AppIcon from '@/components/ui/icon';
 
+import { getUrlParams } from '@/utility/url';
+import { useNavigate } from 'react-router-dom';
 import { AppSetting, SidebarMenu, Socials, ThemeSwitcher } from './index';
 import s from './WorkspaceSidebar.module.scss';
 
@@ -19,13 +21,17 @@ interface Props {
   activeMenu: WorkSpaceMenu;
   onMenuClicked: (name: WorkSpaceMenu) => void;
   projectName?: string | null;
+  isLoaded: boolean;
 }
 
 const WorkspaceSidebar: FC<Props> = ({
   activeMenu,
   onMenuClicked,
   projectName,
+  isLoaded,
 }) => {
+  const navigate = useNavigate();
+
   const handleMenuClick = useCallback(
     (menu: WorkSpaceMenu) => {
       if (!projectName) {
@@ -37,8 +43,15 @@ const WorkspaceSidebar: FC<Props> = ({
   );
 
   useEffect(() => {
-    if (!projectName) {
+    const { code, importURL } = Object.fromEntries(getUrlParams());
+    const shouldRedirectToCode =
+      !projectName && isLoaded && !code && !importURL;
+
+    if (shouldRedirectToCode) {
       onMenuClicked('code');
+      navigate('/', {
+        replace: true,
+      });
     }
   }, [projectName, onMenuClicked]);
 

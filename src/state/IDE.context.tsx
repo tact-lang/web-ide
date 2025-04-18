@@ -1,6 +1,7 @@
 import { SettingInterface } from '@/interfaces/setting.interface';
 import { ProjectSetting, Tree } from '@/interfaces/workspace.interface';
 import { updateProjectTabSetting } from '@/utility/projectSetting';
+import { getUrlParams } from '@/utility/url';
 import {
   FC,
   createContext,
@@ -72,7 +73,7 @@ export const IDEProvider: FC<{ children: React.ReactNode }> = ({
   );
   const [setting, setSetting] = useState<SettingInterface>(defaultSetting);
   const [isLoaded, setIsLoaded] = useState(false);
-  const searchParams = new URLSearchParams(window.location.search);
+  const searchParams = getUrlParams();
 
   const value = useMemo(
     () => ({

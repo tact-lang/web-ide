@@ -132,6 +132,17 @@ const WorkSpace: FC = () => {
     }
   }, [tab]);
 
+  useEffect(() => {
+    if (!isLoaded) return;
+    const newSearchParams = new URLSearchParams({
+      ...Object.fromEntries(searchParams.entries()),
+      tab: activeMenu,
+    } as Record<string, string>).toString();
+    navigate(`${location.pathname}?${newSearchParams}`, {
+      replace: true,
+    });
+  }, [activeMenu]);
+
   useEffectOnce(() => {
     setIsLoaded(true);
     initGlobalSetting();
@@ -159,14 +170,8 @@ const WorkSpace: FC = () => {
           projectName={activeProject?.path ?? ''}
           onMenuClicked={(name) => {
             setActiveMenu(name);
-            const newSearchParams = new URLSearchParams({
-              ...Object.fromEntries(searchParams.entries()),
-              tab: name,
-            } as Record<string, string>).toString();
-            navigate(`${location.pathname}?${newSearchParams}`, {
-              replace: true,
-            });
           }}
+          isLoaded={isLoaded}
         />
       </div>
       <Split
