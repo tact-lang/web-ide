@@ -13,7 +13,6 @@ import { useSettingAction } from '@/hooks/setting.hooks';
 import { Project } from '@/interfaces/workspace.interface';
 import { Analytics } from '@/utility/analytics';
 import EventEmitter from '@/utility/eventEmitter';
-import { delay } from '@/utility/utils';
 import * as TonCore from '@ton/core';
 import * as TonCrypto from '@ton/crypto';
 import { Blockchain } from '@ton/sandbox';
@@ -136,17 +135,13 @@ const WorkSpace: FC = () => {
   }, [tab]);
 
   useEffect(() => {
-    if (activeMenu === 'code') return;
-    (async () => {
-      const newSearchParams = new URLSearchParams({
-        ...Object.fromEntries(searchParams.entries()),
-        tab: activeMenu,
-      } as Record<string, string>).toString();
-      await delay(100);
-      navigate(`${location.pathname}?${newSearchParams}`, {
-        replace: true,
-      });
-    })();
+    const newSearchParams = new URLSearchParams({
+      ...Object.fromEntries(searchParams.entries()),
+      tab: activeMenu,
+    } as Record<string, string>).toString();
+    navigate(`${location.pathname}?${newSearchParams}`, {
+      replace: true,
+    });
   }, [activeMenu]);
 
   useEffectOnce(() => {
