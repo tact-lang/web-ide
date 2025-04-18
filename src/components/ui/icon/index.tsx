@@ -1,6 +1,7 @@
 import { FC } from 'react';
 import {
   AiOutlineBranches,
+  AiOutlineCopy,
   AiOutlineDelete,
   AiOutlineDownload,
   AiOutlineGoogle,
@@ -87,7 +88,8 @@ export type AppIconType =
   | 'Sun'
   | 'CodeScan'
   | 'Refresh'
-  | 'TonVerifier';
+  | 'TonVerifier'
+  | 'Copy';
 
 export interface AppIconInterface {
   name: AppIconType;
@@ -136,6 +138,7 @@ const Components = {
   CodeScan: GoCodescan,
   Refresh: RiRefreshLine,
   TonVerifier,
+  Copy: AiOutlineCopy,
 };
 
 const AppIcon: FC<AppIconInterface> = ({ name, className = '' }) => {
