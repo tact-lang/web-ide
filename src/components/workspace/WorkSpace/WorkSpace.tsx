@@ -135,6 +135,7 @@ const WorkSpace: FC = () => {
   }, [tab]);
 
   useEffect(() => {
+    if (!isLoaded) return;
     const newSearchParams = new URLSearchParams({
       ...Object.fromEntries(searchParams.entries()),
       tab: activeMenu,
