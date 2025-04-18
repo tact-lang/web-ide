@@ -1,5 +1,4 @@
 import AppIcon, { AppIconType } from '@/components/ui/icon';
-import { useFileTab } from '@/hooks';
 import { useLogActivity } from '@/hooks/logActivity.hooks';
 import { useProjectActions } from '@/hooks/project.hooks';
 import { useProject } from '@/hooks/projectV2.hooks';
@@ -46,7 +45,6 @@ const ExecuteFile: FC<Props> = ({
   } = useProject();
   const { compileFuncProgram, compileTactProgram } = useProjectActions();
   const { createLog } = useLogActivity();
-  const { hasDirtyFiles } = useFileTab();
   const [selectedFile, setSelectedFile] = useState<Tree['path'] | undefined>();
   const selectedFileRef = useRef<Tree['path'] | undefined>();
   const isAutoBuildAndDeployEnabled =
@@ -99,12 +97,6 @@ const ExecuteFile: FC<Props> = ({
   }
 
   const buildFile = async (e: ButtonClick) => {
-    if (hasDirtyFiles()) {
-      message.warning({
-        content: 'You have unsaved changes',
-        key: 'unsaved_changes',
-      });
-    }
     const entryFile = selectedFileRef.current;
     if (!entryFile) {
       createLog('Please select a file', 'error');

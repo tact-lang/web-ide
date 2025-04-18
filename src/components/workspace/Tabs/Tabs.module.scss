@@ -40,20 +40,8 @@
     }
     &:hover {
       .close {
-        &:not(.isDirty) {
-          .closeIcon {
-            visibility: visible !important;
-          }
-        }
-        &:hover {
-          &.isDirty {
-            .fileDirtyIcon {
-              visibility: hidden;
-            }
-            .closeIcon {
-              visibility: visible;
-            }
-          }
+        .closeIcon {
+          visibility: visible !important;
         }
       }
     }
@@ -78,14 +66,6 @@
         background-color: #403d3d;
         [data-theme='light'] & {
           background-color: #f7f7f7;
-        }
-      }
-      &.isDirty {
-        .closeIcon {
-          visibility: hidden;
-        }
-        .fileDirtyIcon {
-          visibility: visible;
         }
       }
     }

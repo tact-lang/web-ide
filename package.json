@@ -19,7 +19,7 @@
     "@isomorphic-git/lightning-fs": "^4.6.0",
     "@minoru/react-dnd-treeview": "^3.4.1",
     "@monaco-editor/react": "^4.5.1",
-    "@nowarp/misti": "0.6.1",
+    "@nowarp/misti": "~0.8.0",
     "@orbs-network/ton-access": "^2.3.0",
     "@tact-lang/compiler": "^1.6.5",
     "@ton-community/func-js": "^0.9.1",

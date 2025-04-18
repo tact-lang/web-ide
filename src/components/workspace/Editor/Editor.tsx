@@ -3,7 +3,7 @@ import { Tree } from '@/interfaces/workspace.interface';
 import { configureMonacoEditor } from '@/utility/editor';
 import EventEmitter from '@/utility/eventEmitter';
 import { delay, fileTypeFromFileName } from '@/utility/utils';
-import EditorDefault from '@monaco-editor/react';
+import EditorDefault, { OnChange } from '@monaco-editor/react';
 import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
 import { FC, useEffect, useRef, useState } from 'react';
 // import { useLatest } from 'react-use';
@@ -24,7 +24,7 @@ interface Props {
 const Editor: FC<Props> = ({ className = '' }) => {
   const { activeProject } = useProject();
   const { getFile, saveFile: storeFileContent } = useFile();
-  const { fileTab, updateFileDirty } = useFileTab();
+  const { fileTab } = useFileTab();
   const { theme } = useTheme();
 
   const { isFormatOnSave, getSettingStateByKey } = useSettingAction();
@@ -36,8 +36,6 @@ const Editor: FC<Props> = ({ className = '' }) => {
   ]);
   const editorMode = getSettingStateByKey('editorMode');
 
-  // Using this extra state to trigger save file from js event
-  const [saveFileCounter, setSaveFileCounter] = useState(1);
   const latestFile = useLatest(fileTab.active);
 
   const [initialFile, setInitialFile] = useState<Pick<
@@ -45,6 +43,7 @@ const Editor: FC<Props> = ({ className = '' }) => {
     'id' | 'content'
   > | null>(null);
 
+  const autoSaveTimeoutRef = useRef<number | null>(null);
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
   const monacoRef = useRef<Monaco | null>(null);
   const vimStatusBarRef = useRef<HTMLElement | null>(null);
@@ -55,16 +54,14 @@ const Editor: FC<Props> = ({ className = '' }) => {
   // eslint-disable-next-line prefer-const
   let lspWebSocket: ReconnectingWebSocket | null;
 
-  const saveFile = async () => {
-    const fileContent = editorRef.current?.getValue() ?? '';
+  const saveFile = async (value?: string) => {
+    if (!editorRef.current) return;
+
+    const fileContent = value ?? editorRef.current.getValue();
     if (!fileContent || !fileTab.active) return;
     try {
       if (isFormatOnSave()) {
-        editorRef.current?.trigger(
-          'editor',
-          'editor.action.formatDocument',
-          {},
-        );
+        editorRef.current.trigger('editor', 'editor.action.formatDocument', {});
         await delay(200);
       }
       await storeFileContent(fileTab.active.path, fileContent);
@@ -72,10 +69,6 @@ const Editor: FC<Props> = ({ className = '' }) => {
     } catch (error) {
       /* empty */
     }
-  };
-
-  const updateFileSaveCounter = () => {
-    setSaveFileCounter((prev) => prev + 1);
   };
 
   useEffect(() => {
@@ -89,23 +82,7 @@ const Editor: FC<Props> = ({ className = '' }) => {
   }, []);
 
   useEffect(() => {
-    // Don't save file on initial render
-    if (saveFileCounter === 1) return;
-
-    const saveFileDebouce = setTimeout(() => {
-      (async () => {
-        await saveFile();
-      })().catch(() => {});
-    }, 300);
-
-    return () => {
-      clearTimeout(saveFileDebouce);
-    };
-  }, [saveFileCounter]);
-
-  useEffect(() => {
     if (!isLoaded) return;
-    EventEmitter.on('SAVE_FILE', updateFileSaveCounter);
 
     // If file is changed e.g. in case of build process then force update in editor
     EventEmitter.on('FORCE_UPDATE_FILE', (file) => {
@@ -125,7 +102,6 @@ const Editor: FC<Props> = ({ className = '' }) => {
       });
     });
     return () => {
-      EventEmitter.off('SAVE_FILE', updateFileSaveCounter);
       EventEmitter.off('FORCE_UPDATE_FILE');
     };
   }, [isLoaded]);
@@ -154,21 +130,13 @@ const Editor: FC<Props> = ({ className = '' }) => {
     editorRef.current.focus();
   };
 
-  const markFileDirty = () => {
+  const handleEditorChange: OnChange = (value) => {
     if (!editorRef.current) return;
-    const fileContent = editorRef.current.getValue();
-    if (
-      fileTab.active?.path !== initialFile?.id ||
-      !initialFile?.content ||
-      initialFile.content === fileContent
-    ) {
-      return;
+
+    if (autoSaveTimeoutRef.current) {
+      clearTimeout(autoSaveTimeoutRef.current);
     }
-    if (!fileContent) {
-      return;
-    }
-    if (!fileTab.active?.path) return;
-    updateFileDirty(fileTab.active.path, true);
+    autoSaveTimeoutRef.current = window.setTimeout(() => saveFile(value), 1000);
   };
 
   const initializeEditorMode = async () => {
@@ -241,7 +209,7 @@ const Editor: FC<Props> = ({ className = '' }) => {
         // height="90vh"
         defaultLanguage={fileTypeFromFileName(fileTab.active?.path ?? '')}
         defaultValue={undefined}
-        onChange={markFileDirty}
+        onChange={handleEditorChange}
         options={editorOptions}
         onMount={(editor, monaco) => {
           (async () => {
