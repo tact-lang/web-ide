@@ -161,9 +161,11 @@ const ExecuteFile: FC<Props> = ({
     setSelectedFile(selectedFile?.path);
   };
 
-  const onFileSaved = () => {
+  const onFileSaved = ({ filePath }: { filePath: string }) => {
     if (!isAutoBuildAndDeployEnabledRef.current) return;
-    if (!selectedFileRef.current) return;
+    if (!selectedFileRef.current || filePath !== selectedFileRef.current)
+      return;
+
     buildFile({} as ButtonClick).catch(() => {});
   };
 
