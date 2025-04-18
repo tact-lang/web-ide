@@ -1,16 +1,18 @@
 import { useFile } from '@/hooks';
-import { useContractAction } from '@/hooks/contract.hooks';
+import { combineSendModes, useContractAction } from '@/hooks/contract.hooks';
 import { useLogActivity } from '@/hooks/logActivity.hooks';
 import { baseProjectPath, useProject } from '@/hooks/projectV2.hooks';
 import { CellABI, ProjectSetting } from '@/interfaces/workspace.interface';
 import { buildTs } from '@/utility/typescriptHelper';
-import { Cell } from '@ton/core';
+import { Cell, SendMode } from '@ton/core';
 import { useTonConnectUI } from '@tonconnect/ui-react';
 import { Button, Form } from 'antd';
 import { useForm } from 'antd/lib/form/Form';
 import { FC, useEffect, useRef, useState } from 'react';
 import { OutputChunk } from 'rollup';
 import ABIUi from '../ABIUi';
+import { TonSendMode } from '../ABIUi/TonSendMode';
+import { TonInputValue } from '../ABIUi/TonValueInput';
 import CellBuilder, {
   CellValues,
   generateCellCode,
@@ -107,13 +109,15 @@ const FuncContractInteraction: FC<ProjectInteractionProps> = ({
     }
   };
 
-  const send = async (data: string) => {
+  const send = async (data: string, tonValue: string, sendMode: SendMode[]) => {
     const messageResponse = await sendMessage(
       data,
       contractAddress,
       contract,
       network,
       wallet!,
+      tonValue,
+      combineSendModes(sendMode),
     );
 
     messageResponse?.logs?.map((log) => {
@@ -140,9 +144,21 @@ const FuncContractInteraction: FC<ProjectInteractionProps> = ({
       }
 
       try {
-        await send(event.data.data);
+        await send(
+          event.data.data,
+          messageForm.getFieldValue('tonValue'),
+          messageForm.getFieldValue('sendMode'),
+        );
         createLog('Message sent successfully', 'success');
       } catch (error) {
+        if (error instanceof Error) {
+          createLog(error.message, 'error');
+          return;
+        }
+        createLog(
+          'Something went wrong. Check browser console for details.',
+          'error',
+        );
         console.log('error', error);
       } finally {
         setIsLoading('');
@@ -201,11 +217,20 @@ const FuncContractInteraction: FC<ProjectInteractionProps> = ({
       <Form
         className={`${s.form} app-form`}
         form={messageForm}
+        layout="vertical"
         onFinish={(values) => {
           onFuncSubmit(values as FormValues).catch(() => {});
         }}
+        initialValues={{
+          tonValue: 0.5,
+          sendMode: [SendMode.PAY_GAS_SEPARATELY],
+        }}
       >
         {cellBuilder('Update cell in ')}
+
+        <TonSendMode name="sendMode" />
+        <TonInputValue name="tonValue" />
+
         <Button
           type="default"
           htmlType="submit"
