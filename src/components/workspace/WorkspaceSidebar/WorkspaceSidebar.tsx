@@ -40,7 +40,7 @@ const WorkspaceSidebar: FC<Props> = ({
     if (!projectName) {
       onMenuClicked('code');
     }
-  }, [projectName, onMenuClicked]);
+  }, []);
 
   return (
     <aside className={s.container}>

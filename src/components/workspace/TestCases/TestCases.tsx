@@ -182,13 +182,13 @@ const TestCases: FC<Props> = ({ projectId }) => {
         </p>
 
         <p>
-          See the full{' '}
+          {`If it's not working, check the `}
           <a
-            href="https://webcontainers.io/guides/browser-support"
+            href="https://webcontainers.io/guides/browser-config"
             target="_blank"
             rel="noopener noreferrer"
           >
-            browser support guide
+            browser configuration guide.
           </a>
         </p>
       </div>
