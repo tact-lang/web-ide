@@ -1,5 +1,5 @@
 import { useLogActivity } from '@/hooks/logActivity.hooks';
-import { isChromiumBased } from '@/utility/utils';
+import { isWebContainerSupported } from '@/utility/utils';
 import { WebContainer } from '@webcontainer/api';
 import { createContext, useContext, useRef, useState } from 'react';
 
@@ -104,10 +104,14 @@ export function WebContainerProvider({
   webcontainerRef.current?.on('server-ready', () => {});
 
   const init = async () => {
+    const isWebContainerDisabled =
+      process.env.REACT_APP_DISABLE_WEBCONTAINER === 'true';
+
     if (
       isInitializedRef.current ||
       status === 'loaded' ||
-      (process.env.NEXT_PUBLIC_DISABLE_WEBCONTAINER ?? !isChromiumBased())
+      isWebContainerDisabled ||
+      !isWebContainerSupported
     ) {
       return;
     }

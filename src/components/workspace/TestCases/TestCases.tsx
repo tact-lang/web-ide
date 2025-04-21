@@ -7,7 +7,7 @@ import { useWorkspaceActions } from '@/hooks/workspace.hooks';
 import { useWebContainer } from '@/state/WebContainer.context';
 import { Analytics } from '@/utility/analytics';
 import EventEmitter from '@/utility/eventEmitter';
-import { isChromiumBased } from '@/utility/utils';
+import { isWebContainerSupported } from '@/utility/utils';
 import { LoadingOutlined } from '@ant-design/icons';
 import Path from '@isomorphic-git/lightning-fs/src/path';
 import { Spin } from 'antd';
@@ -168,27 +168,29 @@ const TestCases: FC<Props> = ({ projectId }) => {
   };
 
   const displayBrowserSupportWarning = () => {
-    if (isChromiumBased()) {
+    if (isWebContainerSupported) {
       return <></>;
     }
     return (
       <div className={s.note}>
         <p>
-          ⚠️ <strong>Supported on Chromium-based browsers.</strong>
+          <strong>⚠️ Your browser does not support running unit tests.</strong>
         </p>
         <p>
-          Please use <strong>Google Chrome, Edge, or Brave</strong> for the best
-          experience.
+          For best compatibility, we recommend using{' '}
+          <strong>
+            Chromium-based browsers like Google Chrome, Edge, or Brave.
+          </strong>
         </p>
 
         <p>
-          {`If it's not working, check the `}
+          Learn more in the{' '}
           <a
-            href="https://webcontainers.io/guides/browser-config"
+            href="https://webcontainers.io/guides/browser-support"
             target="_blank"
             rel="noopener noreferrer"
           >
-            browser configuration guide.
+            browser support guide.
           </a>
         </p>
       </div>

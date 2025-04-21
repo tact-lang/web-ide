@@ -258,11 +258,27 @@ export function isErrorWithCode(error: unknown): error is ErrorWithCode {
   return typeof error === 'object' && error !== null && 'code' in error;
 }
 
-export function isChromiumBased() {
-  return (
-    !!window.chrome && /Chrome|Chromium|Edg|Brave/i.test(navigator.userAgent)
-  );
+export function supportsStaticClassFeatures() {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-implied-eval
+    new Function(`
+      class Test {
+        static prop = 123;
+        static {
+          this.value = 456;
+        }
+      }
+    `)();
+    return true;
+  } catch {
+    return false;
+  }
 }
+
+export const isWebContainerSupported =
+  supportsStaticClassFeatures() &&
+  typeof SharedArrayBuffer !== 'undefined' &&
+  self.crossOriginIsolated;
 
 interface MistiResultResponse {
   type: 'info' | 'success' | 'error' | 'warning';
