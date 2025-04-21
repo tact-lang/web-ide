@@ -1,14 +1,15 @@
 import { COLOR_MAP } from '@/constant/ansiCodes';
+import { useFileTab } from '@/hooks';
 import { useLogActivity } from '@/hooks/logActivity.hooks';
 import { useProject } from '@/hooks/projectV2.hooks';
 import { Tree } from '@/interfaces/workspace.interface';
 import fileSystem from '@/lib/fs';
 import { normalizeRelativePath } from '@/utility/path';
-import { mistiFormatResult } from '@/utility/utils';
+import { getFileExtension, mistiFormatResult } from '@/utility/utils';
 import Path from '@isomorphic-git/lightning-fs/src/path';
 import {
+  BROWSER_STDLIB_PATH_ELEMENTS,
   BuiltInDetectors,
-  DEFAULT_STDLIB_PATH_ELEMENTS,
   MISTI_VERSION,
   Severity,
 } from '@nowarp/misti/dist';
@@ -50,6 +51,8 @@ const MistiStaticAnalyzer: FC = () => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const { projectFiles, activeProject, updateProjectSetting } = useProject();
   const { createLog } = useLogActivity();
+  const { fileTab } = useFileTab();
+  const [isLoaded, setIsLoaded] = useState(false);
 
   const [form] = useForm();
 
@@ -80,18 +83,16 @@ const MistiStaticAnalyzer: FC = () => {
           continue;
         }
         const content = await fileSystem.readFile(file.path);
-        if (content) {
-          vfs.writeFile(
-            normalizeRelativePath(file.path, activeProject.path),
-            content as string,
-          );
-        }
+        vfs.writeFile(
+          normalizeRelativePath(file.path, activeProject.path),
+          content as string,
+        );
       }
 
       // add all stdlib files to vfs
       for (const [path, content] of Object.entries(stdLibFiles)) {
-        const stdLibPath = Path.resolve(...DEFAULT_STDLIB_PATH_ELEMENTS, path);
-        vfs.writeFile(stdLibPath, content);
+        const stdLibPath = Path.resolve(...BROWSER_STDLIB_PATH_ELEMENTS, path);
+        vfs.writeFile(stdLibPath, content as string);
       }
 
       const driver = await Driver.create(
@@ -102,8 +103,8 @@ const MistiStaticAnalyzer: FC = () => {
           enabledDetectors: detectors,
           minSeverity: minSeverity,
           listDetectors: false,
-          souffleEnabled: false,
-          tactStdlibPath: Path.resolve(...DEFAULT_STDLIB_PATH_ELEMENTS),
+          souffle: false,
+          tactStdlibPath: Path.resolve(...BROWSER_STDLIB_PATH_ELEMENTS),
           newDetector: undefined,
         },
       );
@@ -133,14 +134,36 @@ const MistiStaticAnalyzer: FC = () => {
     }
   };
 
+  const updateSelectedFilePath = (filePath?: string) => {
+    const fileToSelect = filePath ?? fileTab.active?.path;
+
+    const isValidTactFile =
+      fileToSelect &&
+      getFileExtension(fileToSelect) === 'tact' &&
+      fileList.some((f) => f.path === fileToSelect);
+
+    const selectedPath = isValidTactFile ? fileToSelect : fileList[0]?.path;
+
+    form.setFieldsValue({ selectedPath });
+    form.validateFields();
+  };
+
   useEffect(() => {
-    if (!activeProject?.misti) return;
+    if (!activeProject) return;
 
     const { misti } = activeProject;
-
     form.setFieldsValue(misti);
-    form.setFieldValue('allDetectors', misti.detectors.length === 0);
+    form.setFieldValue('allDetectors', !misti || misti.detectors.length === 0);
+    updateSelectedFilePath(misti?.selectedPath);
+    setIsLoaded(true);
   }, [activeProject?.path]);
+
+  useEffect(() => {
+    if (!isLoaded) {
+      return;
+    }
+    updateSelectedFilePath();
+  }, [fileTab.active?.path]);
 
   return (
     <div className={s.root}>
@@ -184,9 +207,11 @@ const MistiStaticAnalyzer: FC = () => {
             className={`w-100`}
             defaultActiveFirstOption
             filterOption={(inputValue, option) => {
-              return option?.title
-                .toLowerCase()
-                .includes(inputValue.toLowerCase());
+              return (
+                option?.title
+                  ?.toLowerCase()
+                  .includes(inputValue.toLowerCase()) ?? false
+              );
             }}
           >
             {fileList.map((f) => (

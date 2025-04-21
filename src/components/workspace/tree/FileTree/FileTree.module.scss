@@ -3,6 +3,15 @@
   cursor: pointer;
   height: calc(100vh - 11rem);
   overflow-y: auto;
+  .treeRoot {
+    height: 100%;
+  }
+  .draggingSource {
+    opacity: 0.5;
+  }
+  .dropTarget {
+    background-color: var(--grey--70);
+  }
   ul {
     list-style: none;
     padding-left: 0;

@@ -118,6 +118,7 @@ export function useProjectActions() {
         Buffer.from(file.content),
       ]),
       ['contractBOC', Buffer.from((buildResult as SuccessResult).codeBoc)],
+      ['snapshot', Buffer.from(JSON.stringify(buildResult.snapshot))],
     ]);
   }
 

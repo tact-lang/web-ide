@@ -4,7 +4,7 @@ import { useProject } from '@/hooks/projectV2.hooks';
 import { Project, Tree } from '@/interfaces/workspace.interface';
 import EventEmitter from '@/utility/eventEmitter';
 import { encodeBase64, fileTypeFromFileName } from '@/utility/utils';
-import { NodeModel } from '@minoru/react-dnd-treeview';
+import { NodeModel, RenderParams } from '@minoru/react-dnd-treeview';
 import { App } from 'antd';
 import cn from 'clsx';
 import { FC, useState } from 'react';
@@ -13,12 +13,13 @@ import s from './FileTree.module.scss';
 import ItemAction, { actionsTypes } from './ItemActions';
 import TreePlaceholderInput from './TreePlaceholderInput';
 
-interface Props {
+interface Props extends RenderParams {
   node: NodeModel<TreeNodeData>;
   depth: number;
   isOpen: boolean;
-  onToggle: (id: NodeModel['id']) => void;
+  onToggle: () => void;
   projectId: Project['id'];
+  isDragging: boolean;
   newItemToCreate: INewItem | null;
   setNewItemToCreate: (data: INewItem | null) => void;
   commitItemCreation: () => void;
@@ -57,7 +58,7 @@ const TreeNode: FC<Props> = ({
 
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    onToggle(node.id);
+    onToggle();
     if (!node.droppable) {
       openTab(node.text, node.data?.path as string);
     }
@@ -91,7 +92,7 @@ const TreeNode: FC<Props> = ({
   const updateItemTypeCreation = (type: Tree['type']) => {
     if (!isAllowed()) return;
     if (node.droppable && !isOpen) {
-      onToggle(node.id);
+      onToggle();
     }
     if (!node.data) return;
     setNewItemToCreate({ type, parentPath: node.data.path, name: '' });
@@ -231,7 +232,7 @@ const TreeNode: FC<Props> = ({
       </div>
       {newItemToCreate && newItemToCreate.parentPath === node.data?.path && (
         <TreePlaceholderInput
-          style={{ paddingInlineStart: 15 * (depth + 2) }}
+          style={{ paddingInlineStart: 15 * (depth + 1) }}
           onSubmit={commitItemCreation}
           onCancel={reset}
           type={newItemToCreate.type}

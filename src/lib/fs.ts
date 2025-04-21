@@ -1,11 +1,25 @@
 import FS, { PromisifiedFS } from '@isomorphic-git/lightning-fs';
 
 class FileSystem {
+  private static instance: FileSystem | null;
   private fs: PromisifiedFS;
   private virtualFiles: Map<string, string | Uint8Array>;
   constructor(fs: PromisifiedFS) {
     this.fs = fs;
     this.virtualFiles = new Map();
+  }
+
+  static getInstance(singleTon = true): FileSystem {
+    if (singleTon) {
+      if (!FileSystem.instance) {
+        const fsPromises = new FS('IDE_FS').promises;
+        FileSystem.instance = new FileSystem(fsPromises);
+        Object.freeze(FileSystem.instance);
+      }
+      return FileSystem.instance;
+    } else {
+      return new FileSystem(new FS('IDE_FS').promises);
+    }
   }
 
   get fsInstance() {
@@ -303,26 +317,7 @@ class FileSystem {
   }
 }
 
-/**
- * Only create the LightningFS instance in the browser.
- */
-let fsPromises: PromisifiedFS | null = null;
-if (typeof window !== 'undefined') {
-  fsPromises = new FS('IDE_FS').promises;
-}
+const fileSystem = FileSystem.getInstance();
 
-/**
- * Only instantiate the FileSystem if fsPromises is available (i.e., in the browser).
- */
-let fileSystem: FileSystem | null = null;
-
-if (fsPromises) {
-  fileSystem = new FileSystem(fsPromises);
-  Object.freeze(fileSystem);
-}
-
-// By default, we export `fileSystem`. It will be `null` on the server, and a valid instance in the browser.
-// We explicitly cast to `FileSystem` here because we only use `fileSystem` in the browser,
-// where it's guaranteed to be non-null. This avoids compile-time errors in TypeScript.
 export default fileSystem as FileSystem;
-export type { FileSystem };
+export { FileSystem };

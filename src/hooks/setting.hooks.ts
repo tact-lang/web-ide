@@ -17,8 +17,6 @@ export function useSettingAction() {
     toggleContractDebug,
     isFormatOnSave,
     toggleFormatOnSave,
-    updateTonAmountForInteraction,
-    getTonAmountForInteraction,
     isAutoBuildAndDeployEnabled,
     toggleAutoBuildAndDeploy,
     updateEditorMode,
@@ -74,16 +72,6 @@ export function useSettingAction() {
   function toggleFormatOnSave(active: boolean = !setting.formatOnSave) {
     updateStateByKey({
       formatOnSave: active,
-    });
-  }
-
-  function getTonAmountForInteraction() {
-    return setting.tonAmountForInteraction ?? '0.05';
-  }
-
-  function updateTonAmountForInteraction(value: string, reset = false) {
-    updateStateByKey({
-      tonAmountForInteraction: reset ? '0.05' : value,
     });
   }
 

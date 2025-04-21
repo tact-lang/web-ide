@@ -1,19 +1,56 @@
 /* eslint-disable react/no-children-prop */
 import { NewProject } from '@/components/project';
-import { useTheme } from '@/components/shared/ThemeProvider';
+import { Link } from '@/components/shared';
 import AppIcon from '@/components/ui/icon';
 import { projectExamples } from '@/constant/projectExamples';
 import { App, Drawer, Skeleton } from 'antd';
 import axios from 'axios';
-import Link from 'next/link';
-import { FC, useEffect, useState } from 'react';
+import { FC, memo, useEffect, useState } from 'react';
 import Markdown from 'react-markdown';
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import {
-  oneDark as darkTheme,
-  oneLight as lightTheme,
-} from 'react-syntax-highlighter/dist/cjs/styles/prism';
+import { createHighlighter } from 'shiki';
+import tactTMLanguage from '../../../assets/ton/tact/tmLanguage.json';
 import s from './ProjectTemplate.module.scss';
+
+async function highlightCode(code: string) {
+  const highlighter = await createHighlighter({
+    themes: ['min-dark', 'min-light'],
+    langs: [tactTMLanguage, 'typescript'],
+  });
+
+  return highlighter.codeToHtml(code, {
+    lang: 'tact',
+    themes: {
+      light: 'min-light',
+      dark: 'min-dark',
+    },
+    colorReplacements: {
+      '#1f1f1f': '#0e0e10',
+      '#ffffff': '#e8e8e8',
+    },
+  });
+}
+
+interface CodeBlockProps {
+  children?: React.ReactNode;
+}
+
+const CodeBlock: React.FC<CodeBlockProps> = ({ children }) => {
+  const [highlightedCode, setHighlightedCode] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function highlight() {
+      const html = await highlightCode((children as string).trim());
+      setHighlightedCode(html);
+    }
+    highlight();
+  }, [children]);
+
+  if (!highlightedCode) {
+    return <pre className={s.codeLoading}>Loading code...</pre>;
+  }
+
+  return <div dangerouslySetInnerHTML={{ __html: highlightedCode }} />;
+};
 
 function LinkRenderer({
   href,
@@ -38,7 +75,6 @@ const ProjectTemplate: FC = () => {
     contract: string;
     content: string;
   }>({ contract: '', content: '' });
-  const { theme } = useTheme();
   const { message } = App.useApp();
 
   const getContent = async () => {
@@ -52,7 +88,7 @@ const ProjectTemplate: FC = () => {
       const contentResponse = await axios.get(contentURL);
 
       const content =
-        '```ts\n' + contractResponse.data + '\n```\n' + contentResponse.data;
+        '```tact\n' + contractResponse.data + '\n```\n' + contentResponse.data;
 
       setContractDetails({
         contract: contractResponse.data,
@@ -108,11 +144,11 @@ const ProjectTemplate: FC = () => {
       </div>
       <div className={s.credit}>
         Credits for the examples go to the{' '}
-        <Link href="https://github.com/talkol" target="_blank">
+        <Link to="https://github.com/talkol" target="_blank">
           Tal Kol
         </Link>
         {' for '}
-        <Link href="https://tact-by-example.org/all" target="_blank">
+        <Link to="https://tact-by-example.org/all" target="_blank">
           Tact by example
         </Link>
       </div>
@@ -153,21 +189,14 @@ const ProjectTemplate: FC = () => {
         <Markdown
           children={contractDetails.content}
           components={{
-            code(props) {
-              const { children, className, ...rest } = props;
+            code: (props) => {
+              const { children, className } = props;
               const match = /language-(\w+)/.exec(className ?? '');
+
               return match ? (
-                <SyntaxHighlighter
-                  {...(rest as SyntaxHighlighter)}
-                  PreTag="div"
-                  children={String(children).replace(/\n$/, '')}
-                  language={match[1]}
-                  style={theme === 'dark' ? darkTheme : lightTheme}
-                />
+                <CodeBlock {...props} />
               ) : (
-                <code {...rest} className={className}>
-                  {children}
-                </code>
+                <span className={className}>{children}</span>
               );
             },
             a: LinkRenderer,
@@ -178,4 +207,4 @@ const ProjectTemplate: FC = () => {
   );
 };
 
-export default ProjectTemplate;
+export default memo(ProjectTemplate);

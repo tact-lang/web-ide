@@ -85,8 +85,8 @@
       z-index: 0;
 
       &:hover {
-        border-color: transparent;
         color: var(--text-color);
+        border-color: var(--primary);
 
         &:before {
           background: #101010;

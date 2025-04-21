@@ -4,7 +4,7 @@ import MistiStaticAnalyzer from '@/components/MistiStaticAnalyzer';
 import { ManageGit } from '@/components/git';
 import { DownloadProject } from '@/components/project';
 import { ProjectTemplate } from '@/components/template';
-import { AppLogo, NonProductionNotice } from '@/components/ui';
+import { AppLogo, HmrStatus, NonProductionNotice } from '@/components/ui';
 import { AppConfig } from '@/config/AppConfig';
 import { useFileTab } from '@/hooks';
 import { useLogActivity } from '@/hooks/logActivity.hooks';
@@ -17,12 +17,13 @@ import * as TonCore from '@ton/core';
 import * as TonCrypto from '@ton/crypto';
 import { Blockchain } from '@ton/sandbox';
 import { Buffer } from 'buffer';
-import { useRouter } from 'next/router';
 import { FC, useEffect, useMemo, useRef, useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import Split from 'react-split';
 import { useEffectOnce } from 'react-use';
 import BottomPanel from '../BottomPanel/BottomPanel';
 import BuildProject from '../BuildProject';
+import { ContractVerifier } from '../ContractVerifier';
 import Editor from '../Editor';
 import CodeDiffViewer from '../Editor/CodeDiffViewer';
 import Tabs from '../Tabs';
@@ -40,14 +41,17 @@ type SplitInstance = Split & { split: Split.Instance };
 const WorkSpace: FC = () => {
   const { clearLog, createLog } = useLogActivity();
 
-  const router = useRouter();
   const [activeMenu, setActiveMenu] = useState<WorkSpaceMenu>('code');
   const [isLoaded, setIsLoaded] = useState(false);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [contract, setContract] = useState<any>('');
   const splitVerticalRef = useRef<SplitInstance | null>(null);
 
-  const { tab } = router.query;
+  const [searchParams] = useSearchParams();
+  const tab = searchParams.get('tab');
+
+  const navigate = useNavigate();
+
   const { activeProject, setActiveProject, loadProjectFiles } = useProject();
 
   const { fileTab } = useFileTab();
@@ -60,8 +64,6 @@ const WorkSpace: FC = () => {
     }
     const blockchain = await Blockchain.create();
     globalWorkspace.sandboxBlockchain = blockchain;
-    const wallet = await blockchain.treasury('user');
-    globalWorkspace.sandboxWallet = wallet;
   };
 
   const openProject = async (selectedProjectPath: Project['id']) => {
@@ -74,12 +76,11 @@ const WorkSpace: FC = () => {
 
   const cachedProjectPath = useMemo(() => {
     return activeProject?.path as string;
-  }, [activeProject]);
+  }, [activeProject?.path]);
 
   const onKeydown = (e: KeyboardEvent) => {
-    if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+    if ((e.ctrlKey || e.metaKey) && e.code === 'KeyS') {
       e.preventDefault();
-      EventEmitter.emit('SAVE_FILE');
     }
   };
 
@@ -89,7 +90,7 @@ const WorkSpace: FC = () => {
   };
 
   useEffect(() => {
-    if (!cachedProjectPath) return;
+    if (!cachedProjectPath || searchParams.get('code')) return;
     openProject(cachedProjectPath).catch(() => {});
   }, [cachedProjectPath]);
 
@@ -158,11 +159,13 @@ const WorkSpace: FC = () => {
           projectName={activeProject?.path ?? ''}
           onMenuClicked={(name) => {
             setActiveMenu(name);
-            router
-              .replace({
-                query: { ...router.query, tab: name },
-              })
-              .catch(() => {});
+            const newSearchParams = new URLSearchParams({
+              ...Object.fromEntries(searchParams.entries()),
+              tab: name,
+            } as Record<string, string>).toString();
+            navigate(`${location.pathname}?${newSearchParams}`, {
+              replace: true,
+            });
           }}
         />
       </div>
@@ -240,6 +243,11 @@ const WorkSpace: FC = () => {
               <ManageGit />
             </div>
           )}
+          {activeMenu === 'contract-verifier' && (
+            <div className={s.commonContainer}>
+              <ContractVerifier />
+            </div>
+          )}
         </div>
         <div className={`${s.workArea} onboarding-code-editor`}>
           {isLoaded && (
@@ -279,6 +287,7 @@ const WorkSpace: FC = () => {
           )}
         </div>
       </Split>
+      <HmrStatus />
     </div>
   );
 };

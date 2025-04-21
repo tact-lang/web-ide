@@ -1,6 +1,6 @@
+import { Image } from '@/components/shared';
 import { ConnectedWallet, useTonConnectUI } from '@tonconnect/ui-react';
 import { Button } from 'antd';
-import Image from 'next/image';
 import { FC, useEffect, useState } from 'react';
 import s from './TonAuth.module.scss';
 
@@ -12,6 +12,7 @@ const TonAuth: FC = () => {
     try {
       if (isConnected) {
         await tonConnector.disconnect();
+        setIsConnected(false);
         return;
       }
       await tonConnector.connectWallet();

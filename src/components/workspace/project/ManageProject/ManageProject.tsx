@@ -10,16 +10,16 @@ import { baseProjectPath, useProject } from '@/hooks/projectV2.hooks';
 import { Project } from '@/interfaces/workspace.interface';
 import EventEmitter from '@/utility/eventEmitter';
 import { App, Button, Modal, Select } from 'antd';
-import Router, { useRouter } from 'next/router';
 import { FC, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import s from './ManageProject.module.scss';
 
 const ManageProject: FC = () => {
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
-  const router = useRouter();
   const { message } = App.useApp();
+  const [importURL, setImportURL] = useState<string | null>(null);
 
-  const { importURL } = router.query;
+  const navigate = useNavigate();
 
   const {
     projects,
@@ -34,7 +34,7 @@ const ManageProject: FC = () => {
       await deleteProject(id);
       setActiveProject(null);
       setIsDeleteConfirmOpen(false);
-      Router.push('/');
+      navigate('/');
     } catch (error) {
       await message.error('Failed to delete project');
     }
@@ -60,7 +60,8 @@ const ManageProject: FC = () => {
           heading="Import from GitHub"
           icon="GitHub"
           className={s.git}
-          active={!!importURL}
+          active={importURL !== null}
+          key={importURL ?? 'import-from-git'}
         />
         <NewProject
           label="Import"
@@ -81,7 +82,9 @@ const ManageProject: FC = () => {
             <AppIcon name="Delete" />
           </div>
         </Tooltip>
-        <DownloadProject path="/" title="Download all projects" />
+        {projects.length > 0 && (
+          <DownloadProject path="/" title="Download all projects" />
+        )}
       </div>
     </>
   );
@@ -98,7 +101,10 @@ const ManageProject: FC = () => {
         }}
         notFoundContent="No project found"
         filterOption={(inputValue, option) => {
-          return option?.title.toLowerCase().includes(inputValue.toLowerCase());
+          return (
+            option?.title?.toLowerCase().includes(inputValue.toLowerCase()) ??
+            false
+          );
         }}
       >
         {[...projects].reverse().map((project) => (
@@ -111,23 +117,28 @@ const ManageProject: FC = () => {
   );
 
   const noProjectExistsUI = () => (
-    <div className={s.startNew}>
-      <span className={s.title}>Begin by initiating a new project</span>
-      <NewProject ui="button" className={s.newProject} icon="Plus" />
-      <MigrateToUnifiedFS hasDescription />
+    <div className={s.header}>
+      <div className={s.startNew}>
+        <span className={s.title}>
+          Get started by creating your first project.
+        </span>
+        <NewProject ui="button" className={s.newProject} icon="Plus" />
+        <MigrateToUnifiedFS hasDescription />
+      </div>
     </div>
   );
 
   useEffect(() => {
     loadProjects();
+    const searchParams = new URLSearchParams(window.location.search);
+    setImportURL(searchParams.get('importURL'));
   }, []);
 
   return (
     <div className={s.root}>
-      <div className={s.header}>
-        {projects.length > 0 ? projectHeader() : noProjectExistsUI()}
-      </div>
-      {projects.length > 0 && projectOptions()}
+      <div className={s.header}>{projectHeader()}</div>
+
+      {projects.length > 0 ? projectOptions() : noProjectExistsUI()}
 
       <Modal
         className="modal-delete-project"

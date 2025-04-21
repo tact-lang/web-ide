@@ -12,7 +12,6 @@ export interface Tree {
   isOpen?: boolean;
   path: string;
   content?: string;
-  isDirty?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -38,6 +37,13 @@ export interface ABIFormInputValues {
   key: string;
   value: TactInputFields;
   type: 'Init' | 'Getter' | 'Setter';
+}
+
+export interface ContractVerificationInputs {
+  network: Exclude<NetworkEnvironment, 'SANDBOX'>;
+  contractFilePath: Tree['path'];
+  contractAddress: string;
+  isVerified?: boolean;
 }
 
 export interface CreateProjectParams {
@@ -91,6 +97,7 @@ export interface ProjectSetting {
     detectors: string[];
   };
   buildContractList?: Record<string, string[]>;
+  contractVerificationInputs?: ContractVerificationInputs;
 }
 
 export interface ABIParameter {

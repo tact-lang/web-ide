@@ -7,8 +7,8 @@ import fileSystem from './fs';
 class GitManager {
   private fs: PromisifiedFS;
 
-  constructor() {
-    this.fs = fileSystem.fsInstance;
+  constructor(fs?: PromisifiedFS) {
+    this.fs = fs ?? fileSystem.fsInstance;
   }
 
   async init(dest: string) {

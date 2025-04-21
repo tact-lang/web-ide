@@ -1,11 +1,11 @@
 import { ExitCodes } from '@/constant/exitCodes';
 import { WebLinkProvider } from '@/utility/terminal/xtermWebLinkProvider';
-import { EXIT_CODE_PATTERN } from '@/utility/text';
 import { Terminal } from '@xterm/xterm';
 import { Popover } from 'antd';
 import { FC, useCallback, useEffect, useRef, useState } from 'react';
 import Markdown from 'react-markdown';
 import s from './LogView.module.scss';
+import { exitCodeHoverHandler } from './utils/helper';
 
 interface Props {
   terminal: Terminal | null;
@@ -70,50 +70,29 @@ export const LogPopover: FC<Props> = ({ terminal }) => {
   const onInit = useCallback(() => {
     if (!terminal) return;
 
-    terminal.registerLinkProvider(
-      new WebLinkProvider(terminal, EXIT_CODE_PATTERN, () => {}, {
-        hover: (_, text, location) => {
-          const terminalRect = terminal.element?.getBoundingClientRect();
-          if (!terminalRect) return;
-
-          // Access the private _renderer property to get precise character dimensions
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const renderer = (terminal as any)._core?._renderService?._renderer;
-          const dimensions = renderer?.value?.dimensions;
-          if (!dimensions) return;
-
-          const charWidth = dimensions.css.cell.width;
-          const charHeight = dimensions.css.cell.height;
-
-          const scrollOffset = terminal.buffer.active.viewportY;
-
-          let linkX = (location.start.x - 1) * charWidth;
-          const linkY = (location.start.y - 1 - scrollOffset) * charHeight;
-
-          const popoverWidth = 400;
-
-          // Ensure the popover does not overflow beyond the terminal's right edge
-          if (linkX + popoverWidth > terminalRect.width) {
-            linkX = terminalRect.width - popoverWidth - 10;
-          }
-
-          const exitCode = text.split(': ')[1];
-
-          showPopover({
-            exitCode,
-            x: linkX + 5,
-            y: linkY + 25,
-          });
-        },
-        leave: () => {
-          hidePopover();
-        },
-        validator(match) {
-          const code = match[1];
-          return ExitCodes[code] !== undefined;
-        },
-      }),
-    );
+    ['exit_code', 'action_result_code'].map((label) => {
+      terminal.registerLinkProvider(
+        new WebLinkProvider(
+          terminal,
+          new RegExp(`${label}:\\s*(\\d+)`),
+          () => {},
+          {
+            hover: (_, text, location) => {
+              const data = exitCodeHoverHandler(terminal, text, location);
+              if (!data) return;
+              showPopover(data);
+            },
+            leave: () => {
+              hidePopover();
+            },
+            validator(match) {
+              const code = match[1];
+              return ExitCodes[code] !== undefined;
+            },
+          },
+        ),
+      );
+    });
   }, [terminal]);
 
   useEffect(() => {
