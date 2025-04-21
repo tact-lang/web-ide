@@ -17,7 +17,7 @@ import * as TonCore from '@ton/core';
 import * as TonCrypto from '@ton/crypto';
 import { Blockchain } from '@ton/sandbox';
 import { Buffer } from 'buffer';
-import { FC, useEffect, useMemo, useRef, useState } from 'react';
+import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import Split from 'react-split';
 import { useEffectOnce } from 'react-use';
@@ -90,6 +90,10 @@ const WorkSpace: FC = () => {
     if (!projectPath) return;
     await loadProjectFiles(projectPath);
   };
+
+  const handleMenuClick = useCallback((name: WorkSpaceMenu) => {
+    setActiveMenu(name);
+  }, []);
 
   useEffect(() => {
     if (!cachedProjectPath || searchParams.get('code')) return;
@@ -170,9 +174,7 @@ const WorkSpace: FC = () => {
         <WorkspaceSidebar
           activeMenu={activeMenu}
           projectName={activeProject?.path ?? ''}
-          onMenuClicked={(name) => {
-            setActiveMenu(name);
-          }}
+          onMenuClick={handleMenuClick}
           isLoaded={isLoaded}
         />
       </div>

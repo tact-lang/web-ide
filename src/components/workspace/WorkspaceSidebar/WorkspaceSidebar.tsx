@@ -4,7 +4,6 @@ import { FC, useCallback, useEffect } from 'react';
 import AppIcon from '@/components/ui/icon';
 
 import { getUrlParams } from '@/utility/url';
-import { useNavigate } from 'react-router-dom';
 import { AppSetting, SidebarMenu, Socials, ThemeSwitcher } from './index';
 import s from './WorkspaceSidebar.module.scss';
 
@@ -19,27 +18,25 @@ export type WorkSpaceMenu =
 
 interface Props {
   activeMenu: WorkSpaceMenu;
-  onMenuClicked: (name: WorkSpaceMenu) => void;
+  onMenuClick: (name: WorkSpaceMenu) => void;
   projectName?: string | null;
   isLoaded: boolean;
 }
 
 const WorkspaceSidebar: FC<Props> = ({
   activeMenu,
-  onMenuClicked,
+  onMenuClick,
   projectName,
   isLoaded,
 }) => {
-  const navigate = useNavigate();
-
   const handleMenuClick = useCallback(
     (menu: WorkSpaceMenu) => {
       if (!projectName) {
         return;
       }
-      onMenuClicked(menu);
+      onMenuClick(menu);
     },
-    [onMenuClicked, projectName],
+    [onMenuClick, projectName],
   );
 
   useEffect(() => {
@@ -48,12 +45,9 @@ const WorkspaceSidebar: FC<Props> = ({
       !projectName && isLoaded && !code && !importURL;
 
     if (shouldRedirectToCode) {
-      onMenuClicked('code');
-      navigate('/', {
-        replace: true,
-      });
+      onMenuClick('code');
     }
-  }, [projectName, onMenuClicked]);
+  }, [projectName, isLoaded, onMenuClick]);
 
   return (
     <aside className={s.container}>
