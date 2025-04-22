@@ -293,7 +293,7 @@
         },
         {
           "comment": "Other constants from the core library",
-          "match": "(?<!\\.)\\b(SendDefaultMode|SendRemainingValue|SendRemainingBalance|SendPayGasSeparately|SendIgnoreErrors|SendBounceIfActionFail|SendDestroyIfZero|SendOnlyEstimateFee|ReserveExact|ReserveAllExcept|ReserveAtMost|ReserveAddOriginalBalance|ReserveInvertSign|ReserveBounceIfActionFail)\\b",
+          "match": "(?<!\\.)\\b(SendDefaultMode|SendRemainingValue|SendRemainingBalance|SendPayGasSeparately|SendIgnoreErrors|SendBounceIfActionFail|SendDestroyIfZero|SendOnlyEstimateFee|ReserveExact|ReserveAllExcept|ReserveAtMost|ReserveAddOriginalBalance|ReserveInvertSign|ReserveBounceIfActionFail|TactExitCodeNullReferenceException|TactExitCodeInvalidSerializationPrefix|TactExitCodeInvalidIncomingMessage|TactExitCodeConstraintsError|TactExitCodeAccessDenied|TactExitCodeContractStopped|TactExitCodeInvalidArgument|TactExitCodeContractCodeNotFound|TactExitCodeInvalidStandardAddress|TactExitCodeNotBasechainAddress)\\b",
           "name": "constant.other.builtin.tact"
         },
         {
@@ -429,7 +429,7 @@
         },
         {
           "comment": "Augmented assignment operators",
-          "match": "(\\+=|-=|\\*=|/=|%=|\\^=|&=|\\|=|<<=|>>=)",
+          "match": "(\\+=|-=|\\*=|/=|%=|\\^=|&=|\\|=|\\|\\|=|&&=|<<=|>>=)",
           "name": "keyword.operator.assignment.tact"
         },
         {
@@ -536,19 +536,19 @@
           "name": "keyword.other.as.tact storage.modifier.tact"
         },
         {
-          "match": "(?<!\\.)\\b(struct)\\b",
+          "match": "(?<!\\.)\\b(struct)\\b(?!\\s*:)",
           "name": "keyword.other.struct.tact"
         },
         {
-          "match": "(?<!\\.)\\b(message)\\b",
+          "match": "(?<!\\.)\\b(message)\\b(?!\\s*(?::|\\(\\s*M|\\(\\s*\\)))",
           "name": "keyword.other.message.tact"
         },
         {
-          "match": "(?<!\\.)\\b(trait)\\b",
+          "match": "(?<!\\.)\\b(trait)\\b(?!\\s*:)",
           "name": "keyword.other.trait.tact"
         },
         {
-          "match": "(?<!\\.)\\b(contract)\\b",
+          "match": "(?<!\\.)\\b(contract)\\b(?!\\s*:)",
           "name": "keyword.other.contract.tact"
         },
         {
