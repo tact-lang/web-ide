@@ -5,8 +5,13 @@ import EventEmitter from '@/utility/eventEmitter';
 import { FitAddon } from '@xterm/addon-fit';
 import { SearchAddon } from '@xterm/addon-search';
 import { Terminal } from '@xterm/xterm';
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { TERMINAL_OPTIONS } from '../utils/constants';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useTheme } from '../../ThemeProvider';
+import {
+  DARK_TERMINAL_THEME,
+  LIGHT_TERMINAL_THEME,
+  TERMINAL_OPTIONS,
+} from '../utils/constants';
 
 interface UseTerminalProps {
   onLogClear: () => void;
@@ -26,6 +31,11 @@ const useTerminal = ({ onLogClear, onLog }: UseTerminalProps) => {
   const searchAddonRef = useRef<SearchAddon | null>(null);
   const terminalContainerRef = useRef<HTMLDivElement | null>(null);
   const [isTerminalInitialized, setIsTerminalInitialized] = useState(false);
+  const { theme } = useTheme();
+
+  const terminalTheme = useMemo(() => {
+    return theme === 'dark' ? DARK_TERMINAL_THEME : LIGHT_TERMINAL_THEME;
+  }, [theme]);
 
   const handleResize = useCallback(() => {
     const appTerminal: HTMLElement | null =
@@ -63,7 +73,10 @@ const useTerminal = ({ onLogClear, onLog }: UseTerminalProps) => {
         import('@xterm/addon-search'),
       ]);
 
-      const terminal = new Terminal(TERMINAL_OPTIONS);
+      const terminal = new Terminal({
+        ...TERMINAL_OPTIONS,
+        theme: terminalTheme,
+      });
       terminalRef.current = terminal;
 
       const fitAddon = new FitAddon.FitAddon();
@@ -104,6 +117,11 @@ const useTerminal = ({ onLogClear, onLog }: UseTerminalProps) => {
       EventEmitter.off('ON_SPLIT_DRAG_END', handleResize);
     };
   }, [isTerminalInitialized]);
+
+  useEffect(() => {
+    if (!terminalRef.current) return;
+    terminalRef.current.options.theme = terminalTheme;
+  }, [theme]);
 
   return { terminalContainerRef, terminalRef, fitAddonRef, searchAddonRef };
 };
