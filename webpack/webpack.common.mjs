@@ -35,6 +35,7 @@ export default {
       child_process: false,
       process: false,
       "timers/promises": false,
+      async_hooks: false,
     },
     extensions: [".tsx", ".ts", ".js", ".scss"],
   },
