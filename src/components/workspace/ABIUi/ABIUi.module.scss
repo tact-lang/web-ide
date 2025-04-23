@@ -28,19 +28,6 @@
       display: none;
     }
   }
-  .nestedForm {
-    margin: 0.5rem 0;
-    background: rgba(14, 14, 16, 0.9);
-    border-radius: 5px;
-    padding: 5px;
-    [data-theme='light'] & {
-      background: rgba(255, 255, 255, 0.9);
-    }
-
-    > div {
-      border-left: 0 !important;
-    }
-  }
   .abiHeading {
     font-weight: 600;
     margin-bottom: 1rem;
@@ -169,4 +156,37 @@
 
 .sliceInput {
   margin-bottom: 0.5rem;
+}
+.tonInputValue {
+  padding: 0.3rem 0.13rem;
+
+  input[class*='ant-input'] {
+    [data-theme='light'] & {
+      background-color: transparent;
+    }
+  }
+  [class*='ant-input-affix-wrapper'] {
+    padding-block: 0;
+    border: 0;
+    [data-theme='light'] & {
+      background: #e9e9e9;
+    }
+    [data-theme='dark'] & {
+      background: #000000;
+    }
+  }
+}
+
+.nestedForm {
+  margin: 0.5rem 0;
+  background: rgba(14, 14, 16, 0.9);
+  border-radius: 5px;
+  padding: 5px;
+  [data-theme='light'] & {
+    background: rgba(255, 255, 255, 0.9);
+  }
+
+  > div {
+    border-left: 0 !important;
+  }
 }

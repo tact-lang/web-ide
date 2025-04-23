@@ -1,6 +1,6 @@
 import { Form, Input } from 'antd';
 import { FC } from 'react';
-
+import s from './ABIUi.module.scss';
 interface Props {
   name?: string;
 }
@@ -9,6 +9,7 @@ export const TonInputValue: FC<Props> = ({ name = 'tonValue' }) => {
   return (
     <Form.Item
       name={name}
+      className={`${s.tonInputValue} ${s.nestedForm}`}
       required
       rules={[
         {

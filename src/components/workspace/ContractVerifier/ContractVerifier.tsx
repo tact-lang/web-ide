@@ -457,7 +457,11 @@ const TonContractVerifier: FC = () => {
             ))}
           </Select>
         </Form.Item>
-        <AddressInput name="contractAddress" label="Contract Address" />
+        <AddressInput
+          className={s.contractAddress}
+          name="contractAddress"
+          label="Contract Address"
+        />
 
         <Form.Item shouldUpdate>
           {({ getFieldsValue }) => {

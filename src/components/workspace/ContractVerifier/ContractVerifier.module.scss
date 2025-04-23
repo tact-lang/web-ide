@@ -11,4 +11,9 @@
   .viewDetails:hover {
     text-decoration: underline;
   }
+  .contractAddress input[class*='ant-input'] {
+    [data-theme='light'] & {
+      background-color: #fff;
+    }
+  }
 }
