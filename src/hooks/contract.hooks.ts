@@ -11,6 +11,7 @@ import {
   GetterJSONReponse,
   tonHttpEndpoint as getHttpEndpoint,
   serializeToJSONFormat,
+  shorten,
 } from '@/utility/utils';
 import { Network } from '@orbs-network/ton-access';
 import {
@@ -25,7 +26,6 @@ import {
   TupleItemCell,
   beginCell,
   contractAddress,
-  fromNano,
   storeStateInit,
   toNano,
 } from '@ton/core';
@@ -530,21 +530,6 @@ function messageName(body: Cell, contractInstances: Contract[]): string {
     /* empty */
   }
   return 'empty';
-}
-
-function shorten(
-  long: Address | bigint,
-  format: 'default' | 'coins' = 'default',
-) {
-  if (long instanceof Address) {
-    return `${long.toString().slice(0, 4)}..${long.toString().slice(-4)}`;
-  }
-  if (typeof long === 'bigint') {
-    if (format === 'default') return long.toString();
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    if (format === 'coins') return fromNano(long);
-  }
-  return '';
 }
 
 function parseStackForFunc(stack: TupleItem[] | undefined) {

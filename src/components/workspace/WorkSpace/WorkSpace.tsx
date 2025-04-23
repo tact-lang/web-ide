@@ -64,8 +64,6 @@ const WorkSpace: FC = () => {
     }
     const blockchain = await Blockchain.create();
     globalWorkspace.sandboxBlockchain = blockchain;
-    const wallet = await blockchain.treasury('user');
-    globalWorkspace.sandboxWallet = wallet;
   };
 
   const openProject = async (selectedProjectPath: Project['id']) => {

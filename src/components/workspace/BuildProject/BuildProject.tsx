@@ -1,5 +1,5 @@
 import TonAuth from '@/components/auth/TonAuth/TonAuth';
-import { UserContract, useContractAction } from '@/hooks/contract.hooks';
+import { useContractAction, UserContract } from '@/hooks/contract.hooks';
 import { useLogActivity } from '@/hooks/logActivity.hooks';
 import {
   ABIField,
@@ -16,6 +16,7 @@ import {
   delay,
   htmlToAnsi,
   isIncludesTypeCellOrSlice,
+  shorten,
   stripPrefix,
   tonHttpEndpoint,
 } from '@/utility/utils';
@@ -47,7 +48,7 @@ import { OutputChunk } from 'rollup';
 import packageJson from '../../../../package.json';
 import { renderField } from '../ABIUi/TactABIUi';
 import { TonInputValue } from '../ABIUi/TonValueInput';
-import { globalWorkspace } from '../globalWorkspace';
+import { globalWorkspace, WalletDetails } from '../globalWorkspace';
 import CellBuilder, { CellValues, generateCellCode } from './CellBuilder';
 
 const blankABI = {
@@ -55,6 +56,8 @@ const blankABI = {
   setters: [],
   initParams: [],
 };
+
+const SANDBOX_WALLET_PREFIX = 'SANDBOX_WALLET';
 
 interface Props {
   projectId: string;
@@ -81,6 +84,11 @@ const BuildProject: FC<Props> = ({ projectId, contract, updateContract }) => {
     undefined,
   );
 
+  const [wallets, setWallets] = useState<WalletDetails[]>([]);
+  const [selectedWallet, setSelectedWallet] = useState<
+    WalletDetails | undefined
+  >(undefined);
+
   const previouslySelectedContract = useRef<string | null>();
 
   const { isAutoBuildAndDeployEnabled } = useSettingAction();
@@ -96,7 +104,7 @@ const BuildProject: FC<Props> = ({ projectId, contract, updateContract }) => {
 
   const [tonConnector] = useTonConnectUI();
   const chain = tonConnector.wallet?.account.chain;
-  const connectedWalletAddress = useTonAddress();
+  const onChainWalletAddress = useTonAddress();
 
   const { sandboxBlockchain } = globalWorkspace;
   const tactVersion = stripPrefix(
@@ -304,11 +312,11 @@ const BuildProject: FC<Props> = ({ projectId, contract, updateContract }) => {
       throw new Error('Contract BOC is missing. Rebuild the contract.');
     }
     try {
-      if (sandboxBlockchain && environment === 'SANDBOX') {
+      if (sandboxBlockchain && environment === 'SANDBOX' && selectedWallet) {
         const blockchain = await Blockchain.create();
         globalWorkspace.sandboxBlockchain = blockchain;
 
-        const wallet = await blockchain.treasury('user');
+        const wallet = await blockchain.treasury(selectedWallet.key);
         globalWorkspace.sandboxWallet = wallet;
         createLog(
           htmlToAnsi(
@@ -545,20 +553,13 @@ const BuildProject: FC<Props> = ({ projectId, contract, updateContract }) => {
   };
 
   const getConnectedWallet = () => {
-    let _connectedWalletAddress =
-      environment === 'SANDBOX' &&
-      globalWorkspace.sandboxWallet?.address.toString();
-
-    if (environment !== 'SANDBOX' && connectedWalletAddress) {
-      _connectedWalletAddress = connectedWalletAddress;
-    }
-    if (!_connectedWalletAddress) {
+    if (!selectedWallet) {
       return <></>;
     }
 
     return (
       <div className={`${s.connectedWallet} wrap-text`}>
-        Connected Wallet: <span>{_connectedWalletAddress}</span>
+        Wallet Address: <span>{selectedWallet.address}</span>
       </div>
     );
   };
@@ -701,6 +702,40 @@ const BuildProject: FC<Props> = ({ projectId, contract, updateContract }) => {
     return contractABIPath;
   };
 
+  const fetchAvailableWallets = async () => {
+    const SANDBOX_WALLET_COUNT = 5;
+
+    if (environment !== 'SANDBOX') {
+      if (!onChainWalletAddress) return [];
+      return [
+        {
+          address: onChainWalletAddress,
+          key: 'LIVE_WALLET',
+        },
+      ];
+    }
+
+    const { sandboxBlockchain } = globalWorkspace;
+
+    if (!sandboxBlockchain) {
+      return [];
+    }
+
+    const walletList = await Promise.all(
+      Array.from({ length: SANDBOX_WALLET_COUNT }, async (_, index) => {
+        const key = `${SANDBOX_WALLET_PREFIX}_${index}`;
+        const newWallet = await sandboxBlockchain.treasury(key);
+
+        return {
+          address: newWallet.address.toString(),
+          key,
+        };
+      }),
+    );
+
+    return walletList;
+  };
+
   useEffect(() => {
     updateABI().catch(() => {});
   }, [selectedContract, contract]);
@@ -802,6 +837,39 @@ const BuildProject: FC<Props> = ({ projectId, contract, updateContract }) => {
     }
   }, [activeProject?.selectedContract]);
 
+  useEffect(() => {
+    const fetchWallets = async () => {
+      const availableWallets = await fetchAvailableWallets();
+      setWallets(availableWallets);
+
+      const connectedKey = globalWorkspace.connectedWallet?.key;
+      const existingConnectedWallet = availableWallets.find(
+        (w) => w.key === connectedKey,
+      );
+
+      const selected = existingConnectedWallet ?? availableWallets[0];
+      setSelectedWallet(selected);
+      globalWorkspace.connectedWallet = selected;
+    };
+
+    fetchWallets();
+  }, [activeProject?.path, environment, onChainWalletAddress]);
+
+  useEffect(() => {
+    const updateSandboxWallet = async () => {
+      if (
+        selectedWallet?.key.startsWith(SANDBOX_WALLET_PREFIX) &&
+        sandboxBlockchain
+      ) {
+        globalWorkspace.sandboxWallet = await sandboxBlockchain.treasury(
+          selectedWallet.key,
+        );
+      }
+    };
+
+    updateSandboxWallet();
+  }, [selectedWallet]);
+
   return (
     <div className={`${s.root} onboarding-build-deploy`}>
       <h3 className={`section-heading`}>
@@ -829,6 +897,30 @@ const BuildProject: FC<Props> = ({ projectId, contract, updateContract }) => {
             { value: 'MAINNET', label: 'Mainnet' },
           ]}
         />
+      </Form.Item>
+
+      <Form.Item
+        label="Wallet"
+        className={`${s.formItem} select-search-input-dark`}
+        labelAlign="left"
+      >
+        <Select
+          value={selectedWallet?.key}
+          onChange={(key) => {
+            const selectedWallet = wallets.find((w) => w.key === key);
+            setSelectedWallet(selectedWallet);
+            globalWorkspace.connectedWallet = selectedWallet;
+          }}
+          notFoundContent="No wallets available"
+          placeholder="Select a wallet"
+          disabled={!wallets.length}
+        >
+          {wallets.map((wallet) => (
+            <Select.Option key={wallet.key} value={wallet.key}>
+              {shorten(wallet.address)}
+            </Select.Option>
+          ))}
+        </Select>
       </Form.Item>
 
       {environment !== 'SANDBOX' && <TonAuth />}
