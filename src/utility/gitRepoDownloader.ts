@@ -36,7 +36,7 @@ async function convertToZipUrl(
         branchName = repoData.default_branch;
       }
 
-      const zipUrl = `${owner}/${repo}/archive/refs/heads/${branchName}.zip`;
+      const zipUrl = `${owner}/${repo}/zip/refs/heads/${branchName}`;
       return { url: zipUrl, path: pathName };
     }
 

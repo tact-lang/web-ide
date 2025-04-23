@@ -22,7 +22,7 @@ export const AppConfig = {
   },
   proxy: {
     GIT_RAW_CONTENT: 'https://cdn-ide-raw.tonstudio.io',
-    GIT_IMPORT: 'https://cdn-ide-github.tonstudio.io',
+    GIT_IMPORT: 'https://cdn-ide-codeload.tonstudio.io',
   },
   cors: {
     proxy:
