@@ -21,7 +21,7 @@
     "@monaco-editor/react": "^4.5.1",
     "@nowarp/misti": "~0.8.3",
     "@orbs-network/ton-access": "^2.3.0",
-    "@tact-lang/compiler": "^1.6.7",
+    "@tact-lang/compiler": "^1.6.10",
     "@ton-community/func-js": "^0.9.1",
     "@ton/core": "^0.60.1",
     "@ton/sandbox": "^0.20.0",
