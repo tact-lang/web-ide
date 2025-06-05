@@ -1,8 +1,8 @@
 deployEnv: production
-defaultReplicaCount: 2
+defaultReplicaCount: 4
 imageTag: "production"
 
-minReplicas: 2
+minReplicas: 4
 maxReplicas: 4
 
 memoryLimit: 120Mi

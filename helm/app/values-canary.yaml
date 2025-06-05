@@ -3,8 +3,8 @@ replicaCount: 2
 imageTag: "canary"
 canaryWeight: 10
 
-minReplicas: 1
-maxReplicas: 1
+minReplicas: 2
+maxReplicas: 2
 
 memoryLimit: 120Mi
 memoryRequest: 100Mi
