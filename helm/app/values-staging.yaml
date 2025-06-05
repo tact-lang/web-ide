@@ -1,9 +1,9 @@
 deployEnv: staging
-replicaCount: 1
+replicaCount: 3
 imageTag: "staging"
 
-minReplicas: 1
-maxReplicas: 1
+minReplicas: 3
+maxReplicas: 3
 
 memoryLimit: 120Mi
 memoryRequest: 100Mi
