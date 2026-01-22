@@ -114,6 +114,6 @@ export const editorOnMount = async (monaco: Monaco) => {
   );
   monaco.languages.typescript.typescriptDefaults.addExtraLib(
     tonSanboxText,
-    'file:///node_modules/@types/ton-community__sandbox/index.d.ts',
+    'file:///node_modules/@types/ton__sandbox/index.d.ts',
   );
 };
