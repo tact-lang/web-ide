@@ -1,10 +1,12 @@
 {
-  "name": "ton-web-ide",
-  "version": "0.1.0",
-  "author": {
-    "name": "Rahul Yadav",
-    "url": "https://github.com/rahulyadav-57/"
+  "name": "ton-ide",
+  "version": "2.0.0",
+  "description": "TON IDE 2.0 — browser IDE for TON smart contracts with AI agents",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/YOUR_ORG/ton-ide.git"
   },
+  "license": "MIT",
   "scripts": {
     "dev": "NODE_ENV=development NODE_OPTIONS='--max-old-space-size=4096' webpack serve --config webpack/webpack.dev.mjs --mode development  --hot",
     "build": "webpack --config webpack/webpack.prod.mjs --mode production --progress",

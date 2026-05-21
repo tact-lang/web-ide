@@ -1,9 +1,13 @@
+const projectGithub =
+  process.env.REACT_APP_PROJECT_GITHUB_URL?.trim() ||
+  'https://github.com/YOUR_ORG/ton-ide';
+
 export const AppData = {
   socials: [
     {
       label: 'Project GitHub',
       icon: 'GitHub',
-      url: 'https://github.com/tact-lang/web-ide',
+      url: projectGithub,
     },
     {
       label: 'Telegram',

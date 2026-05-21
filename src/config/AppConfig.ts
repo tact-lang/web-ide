@@ -7,10 +7,10 @@ const MIXPANEL_TOKEN =
   '279a0a925b2c3388797950019c3733b4';
 
 export const AppConfig = {
-  name: 'TON Web IDE',
+  name: 'TON IDE',
   host: process.env.REACT_APP_PROJECT_HOST || 'ide.ton.org',
   seo: {
-    title: 'TON Web IDE',
+    title: 'TON IDE 2.0',
   },
   network: 'testnet',
   analytics: {
