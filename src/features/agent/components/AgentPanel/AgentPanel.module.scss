@@ -1,0 +1,109 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 320px;
+  gap: 12px;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.subtitle {
+  margin: 0;
+  font-size: 12px;
+  opacity: 0.7;
+  line-height: 1.4;
+}
+
+.messages {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px;
+  border-radius: 6px;
+  background: var(--ide-panel-bg, rgba(0, 0, 0, 0.04));
+  min-height: 120px;
+}
+
+.message {
+  font-size: 12px;
+  line-height: 1.5;
+  padding: 8px 10px;
+  border-radius: 6px;
+  max-width: 100%;
+}
+
+.messageUser {
+  align-self: flex-end;
+  background: var(--ide-accent-bg, rgba(0, 120, 215, 0.12));
+}
+
+.messageAssistant {
+  align-self: flex-start;
+  background: var(--ide-muted-bg, rgba(0, 0, 0, 0.06));
+}
+
+.mcpSection {
+  font-size: 11px;
+}
+
+.mcpList {
+  margin: 4px 0 0;
+  padding-left: 16px;
+  opacity: 0.85;
+}
+
+.mcpItem {
+  margin-bottom: 2px;
+}
+
+.statusTag {
+  font-size: 10px;
+  text-transform: uppercase;
+  margin-left: 4px;
+  opacity: 0.65;
+}
+
+.inputRow {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.hint {
+  font-size: 11px;
+  opacity: 0.6;
+  margin: 0;
+}
+
+.toolCall {
+  font-size: 11px;
+  margin: 4px 0 4px 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: flex-start;
+}
+
+.toolResult {
+  width: 100%;
+  margin: 4px 0 0;
+  padding: 6px;
+  font-size: 10px;
+  max-height: 120px;
+  overflow: auto;
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 4px;
+}

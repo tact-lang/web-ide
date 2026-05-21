@@ -26,7 +26,7 @@ import {
   GoTriangleUp,
 } from 'react-icons/go';
 import { GrClear } from 'react-icons/gr';
-import { HiDocumentText } from 'react-icons/hi';
+import { HiDocumentText, HiOutlineSparkles } from 'react-icons/hi';
 import { MdFeedback } from 'react-icons/md';
 
 import {
@@ -89,7 +89,8 @@ export type AppIconType =
   | 'CodeScan'
   | 'Refresh'
   | 'TonVerifier'
-  | 'Copy';
+  | 'Copy'
+  | 'Agent';
 
 export interface AppIconInterface {
   name: AppIconType;
@@ -139,6 +140,7 @@ const Components = {
   Refresh: RiRefreshLine,
   TonVerifier,
   Copy: AiOutlineCopy,
+  Agent: HiOutlineSparkles,
 };
 
 const AppIcon: FC<AppIconInterface> = ({ name, className = '' }) => {

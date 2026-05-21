@@ -1,6 +1,7 @@
 'use client';
 
 import MistiStaticAnalyzer from '@/components/MistiStaticAnalyzer';
+import AgentPanelConnected from '@/features/agent/components/AgentPanel/AgentPanelConnected';
 import { ManageGit } from '@/components/git';
 import { DownloadProject } from '@/components/project';
 import { ProjectTemplate } from '@/components/template';
@@ -238,6 +239,11 @@ const WorkSpace: FC = () => {
           {activeMenu === 'test-cases' && (
             <div className={s.commonContainer}>
               <TestCases projectId={activeProject?.path as string} />
+            </div>
+          )}
+          {activeMenu === 'agent' && (
+            <div className={s.commonContainer}>
+              <AgentPanelConnected projectPath={activeProject?.path} />
             </div>
           )}
           {activeMenu === 'misti' && (

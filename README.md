@@ -1,73 +1,60 @@
-# What is TON Web IDE?
+# TON IDE 2.0
 
-It is your ultimate browser-based IDE designed to simplify the journey of writing, testing, compiling, deploying, and interacting with smart contracts on TON. Write smart contracts from anywhere, No setups, no downloads, just pure convenience and versatility.
+Browser-based IDE for [TON](https://ton.org) smart contract development: FunC, Tact, Tolk, compile, sandbox tests, deploy, and **AI agents** with tool-calling and MCP.
 
-# What we offer 🤝
+Previously known as TON Web IDE ([ide.ton.org](https://ide.ton.org)). This tree is intended as a **standalone repository** (not a GitHub fork). See [docs/NEW_REPOSITORY.ru.md](./docs/NEW_REPOSITORY.ru.md) for publishing to a new repo.
 
-- User-friendly Code Editor & Syntax Highlighter
-- Efficient File Manager & Compiler
-- One-click deployment using TON Web IDE - Sandbox, Testnet, Mainnet
-- Easy Interaction with Contract
+## Features
 
-# We Are Live on 🤩
+- Monaco editor, WebContainer, `@ton/sandbox`
+- FunC / Tact compile, Misti analyzer, TonConnect deploy
+- **AI agents**: Contract, Jetton, DeFi, Frontend, Security
+- Templates: blank, counter, **Jetton**, **AMM**
+- MCP: TonAPI, TON docs (via `server/agent-api`)
+- Plugins, cloud jobs (MVP), shared team context
 
-We are pleased to announce that our project is now live, and you can access it at [ide.ton.org](https://ide.ton.org/)
+Architecture: [docs/TON_IDE_2.0.md](./docs/TON_IDE_2.0.md) · Agent system: [docs/AGENT_SYSTEM.md](./docs/AGENT_SYSTEM.md)
 
-## IDE Preview
-
-![IDE Preview](/images/screenshot.jpg)
-
-## Local Setup
-
-To set up the project locally for development, ensure that Node.js v18 LTS or higher is installed, and follow these steps:
-
-### Steps
-
-1. **Clone the repository**
-2. **Install the dependencies**: After cloning the repository, navigate to the project directory and install the dependencies:
-
-   ```bash
-   npm install
-   ```
-
-3. **Run the development server**
-
-   ```bash
-   npm run dev
-   ```
-
-4. **Open the project in the browser**: Once the development server is running, open your browser and navigate to:
-
-   ```
-   http://localhost:3000
-   ```
-
-   This will load the local version of the IDE.
-
-Ensure that you configure any necessary environment variables in a `.env` file. You can create this file by copying `.env.example` and modifying it with your own values.
+## Quick start
 
 ```bash
+npm install
+npm run agent-api:install
 cp .env.example .env
+
+# terminal 1
+npm run agent-api:dev
+
+# terminal 2
+npm run dev
 ```
 
-### Building for Production
+Open http://localhost:3000 — sidebar **TON AI Agent**.
 
-To create an optimized production build of the application, use the following command:
+## Environment
+
+| Variable | Purpose |
+|----------|---------|
+| `REACT_APP_AGENT_API_URL` | Agent API base (default `/api/agent`) |
+| `AGENT_API_PROXY` | Webpack dev proxy target (default `http://127.0.0.1:8787`) |
+| `OPENAI_API_KEY` | LLM for agent-api |
+| `TON_API_KEY` | TonAPI for MCP |
+| `REACT_APP_PROJECT_GITHUB_URL` | GitHub link in sidebar (default: ViberKoder/TON-IDE-2.0) |
+
+## Production build
 
 ```bash
 npm run build
-```
-
-After the build process is complete, you can start the production server:
-
-```bash
 npm start
 ```
 
-## Feedback
-
-We have put significant effort into developing and refining our codebase, and we invite developers, collaborators, and enthusiasts to explore our repository. Your feedback, contributions, and engagement with our project are highly valued as we continue to evolve and improve our platform. Thank you for your interest, and we look forward to building a vibrant and productive community around our GitHub repository.
-
 ## License
 
-MIT
+MIT — see [LICENSE](./LICENSE). Based on MIT-licensed TON Web IDE; attribution to TON Community and original contributors.
+
+## Publishing your own repo
+
+```bash
+./scripts/publish-standalone-repo.sh
+# then push standalone-main to your new GitHub repository
+```

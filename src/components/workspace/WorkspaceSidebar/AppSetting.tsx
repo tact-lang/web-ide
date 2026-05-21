@@ -1,10 +1,20 @@
-import { Form, Select, Switch } from 'antd';
-import { FC } from 'react';
+import PluginSettings from '@/features/plugins/PluginSettings';
+import { useProject } from '@/hooks/projectV2.hooks';
+import {
+  buildShareImportUrl,
+  writeSharedContext,
+} from '@/utility/sharedContext';
+import { Form, Select, Switch, Input, Button } from 'antd';
+import { FC, useState } from 'react';
 
 import { useSettingAction } from '@/hooks/setting.hooks';
 import s from './WorkspaceSidebar.module.scss';
 
 const AppSetting: FC = () => {
+  const { activeProject } = useProject();
+  const [shareNote, setShareNote] = useState('');
+  const [shareUrl, setShareUrl] = useState('');
+
   const {
     isContractDebugEnabled,
     toggleContractDebug,
@@ -84,6 +94,46 @@ const AppSetting: FC = () => {
             <Select.Option value="vim">Vim</Select.Option>
           </Select>
         </Form.Item>
+      </div>
+
+      <div className={s.settingItem}>
+        <Form.Item label="TON IDE Plugins">
+          <PluginSettings />
+        </Form.Item>
+      </div>
+
+      <div className={s.settingItem}>
+        <Form.Item label="Team chain context">
+          <Input.TextArea
+            rows={2}
+            value={shareNote}
+            onChange={(e) => { setShareNote(e.target.value); }}
+            placeholder='{"network":"testnet","contracts":[]}'
+          />
+        </Form.Item>
+        <Button
+          size="small"
+          disabled={!activeProject?.path}
+          onClick={async () => {
+            if (!activeProject?.path) return;
+            let parsed = { notes: shareNote };
+            try {
+              parsed = JSON.parse(shareNote);
+            } catch {
+              /* notes only */
+            }
+            await writeSharedContext(activeProject.path, parsed);
+            const shareId = activeProject.path.replace(/^\/projects\//, '');
+            setShareUrl(buildShareImportUrl(shareId));
+          }}
+        >
+          Save shared context
+        </Button>
+        {shareUrl && (
+          <p className={s.description} style={{ wordBreak: 'break-all' }}>
+            Share: {shareUrl}
+          </p>
+        )}
       </div>
     </>
   );

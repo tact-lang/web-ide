@@ -16,11 +16,16 @@ export interface Tree {
   updatedAt?: Date;
 }
 
-export type ProjectTemplate = 'tonBlank' | 'tonCounter' | 'import';
+export type ProjectTemplate =
+  | 'tonBlank'
+  | 'tonCounter'
+  | 'tonJetton'
+  | 'tonAmm'
+  | 'import';
 
 export type NetworkEnvironment = 'TESTNET' | 'MAINNET' | 'SANDBOX';
 
-export type ContractLanguage = 'func' | 'tact';
+export type ContractLanguage = 'func' | 'tact' | 'tolk';
 
 export interface InitParams {
   name: string;

@@ -14,7 +14,8 @@ export type WorkSpaceMenu =
   | 'setting'
   | 'misti'
   | 'git'
-  | 'contract-verifier';
+  | 'contract-verifier'
+  | 'agent';
 
 interface Props {
   activeMenu: WorkSpaceMenu;

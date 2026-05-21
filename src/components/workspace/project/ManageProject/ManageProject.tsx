@@ -132,6 +132,11 @@ const ManageProject: FC = () => {
   useEffect(() => {
     loadProjects();
     setImportURL(getUrlParams().get('importURL'));
+    const shareId = getUrlParams().get('share');
+    if (shareId) {
+      const projectPath = `${baseProjectPath}/${shareId}`;
+      openProject(projectPath).catch(() => {});
+    }
   }, []);
 
   return (

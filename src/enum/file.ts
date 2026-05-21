@@ -8,6 +8,7 @@ export enum FileType {
   C = 'c',
   FC = 'func',
   TACT = 'tact',
+  TOLK = 'tolk',
   Cpp = 'cpp',
   Rust = 'rust',
   Wat = 'wat',
@@ -33,6 +34,7 @@ export enum FileExtensionToFileType {
   fc = FileType.FC,
   func = FileType.FC,
   tact = FileType.TACT,
+  tolk = FileType.TOLK,
   json = FileType.JSON,
 }
 /* eslint-enable @typescript-eslint/prefer-literal-enum-member */

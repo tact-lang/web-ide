@@ -62,11 +62,14 @@ const NewProject: FC<Props> = ({
   const language = [
     { label: 'Tact', value: 'tact', default: true },
     { label: 'Func', value: 'func' },
+    { label: 'Tolk', value: 'tolk' },
   ];
 
   const templatedList = [
     { label: 'Blank Contract', value: 'tonBlank' },
     { label: 'Counter Contract', value: 'tonCounter' },
+    { label: 'Jetton (TEP-74)', value: 'tonJetton' },
+    { label: 'AMM Pool (skeleton)', value: 'tonAmm' },
   ];
 
   interface FormValues {
