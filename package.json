@@ -4,7 +4,7 @@
   "description": "TON IDE 2.0 — browser IDE for TON smart contracts with AI agents",
   "repository": {
     "type": "git",
-    "url": "https://github.com/YOUR_ORG/ton-ide.git"
+    "url": "https://github.com/ViberKoder/TON-IDE-2.0.git"
   },
   "license": "MIT",
   "scripts": {

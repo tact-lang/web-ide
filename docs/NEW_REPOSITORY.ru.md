@@ -24,7 +24,7 @@ chmod +x scripts/publish-standalone-repo.sh
 
 ```bash
 git remote remove origin   # если старый origin — форк ton-ide
-git remote add origin https://github.com/YOUR_ORG/ton-ide.git
+git remote add origin https://github.com/ViberKoder/TON-IDE-2.0.git
 git push -u origin standalone-main:main
 ```
 

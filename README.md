@@ -39,7 +39,7 @@ Open http://localhost:3000 — sidebar **TON AI Agent**.
 | `AGENT_API_PROXY` | Webpack dev proxy target (default `http://127.0.0.1:8787`) |
 | `OPENAI_API_KEY` | LLM for agent-api |
 | `TON_API_KEY` | TonAPI for MCP |
-| `REACT_APP_PROJECT_GITHUB_URL` | GitHub link in sidebar |
+| `REACT_APP_PROJECT_GITHUB_URL` | GitHub link in sidebar (default: ViberKoder/TON-IDE-2.0) |
 
 ## Production build
 
