@@ -391,14 +391,26 @@ export const useProject = () => {
 };
 
 const createTemplateBasedProject = (
-  template: 'tonBlank' | 'tonCounter' | 'import',
+  template: 'tonBlank' | 'tonCounter' | 'tonJetton' | 'tonAmm' | 'import',
   language: ContractLanguage = 'tact',
   files: Tree[] = [],
   basePath?: string,
 ) => {
   let _files: Pick<Tree, 'type' | 'path' | 'content'>[] = cloneDeep(files);
   if (files.length === 0 && template !== 'import') {
-    _files = ProjectTemplateData[template][language];
+    const templateSet = ProjectTemplateData[template] as Record<
+      string,
+      Tree[]
+    >;
+    _files =
+      templateSet[language] ??
+      (language === 'tolk'
+        ? (templateSet.tact ?? []).map((f) => ({
+            ...f,
+            path: f.path.replace(/\.tact$/, '.tolk'),
+            name: f.name.replace(/\.tact$/, '.tolk'),
+          }))
+        : templateSet.tact ?? []);
   }
 
   _files = _files.map((file) => {

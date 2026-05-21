@@ -110,30 +110,31 @@ MCP-серверы (подключаемые, конфиг в IDE):
 
 ## Этапы внедрения
 
-### Фаза 0 — Foundation (текущий PR)
+### Фаза 0 — Foundation
 
 - Документация 2.0
 - UI-панель агента (shell)
 - Типы, конфиг агентов и MCP
 - Skills в `src/features/agent/skills/`
 
-### Фаза 1 — Agent MVP
+### Фаза 1 — Agent MVP (реализовано)
 
-- Backend или AI Gateway (streaming)
-- Tool calling: read/write files, compile, test
-- Один агент (Contract Developer) end-to-end
+- `server/agent-api` — chat + mock/OpenAI, MCP ton-api/docs
+- `src/services/*` — compile, test, FS, misti, deploy stub
+- Tool registry + Agent Panel с tool loop и patch approve
+- Webpack/nginx proxy `/api/agent`
 
-### Фаза 2 — TON-native depth
+### Фаза 2 — TON-native depth (реализовано)
 
-- Tolk toolchain в IDE
-- Шаблоны Jetton + AMM
-- MCP ton-api + docs
+- Tolk: language id, подсветка, compile stub
+- Шаблоны `tonJetton`, `tonAmm` (Tact)
+- MCP handlers в agent-api
 
-### Фаза 3 — Ecosystem
+### Фаза 3 — Ecosystem (MVP реализовано)
 
-- Marketplace плагинов/skills
-- Cloud agents (долгие deploy/test циклы)
-- Team workspaces, shared chain context
+- `ton-ide-plugin.json` loader + Settings UI
+- Cloud jobs API + панель в Agent
+- `.ide/shared-context.json` + share URL `?share=`
 
 ## Технические решения
 

@@ -1,19 +1,20 @@
 import { DEFAULT_AGENT_ID, TON_AGENTS, TON_MCP_SERVERS } from '../../config';
-import type { AgentId, AgentMessage } from '../../types';
-import { Button, Input, Select, Tag } from 'antd';
-import { FC, useCallback, useState } from 'react';
+import type { AgentId } from '../../types';
+import { useAgentChat } from '../../runtime/useAgentChat';
+import type { UseAgentChatOptions } from '../../runtime/useAgentChat';
+import { PatchApproveModal } from '../PatchApproveModal';
+import CloudJobsPanel from '../CloudJobsPanel/CloudJobsPanel';
+import { Button, Input, Select, Tag, Spin } from 'antd';
+import { FC, useState } from 'react';
 import s from './AgentPanel.module.scss';
+import type { Project } from '@/interfaces/workspace.interface';
+import type { Tree } from '@/interfaces/workspace.interface';
 
 const { TextArea } = Input;
 
-const WELCOME_MESSAGE: AgentMessage = {
-  id: 'welcome',
-  role: 'assistant',
-  content:
-    'TON IDE 2.0 Agent — foundation build. Выберите агента и опишите задачу: jetton, AMM, контракт на FunC/Tact/Tolk. Подключение к AI Gateway и tool-calling — в следующей фазе.',
-  createdAt: Date.now(),
-  agentId: DEFAULT_AGENT_ID,
-};
+interface Props extends UseAgentChatOptions {
+  projectPath?: string;
+}
 
 const statusColor: Record<string, string> = {
   available: 'green',
@@ -21,45 +22,56 @@ const statusColor: Record<string, string> = {
   needs_auth: 'orange',
 };
 
-interface Props {
-  projectPath?: string;
-}
-
-const AgentPanel: FC<Props> = ({ projectPath }) => {
+const AgentPanel: FC<Props> = ({
+  projectPath,
+  project,
+  projectFiles,
+  openFiles,
+  webcontainer,
+  sandbox,
+  compileOptions,
+  compileFunc,
+  compileTs,
+  getFile,
+  onLog,
+}) => {
   const [agentId, setAgentId] = useState<AgentId>(DEFAULT_AGENT_ID);
   const [input, setInput] = useState('');
-  const [messages, setMessages] = useState<AgentMessage[]>([
-    WELCOME_MESSAGE,
-  ]);
+
+  const {
+    messages,
+    isRunning,
+    sendMessage,
+    stop,
+    pendingPatch,
+    resolvePatch,
+  } = useAgentChat({
+    agentId,
+    project: project ?? null,
+    projectFiles,
+    openFiles,
+    webcontainer,
+    sandbox,
+    compileOptions,
+    compileFunc,
+    compileTs,
+    getFile,
+    onLog,
+  });
 
   const selectedAgent = TON_AGENTS.find((a) => a.id === agentId)!;
 
-  const handleSend = useCallback(() => {
-    const text = input.trim();
-    if (!text) return;
-
-    const userMsg: AgentMessage = {
-      id: `user-${Date.now()}`,
-      role: 'user',
-      content: text,
-      createdAt: Date.now(),
-      agentId,
-    };
-
-    const placeholderReply: AgentMessage = {
-      id: `assistant-${Date.now()}`,
-      role: 'assistant',
-      content: `[${selectedAgent.name}] Запрос принят. Runtime агента пока не подключён — настройте TON_IDE_AI_GATEWAY_URL для streaming и tools. Проект: ${projectPath ?? 'не открыт'}.`,
-      createdAt: Date.now(),
-      agentId,
-    };
-
-    setMessages((prev) => [...prev, userMsg, placeholderReply]);
-    setInput('');
-  }, [input, agentId, selectedAgent.name, projectPath]);
+  const mcpWithStatus = TON_MCP_SERVERS.map((srv) => ({
+    ...srv,
+    status:
+      srv.id === 'ton-api' || srv.id === 'ton-docs'
+        ? ('available' as const)
+        : srv.status,
+  }));
 
   return (
     <div className={s.root}>
+      <PatchApproveModal patch={pendingPatch} onResolve={resolvePatch} />
       <div className={s.header}>
         <h3 className={s.title}>TON AI Agent</h3>
         <p className={s.subtitle}>{selectedAgent.description}</p>
@@ -72,26 +84,55 @@ const AgentPanel: FC<Props> = ({ projectPath }) => {
             label: a.name,
           }))}
           style={{ width: '100%' }}
+          disabled={isRunning}
         />
       </div>
 
       <div className={s.messages}>
+        {messages.length === 0 && (
+          <div className={`${s.message} ${s.messageAssistant}`}>
+            TON IDE 2.0 — опишите задачу: jetton, AMM, контракт FunC/Tact/Tolk.
+            Tools: compile, test, read/write files (с подтверждением), Misti,
+            MCP ton-api/docs.
+          </div>
+        )}
         {messages.map((msg) => (
-          <div
-            key={msg.id}
-            className={`${s.message} ${
-              msg.role === 'user' ? s.messageUser : s.messageAssistant
-            }`}
-          >
-            {msg.content}
+          <div key={msg.id}>
+            <div
+              className={`${s.message} ${
+                msg.role === 'user' ? s.messageUser : s.messageAssistant
+              }`}
+            >
+              {msg.content}
+            </div>
+            {msg.toolCalls?.map((tc) => (
+              <div key={tc.id} className={s.toolCall}>
+                <Tag>{tc.name}</Tag>
+                <Tag
+                  color={
+                    tc.status === 'done'
+                      ? 'green'
+                      : tc.status === 'error'
+                        ? 'red'
+                        : 'processing'
+                  }
+                >
+                  {tc.status}
+                </Tag>
+                {tc.result && (
+                  <pre className={s.toolResult}>{tc.result.slice(0, 500)}</pre>
+                )}
+              </div>
+            ))}
           </div>
         ))}
+        {isRunning && <Spin size="small" />}
       </div>
 
       <div className={s.mcpSection}>
         <strong>MCP & tools</strong>
         <ul className={s.mcpList}>
-          {TON_MCP_SERVERS.map((srv) => (
+          {mcpWithStatus.map((srv) => (
             <li key={srv.id} className={s.mcpItem}>
               {srv.name}
               <Tag
@@ -110,22 +151,39 @@ const AgentPanel: FC<Props> = ({ projectPath }) => {
         <TextArea
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder="Например: создай jetton с 3% fee на transfer и тестами в sandbox..."
+          placeholder="Например: прочитай main.tact, добавь getter и запусти тесты..."
           autoSize={{ minRows: 2, maxRows: 6 }}
+          disabled={isRunning || !projectPath}
           onPressEnter={(e) => {
             if (!e.shiftKey) {
               e.preventDefault();
-              handleSend();
+              sendMessage(input);
+              setInput('');
             }
           }}
         />
-        <Button type="primary" size="small" onClick={handleSend}>
-          Send
-        </Button>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <Button
+            type="primary"
+            size="small"
+            disabled={isRunning || !projectPath}
+            onClick={() => {
+              sendMessage(input);
+              setInput('');
+            }}
+          >
+            Send
+          </Button>
+          {isRunning && (
+            <Button size="small" onClick={stop}>
+              Stop
+            </Button>
+          )}
+        </div>
         <p className={s.hint}>
-          Phase 0: UI + config. Phase 1: AI Gateway, file tools, compile/test
-          loop.
+          Agent API: /api/agent — локально `cd server/agent-api && npm run dev`
         </p>
+        <CloudJobsPanel />
       </div>
     </div>
   );

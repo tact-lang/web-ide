@@ -29,4 +29,6 @@ export const AppConfig = {
       process.env.REACT_APP_CORS_PROXY_URL || 'https://cors.isomorphic-git.org',
   },
   lspServer: process.env.REACT_APP_LSP_SERVER_URL || '',
+  agentApiUrl:
+    process.env.REACT_APP_AGENT_API_URL?.trim() || '/api/agent',
 };

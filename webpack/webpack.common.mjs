@@ -46,6 +46,10 @@ export default {
         type: "json",
       },
       {
+        test: /\.md$/,
+        type: "asset/source",
+      },
+      {
         test: /\.worker\.ts$/,
         use: { loader: "worker-loader" },
         exclude: /node_modules/,

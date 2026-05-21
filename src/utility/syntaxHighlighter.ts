@@ -18,9 +18,10 @@ export async function highlightCodeSnippets(
   loader: Loader,
   _language: ContractLanguage,
 ): Promise<void> {
-  const ftmLanguage = {
+  const ftmLanguage: Record<string, typeof funcTMLanguage> = {
     func: funcTMLanguage,
     tact: tactTMLanguage,
+    tolk: tactTMLanguage,
     typescript: typeScriptTMLanguage,
   };
 
@@ -53,12 +54,19 @@ export async function highlightCodeSnippets(
         grammars.set(language, `source.${language}`);
         monaco.languages.register({ id: language });
 
-        const commentRules = {
+        const commentRules: Record<
+          string,
+          monaco.languages.CommentRule | undefined
+        > = {
           func: {
             lineComment: ';;',
             blockComment: ['{-', '-}'],
           },
           tact: {
+            lineComment: '//',
+            blockComment: ['/*', '*/'],
+          },
+          tolk: {
             lineComment: '//',
             blockComment: ['/*', '*/'],
           },
@@ -90,7 +98,7 @@ export async function highlightCodeSnippets(
           },
         };
 
-        if (language === 'tact') {
+        if (language === 'tact' || language === 'tolk') {
           languageConfiguration = {
             ...languageConfiguration,
             ...autoPairingRules.tact,

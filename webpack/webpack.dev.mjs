@@ -37,6 +37,14 @@ const devConfig = async () => {
         "Cross-Origin-Opener-Policy": "same-origin",
       },
       setupExitSignals: true,
+      proxy: [
+        {
+          context: ["/api/agent"],
+          target: process.env.AGENT_API_PROXY ?? "http://127.0.0.1:8787",
+          pathRewrite: { "^/api/agent": "" },
+          changeOrigin: true,
+        },
+      ],
     },
     watchOptions: {
       ignored: /node_modules/,

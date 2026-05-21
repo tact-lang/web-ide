@@ -63,13 +63,13 @@ export const TON_MCP_SERVERS: McpServerDefinition[] = [
     id: 'ton-api',
     name: 'TON API',
     description: 'Account state, transactions, jetton metadata (TonAPI / Toncenter).',
-    status: 'planned',
+    status: 'available',
   },
   {
     id: 'ton-docs',
     name: 'TON Docs',
     description: 'Search docs.ton.org, TEPs, and official cookbooks.',
-    status: 'planned',
+    status: 'available',
   },
   {
     id: 'blueprint',
