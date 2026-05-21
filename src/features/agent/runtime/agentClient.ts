@@ -69,10 +69,9 @@ export async function* streamAgentChat(
   const decoder = new TextDecoder();
   let buffer = '';
 
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) break;
-    buffer += decoder.decode(value, { stream: true });
+  let chunk = await reader.read();
+  while (!chunk.done) {
+    buffer += decoder.decode(chunk.value, { stream: true });
     const parts = buffer.split('\n\n');
     buffer = parts.pop() ?? '';
     for (const part of parts) {
@@ -107,6 +106,7 @@ export async function* streamAgentChat(
         /* skip malformed */
       }
     }
+    chunk = await reader.read();
   }
 }
 

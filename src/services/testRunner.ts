@@ -80,13 +80,6 @@ export async function runSandboxTests(
 
     const jsPath = filePath.replace('.spec.ts', '.spec.js');
     const fileName = jsPath.split('/').pop()!;
-    if (!webcontainer?.fs) {
-      return {
-        success: false,
-        exitCode: 1,
-        stdout: 'WebContainer not initialized',
-      };
-    }
 
     await webcontainer.fs.writeFile(fileName, testCaseCode);
     const response = await webcontainer.spawn('npx', ['jest', fileName]);
@@ -97,7 +90,7 @@ export async function runSandboxTests(
         },
       }),
     );
-    const exitCode = response.exit ?? 0;
+    const exitCode = response.exit;
     const success =
       exitCode === 0 &&
       !stdout.toLowerCase().includes('fail') &&

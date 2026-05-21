@@ -4,10 +4,10 @@ import type { CompileContext, CompileResultPayload } from './types';
  * Tolk compilation — Phase 2.
  * Uses WebContainer CLI when available; otherwise returns guided error.
  */
-export async function compileTolkContract(
+export function compileTolkContract(
   ctx: CompileContext,
   entryFile: string,
-): Promise<CompileResultPayload> {
+): CompileResultPayload {
   ctx.log?.(`Tolk compile requested for ${entryFile}`, 'info');
   return {
     success: false,

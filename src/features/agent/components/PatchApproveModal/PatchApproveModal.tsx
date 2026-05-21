@@ -12,12 +12,12 @@ const PatchApproveModal: FC<Props> = ({ patch, onResolve }) => {
     <Modal
       open={!!patch}
       title={`Apply changes to ${patch?.relativePath}`}
-      onCancel={() => onResolve(false)}
+      onCancel={() => { onResolve(false); }}
       footer={[
-        <Button key="reject" onClick={() => onResolve(false)}>
+        <Button key="reject" onClick={() => { onResolve(false); }}>
           Reject
         </Button>,
-        <Button key="approve" type="primary" onClick={() => onResolve(true)}>
+        <Button key="approve" type="primary" onClick={() => { onResolve(true); }}>
           Apply
         </Button>,
       ]}

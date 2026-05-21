@@ -7,9 +7,6 @@ import CloudJobsPanel from '../CloudJobsPanel/CloudJobsPanel';
 import { Button, Input, Select, Tag, Spin } from 'antd';
 import { FC, useState } from 'react';
 import s from './AgentPanel.module.scss';
-import type { Project } from '@/interfaces/workspace.interface';
-import type { Tree } from '@/interfaces/workspace.interface';
-
 const { TextArea } = Input;
 
 interface Props extends UseAgentChatOptions {
@@ -78,7 +75,7 @@ const AgentPanel: FC<Props> = ({
         <Select
           size="small"
           value={agentId}
-          onChange={(v) => setAgentId(v as AgentId)}
+          onChange={(v) => { setAgentId(v as AgentId); }}
           options={TON_AGENTS.map((a) => ({
             value: a.id,
             label: a.name,
@@ -150,7 +147,7 @@ const AgentPanel: FC<Props> = ({
       <div className={s.inputRow}>
         <TextArea
           value={input}
-          onChange={(e) => setInput(e.target.value)}
+          onChange={(e) => { setInput(e.target.value); }}
           placeholder="Например: прочитай main.tact, добавь getter и запусти тесты..."
           autoSize={{ minRows: 2, maxRows: 6 }}
           disabled={isRunning || !projectPath}

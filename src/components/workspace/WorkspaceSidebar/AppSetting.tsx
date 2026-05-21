@@ -107,7 +107,7 @@ const AppSetting: FC = () => {
           <Input.TextArea
             rows={2}
             value={shareNote}
-            onChange={(e) => setShareNote(e.target.value)}
+            onChange={(e) => { setShareNote(e.target.value); }}
             placeholder='{"network":"testnet","contracts":[]}'
           />
         </Form.Item>

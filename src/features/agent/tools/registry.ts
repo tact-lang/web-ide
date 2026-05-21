@@ -269,8 +269,7 @@ export async function executeTool(
   name: string,
   args: Record<string, unknown>,
 ) {
-  const tool = TOOL_REGISTRY[name];
-  if (!tool) {
+  if (!(name in TOOL_REGISTRY)) {
     return {
       toolCallId,
       name,
@@ -278,6 +277,7 @@ export async function executeTool(
       error: `Unknown tool: ${name}`,
     };
   }
+  const tool = TOOL_REGISTRY[name];
   try {
     const parsed = tool.parameters.parse(args);
     const result = await tool.execute(ctx, parsed);
@@ -294,7 +294,7 @@ export async function executeTool(
 
 export function getToolSchemasForAgent(allowedTools: string[]) {
   return allowedTools
-    .filter((id) => TOOL_REGISTRY[id])
+    .filter((id): id is keyof typeof TOOL_REGISTRY => id in TOOL_REGISTRY)
     .map((id) => {
       const t = TOOL_REGISTRY[id];
       return {

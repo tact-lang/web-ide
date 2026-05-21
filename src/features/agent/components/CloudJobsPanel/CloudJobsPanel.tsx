@@ -48,7 +48,7 @@ const CloudJobsPanel: FC = () => {
       <Input.TextArea
         rows={2}
         value={prompt}
-        onChange={(e) => setPrompt(e.target.value)}
+        onChange={(e) => { setPrompt(e.target.value); }}
         placeholder="Long-running task, e.g. run all tests and audit"
         style={{ marginTop: 8 }}
       />

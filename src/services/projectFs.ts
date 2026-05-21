@@ -131,4 +131,4 @@ export async function applyPatch(
   await writeProjectFile(ctx, patch.relativePath, patch.newContent);
 }
 
-export function defaultLogger: ServiceLogger = () => {};
+export const defaultLogger: ServiceLogger = () => {};

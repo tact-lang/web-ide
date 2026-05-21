@@ -8,7 +8,7 @@ const PluginSettings: FC = () => {
   const [plugins, setPlugins] = useState(getEnabledPlugins());
   const [error, setError] = useState('');
 
-  const refresh = () => setPlugins(getEnabledPlugins());
+  const refresh = () => { setPlugins(getEnabledPlugins()); };
 
   return (
     <div style={{ maxWidth: 320 }}>
@@ -38,7 +38,7 @@ const PluginSettings: FC = () => {
       <Input
         placeholder="https://.../ton-ide-plugin.json"
         value={url}
-        onChange={(e) => setUrl(e.target.value)}
+        onChange={(e) => { setUrl(e.target.value); }}
         style={{ marginTop: 8 }}
       />
       {error && <p style={{ color: 'crimson', fontSize: 11 }}>{error}</p>}

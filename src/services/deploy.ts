@@ -22,7 +22,7 @@ export async function deployContractSandbox(
 ): Promise<DeployResult> {
   const logs: string[] = [];
   try {
-    const blockchain = ctx.blockchain ?? (await ensureSandbox());
+    const blockchain = ctx.blockchain;
     if (!globalWorkspace.sandboxWallet) {
       const wallet = await blockchain.treasury('agent');
       globalWorkspace.sandboxWallet = wallet;
@@ -41,7 +41,7 @@ export async function deployContractSandbox(
 
     return {
       success: true,
-      address: globalWorkspace.sandboxWallet?.address.toString(),
+      address: globalWorkspace.sandboxWallet.address.toString(),
       logs,
       errors: [],
     };

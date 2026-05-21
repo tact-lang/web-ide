@@ -73,7 +73,7 @@ export function useAgentChat(options: UseAgentChatOptions) {
         getFile: options.getFile,
         onPendingPatch: waitForPatchApproval,
         updateAgentContext: (partial) =>
-          setAgentContext((prev) => ({ ...(prev ?? {}), ...partial } as AgentProjectContext)),
+          { setAgentContext((prev) => ({ ...(prev ?? {}), ...partial } as AgentProjectContext)); },
       };
     },
     [options, agentContext, waitForPatchApproval],
@@ -116,7 +116,7 @@ export function useAgentChat(options: UseAgentChatOptions) {
 
         const tools = getToolSchemasForAgent(agentDef.tools);
         let iteration = 0;
-        let loopMessages = [...chatHistory];
+        const loopMessages = [...chatHistory];
 
         while (iteration < MAX_TOOL_ITERATIONS) {
           iteration++;
@@ -134,7 +134,7 @@ export function useAgentChat(options: UseAgentChatOptions) {
             id: `a-${Date.now()}-${iteration}`,
             role: 'assistant',
             content: response.message.content,
-            toolCalls: response.message.toolCalls?.map((tc) => ({
+            toolCalls: response.message.toolCalls.map((tc) => ({
               id: tc.id,
               name: tc.name,
               status: 'pending' as const,
@@ -143,7 +143,7 @@ export function useAgentChat(options: UseAgentChatOptions) {
           };
           setMessages((m) => [...m, assistantMsg]);
 
-          const toolCalls = response.message.toolCalls ?? [];
+          const toolCalls = response.message.toolCalls;
           if (toolCalls.length === 0 || response.finishReason === 'stop') {
             break;
           }

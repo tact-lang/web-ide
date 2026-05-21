@@ -16,7 +16,7 @@ interface Props {
 const AgentPanelConnected: FC<Props> = ({ projectPath }) => {
   const { activeProject, projectFiles } = useProject();
   const { createLog } = useLogActivity();
-  const { compileFuncProgram, compileTactProgram } = useProjectActions();
+  const { compileFuncProgram } = useProjectActions();
   const { compileTsFile } = useWorkspaceActions();
   const { getFile } = useFile();
   const { fileTab } = useFileTab();
@@ -42,7 +42,7 @@ const AgentPanelConnected: FC<Props> = ({ projectPath }) => {
       compileFunc={compileFuncProgram}
       compileTs={async (path, id) => {
         const chunks = await compileTsFile(path, id);
-        return chunks.map((c) => ({ code: c.code ?? '' }));
+        return chunks.map((c) => ({ code: c.code }));
       }}
       getFile={async (path) => {
         try {
@@ -51,7 +51,7 @@ const AgentPanelConnected: FC<Props> = ({ projectPath }) => {
           return undefined;
         }
       }}
-      onLog={(msg, level) => createLog(msg, level ?? 'info')}
+      onLog={(msg, level) => { createLog(msg, level ?? 'info'); }}
     />
   );
 };

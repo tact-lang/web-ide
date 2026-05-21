@@ -15,7 +15,7 @@ const SKILL_MAP: Record<AgentId, string> = {
 };
 
 export function loadAgentSkill(agentId: AgentId): string {
-  let skill = SKILL_MAP[agentId] ?? SKILL_MAP['contract-developer'];
+  let skill = SKILL_MAP[agentId];
   const plugins = getEnabledPlugins();
   const extra = plugins
     .flatMap((p) => p.skills ?? [])

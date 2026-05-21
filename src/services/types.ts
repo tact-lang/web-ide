@@ -4,9 +4,7 @@ import type { Blockchain } from '@ton/sandbox';
 
 export type ServiceLogLevel = 'info' | 'error' | 'success';
 
-export interface ServiceLogger {
-  (message: string, level?: ServiceLogLevel): void;
-}
+export type ServiceLogger = (message: string, level?: ServiceLogLevel) => void;
 
 export interface ProjectFsContext {
   projectPath: string;

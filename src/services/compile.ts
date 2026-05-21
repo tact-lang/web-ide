@@ -198,9 +198,6 @@ export async function compileContract(
   if (ctx.language === 'tact') {
     return compileTactContract(ctx, entryFile);
   }
-  if (ctx.language === 'tolk') {
-    const { compileTolkContract } = await import('./compileTolk');
-    return compileTolkContract(ctx, entryFile);
-  }
-  return { success: false, artifacts: [], errors: ['Unknown language'] };
+  const { compileTolkContract } = await import('./compileTolk');
+  return compileTolkContract(ctx, entryFile);
 }
