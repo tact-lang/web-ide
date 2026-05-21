@@ -29,6 +29,11 @@ const menuItems: IMenuItem[] = [
     icon: 'Test',
   },
   {
+    label: 'TON AI Agent',
+    value: 'agent',
+    icon: 'Agent',
+  },
+  {
     label: 'Misti Static Analyzer',
     value: 'misti',
     icon: 'CodeScan',

@@ -2,6 +2,10 @@
 
 It is your ultimate browser-based IDE designed to simplify the journey of writing, testing, compiling, deploying, and interacting with smart contracts on TON. Write smart contracts from anywhere, No setups, no downloads, just pure convenience and versatility.
 
+## TON IDE 2.0 (in progress)
+
+We are evolving this project into **TON IDE 2.0** — a TON-native development environment with AI agents (FunC, Tolk, Tact), MCP integrations, and product templates (Jetton, AMM DEX, and more). See the [architecture roadmap](./docs/TON_IDE_2.0.md) and [agent system design](./docs/AGENT_SYSTEM.md).
+
 # What we offer 🤝
 
 - User-friendly Code Editor & Syntax Highlighter
