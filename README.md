@@ -1,7 +1,8 @@
-# What is TON Web IDE?
+> [!CAUTION]
+> This project is deprecated. For up-to-date guidance on TON contract development, see
+> the [TON contract development introduction](https://docs.ton.org/blockchain-basics/contract-dev/introduction).
 
-> [!WARNING]
-> This project is deprecated. For up-to-date guidance on TON contract development, see the [TON contract development introduction](https://docs.ton.org/blockchain-basics/contract-dev/introduction).
+# What is TON Web IDE?
 
 It is your ultimate browser-based IDE designed to simplify the journey of writing, testing, compiling, deploying, and interacting with smart contracts on TON. Write smart contracts from anywhere, No setups, no downloads, just pure convenience and versatility.
 
